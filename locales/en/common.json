@@ -1,0 +1,68 @@
+{
+  "screen": {
+    "home": { "title": "Home" },
+    "inbox": { "title": "Inbox" },
+    "assistant": { "title": "Assistant" },
+    "settings": { "title": "Settings" }
+  },
+  "user": {
+    "fallbackName": "User"
+  },
+  "appearance": {
+    "darkMode": {
+      "title": "Dark Mode",
+      "subtitle": "Use a darker appearance"
+    }
+  },
+  "settings": {
+    "sections": {
+      "notifications": "Notifications",
+      "privacy": "Privacy",
+      "about": "About"
+    },
+    "logout": "Log out"
+  },
+  "app": {
+    "version": "AiNote v{{version}}"
+  },
+  "home": {
+    "welcome": "Welcome back 👋",
+    "notesToday": "You have {{count}} notes today",
+    "stats": "Stats",
+    "thisWeek": "This week",
+    "total": "Total"
+  },
+  "types": {
+    "text": "Text",
+    "audio": "Audio",
+    "photo": "Photo",
+    "video": "Video"
+  },
+  "week": {
+    "days": ["M", "T", "W", "T", "F", "S", "S"]
+  },
+  "inbox": {
+    "delete": "Delete",
+    "empty": {
+      "title": "Your inbox is empty",
+      "message": "Your notes will appear here as soon as you add them.",
+      "addNote": "Add note"
+    }
+  },
+  "note": {
+    "untitled": "Untitled"
+  },
+  "fab": {
+    "newText": "New text note",
+    "newAudio": "New audio note",
+    "newPhoto": "New photo note",
+    "newVideo": "New video note"
+  },
+  "assistant": {
+    "section": "Section {{index}}",
+    "today": "Today",
+    "newNotesCount": "You have {{count}} new notes",
+    "askAnything": "Ask Anything",
+    "powered": "powered by AI"
+  }
+}

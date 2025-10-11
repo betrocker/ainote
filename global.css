@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+    /* Headings */
+    .h1 {
+        @apply text-4xl text-gray-900 dark:text-gray-100;
+        font-family: MonaSans, sans-serif;
+        font-weight: 700;
+        letter-spacing: 2px;
+        line-height: 44px;
+    }
+
+    .h2 {
+        @apply text-2xl text-gray-900 dark:text-gray-100;
+        font-family: MonaSans, sans-serif;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        line-height: 32px;
+    }
+
+    /* Section label */
+    .section-title {
+        @apply text-xl text-gray-800 dark:text-gray-200;
+        font-family: MonaSans, sans-serif;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        line-height: 28px;
+    }
+
+    /* Body text */
+    .body {
+        @apply text-base text-gray-700 dark:text-gray-300;
+        font-family: MonaSans, sans-serif;
+        font-weight: 400;
+        line-height: 22px;
+        letter-spacing: .25px;
+    }
+
+    /* Caption / Small text */
+    .caption {
+        @apply text-sm text-gray-500 dark:text-gray-400 uppercase;
+        font-family: MonaSans, sans-serif;
+        font-weight: 400;
+        letter-spacing: 1.5px;
+    }
+}

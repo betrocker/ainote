@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="4626ac8a-c00b-4985-b68a-659b18d1a37a" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/components/ContextMenu.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/ui/NoteCard.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/context/NotesContext.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(tabs)/inbox.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(tabs)/inbox.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/_layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/_layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/settings.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/settings.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/CustomTabBar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/CustomTabBar.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/FabMenu.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/FabMenu.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ScreenBackground.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/ScreenBackground.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/Input.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/ui/Input.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tailwind.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/tailwind.config.js" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FormatOnSaveOptions">
+    <option name="myRunOnSave" value="true" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 7
+}</component>
+  <component name="ProjectId" id="339xZHx9b9nkG0hYTXIWe7qRmVn" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;code.cleanup.on.save&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.standard&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.standard&quot;: &quot;&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;prettierjs.PrettierConfiguration.Package&quot;: &quot;D:\\MOBILNE-APLIKACIJE\\ainote\\node_modules\\prettier&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;actions.on.save&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;D:\\MOBILNE-APLIKACIJE\\ainote\\node_modules\\typescript\\lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\MOBILNE-APLIKACIJE\ainote\theme" />
+      <recent name="D:\MOBILNE-APLIKACIJE\ainote\app\(tabs)\(stack)" />
+      <recent name="D:\MOBILNE-APLIKACIJE\ainote\app\(tabs)" />
+      <recent name="D:\MOBILNE-APLIKACIJE\ainote\app\(auth)" />
+      <recent name="D:\MOBILNE-APLIKACIJE\ainote\assets\fonts" />
+    </key>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-b598e85cdad2-JavaScript-WS-252.25557.126" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="4626ac8a-c00b-4985-b68a-659b18d1a37a" name="Changes" comment="" />
+      <created>1758743147685</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1758743147685</updated>
+      <workItem from="1758743153330" duration="1398000" />
+      <workItem from="1758745778094" duration="2340000" />
+      <workItem from="1758787508609" duration="2114000" />
+      <workItem from="1758821749277" duration="3090000" />
+      <workItem from="1758824877647" duration="9316000" />
+      <workItem from="1758902674879" duration="16265000" />
+      <workItem from="1758994961079" duration="13896000" />
+      <workItem from="1759067843518" duration="17356000" />
+      <workItem from="1759160356001" duration="8857000" />
+      <workItem from="1759169952380" duration="94000" />
+      <workItem from="1759170088404" duration="242000" />
+      <workItem from="1759170416076" duration="363000" />
+      <workItem from="1759174286172" duration="210000" />
+      <workItem from="1759174698578" duration="1122000" />
+      <workItem from="1759175844918" duration="10000" />
+      <workItem from="1759175920273" duration="434000" />
+      <workItem from="1759176401320" duration="314000" />
+      <workItem from="1759251966205" duration="13718000" />
+      <workItem from="1759266123316" duration="10000" />
+      <workItem from="1759337550281" duration="3006000" />
+      <workItem from="1759340606443" duration="11656000" />
+      <workItem from="1759419452718" duration="13844000" />
+      <workItem from="1759434295155" duration="546000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/app/settings.tsx</url>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>

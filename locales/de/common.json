@@ -1,0 +1,68 @@
+{
+  "screen": {
+    "home": { "title": "Start" },
+    "inbox": { "title": "Posteingang" },
+    "assistant": { "title": "Assistent" },
+    "settings": { "title": "Einstellungen" }
+  },
+  "user": {
+    "fallbackName": "Benutzer"
+  },
+  "appearance": {
+    "darkMode": {
+      "title": "Dunkelmodus",
+      "subtitle": "Dunklere Darstellung verwenden"
+    }
+  },
+  "settings": {
+    "sections": {
+      "notifications": "Benachrichtigungen",
+      "privacy": "Datenschutz",
+      "about": "Info"
+    },
+    "logout": "Abmelden"
+  },
+  "app": {
+    "version": "AiNote v{{version}}"
+  },
+  "home": {
+    "welcome": "Willkommen zurück 👋",
+    "notesToday": "Du hast heute {{count}} Notizen",
+    "stats": "Statistiken",
+    "thisWeek": "Diese Woche",
+    "total": "Gesamt"
+  },
+  "types": {
+    "text": "Text",
+    "audio": "Audio",
+    "photo": "Foto",
+    "video": "Video"
+  },
+  "week": {
+    "days": ["M", "D", "M", "D", "F", "S", "S"]
+  },
+  "inbox": {
+    "delete": "Löschen",
+    "empty": {
+      "title": "Dein Posteingang ist leer",
+      "message": "Sobald du Notizen erstellst, erscheinen sie hier.",
+      "addNote": "Notiz hinzufügen"
+    }
+  },
+  "note": {
+    "untitled": "Ohne Titel"
+  },
+  "fab": {
+    "newText": "Neue Textnotiz",
+    "newAudio": "Neue Audionotiz",
+    "newPhoto": "Neue Fotonotiz",
+    "newVideo": "Neue Videonotiz"
+  },
+  "assistant": {
+    "section": "Abschnitt {{index}}",
+    "today": "Heute",
+    "newNotesCount": "Du hast {{count}} neue Notizen",
+    "askAnything": "Frag mich alles",
+    "powered": "unterstützt von KI"
+  }
+}

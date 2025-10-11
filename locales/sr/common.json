@@ -1,0 +1,68 @@
+{
+  "screen": {
+    "home": { "title": "Home" },
+    "inbox": { "title": "Inbox" },
+    "assistant": { "title": "Asistent" },
+    "settings": { "title": "Podešavanja" }
+  },
+  "user": {
+    "fallbackName": "Korisnik"
+  },
+  "appearance": {
+    "darkMode": {
+      "title": "Tamni režim",
+      "subtitle": "Uključi tamniji izgled"
+    }
+  },
+  "settings": {
+    "sections": {
+      "notifications": "Obaveštenja",
+      "privacy": "Privatnost",
+      "about": "O aplikaciji"
+    },
+    "logout": "Odjavi se"
+  },
+  "app": {
+    "version": "AiNote v{{version}}"
+  },
+  "home": {
+    "welcome": "Dobrodošli nazad 👋",
+    "notesToday": "Danas imate {{count}} beleški",
+    "stats": "Statistika",
+    "thisWeek": "Ove nedelje",
+    "total": "Ukupno"
+  },
+  "types": {
+    "text": "Tekst",
+    "audio": "Audio",
+    "photo": "Foto",
+    "video": "Video"
+  },
+  "week": {
+    "days": ["P", "U", "S", "Č", "P", "S", "N"]
+  },
+  "inbox": {
+    "delete": "Obriši",
+    "empty": {
+      "title": "Inbox je prazan",
+      "message": "Ovde će se pojaviti tvoje beleške čim ih dodaš.",
+      "addNote": "Dodaj belešku"
+    }
+  },
+  "note": {
+    "untitled": "Bez naslova"
+  },
+  "fab": {
+    "newText": "Nova tekstualna beleška",
+    "newAudio": "Nova audio beleška",
+    "newPhoto": "Nova foto beleška",
+    "newVideo": "Nova video beleška"
+  },
+  "assistant": {
+    "section": "Sekcija {{index}}",
+    "today": "Danas",
+    "newNotesCount": "Imate {{count}} nove beleške",
+    "askAnything": "Pitaj šta god",
+    "powered": "pokreće AI"
+  }
+}
