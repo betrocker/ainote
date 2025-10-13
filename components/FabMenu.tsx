@@ -2,6 +2,7 @@ import { useNotes } from "@/context/NotesContext";
 import { useTab } from "@/context/TabContext";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
+import { router } from "expo-router";
 import { useColorScheme } from "nativewind";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -122,6 +123,9 @@ export default function FabMenu() {
     setMenuOpen(false);
   };
 
+  const afterTwoFrames = (cb: () => void) =>
+    requestAnimationFrame(() => requestAnimationFrame(cb));
+
   const iconColor = isDark ? "#FFF" : "#111";
   const textColor = isDark ? "text-white" : "text-black";
   const sepColor = isDark ? "rgba(235,235,245,0.28)" : "rgba(60,60,67,0.18)";
@@ -188,7 +192,12 @@ export default function FabMenu() {
       <Divider />
 
       <TouchableOpacity
-        onPress={addTextNote}
+        onPress={() => {
+          setMenuOpen(false); // zatvori meni
+          afterTwoFrames(() => {
+            router.push("/note-compose"); // tek onda navigiraj
+          });
+        }}
         activeOpacity={0.85}
         className="flex-row items-center"
         style={{ paddingVertical: ITEM_VPAD }}

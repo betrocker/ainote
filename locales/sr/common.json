@@ -3,7 +3,8 @@
     "home": { "title": "Home" },
     "inbox": { "title": "Inbox" },
     "assistant": { "title": "Asistent" },
-    "settings": { "title": "Podešavanja" }
+    "settings": { "title": "Podešavanja" },
+    "noteCompose": { "title": "Nova beleška" }
   },
   "user": {
     "fallbackName": "Korisnik"
@@ -44,13 +45,18 @@
   "inbox": {
     "delete": "Obriši",
     "empty": {
-      "title": "Inbox je prazan",
-      "message": "Ovde će se pojaviti tvoje beleške čim ih dodaš.",
-      "addNote": "Dodaj belešku"
+      "title": "Nema beleški još",
+      "subtitle": "Zabeleži ideju, misao ili podsetnik — sve počinje jednom beleškom.",
+      "cta": "Nova beleška",
+      "hint": "Ili otvori + meni za brze akcije"
     }
   },
   "note": {
-    "untitled": "Bez naslova"
+    "untitled": "Bez naslova",
+    "placeholder": {
+      "title": "Naslov",
+      "body": "Počni da kucaš…"
+    }
   },
   "fab": {
     "newText": "Nova tekstualna beleška",

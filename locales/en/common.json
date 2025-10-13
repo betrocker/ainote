@@ -3,7 +3,8 @@
     "home": { "title": "Home" },
     "inbox": { "title": "Inbox" },
     "assistant": { "title": "Assistant" },
-    "settings": { "title": "Settings" }
+    "settings": { "title": "Settings" },
+    "noteCompose": { "title": "New note" }
   },
   "user": {
     "fallbackName": "User"
@@ -44,13 +45,18 @@
   "inbox": {
     "delete": "Delete",
     "empty": {
-      "title": "Your inbox is empty",
-      "message": "Your notes will appear here as soon as you add them.",
-      "addNote": "Add note"
+      "title": "No notes yet",
+      "subtitle": "Capture an idea, a thought, or a reminder — it all starts with one note.",
+      "cta": "New note",
+      "hint": "Or open the + menu for quick actions"
     }
   },
   "note": {
-    "untitled": "Untitled"
+    "untitled": "Untitled",
+    "placeholder": {
+      "title": "Title",
+      "body": "Start typing…"
+    }
   },
   "fab": {
     "newText": "New text note",

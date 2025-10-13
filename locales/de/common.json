@@ -3,7 +3,8 @@
     "home": { "title": "Start" },
     "inbox": { "title": "Posteingang" },
     "assistant": { "title": "Assistent" },
-    "settings": { "title": "Einstellungen" }
+    "settings": { "title": "Einstellungen" },
+    "noteCompose": { "title": "Neue Notiz" }
   },
   "user": {
     "fallbackName": "Benutzer"
@@ -44,13 +45,18 @@
   "inbox": {
     "delete": "Löschen",
     "empty": {
-      "title": "Dein Posteingang ist leer",
-      "message": "Sobald du Notizen erstellst, erscheinen sie hier.",
-      "addNote": "Notiz hinzufügen"
+      "title": "Noch keine Notizen",
+      "subtitle": "Halte eine Idee, einen Gedanken oder eine Erinnerung fest – alles beginnt mit einer Notiz.",
+      "cta": "Neue Notiz",
+      "hint": "Oder öffne das + Menü für Schnellaktionen"
     }
   },
   "note": {
-    "untitled": "Ohne Titel"
+    "untitled": "Ohne Titel",
+    "placeholder": {
+      "title": "Titel",
+      "body": "Schreib los…"
+    }
   },
   "fab": {
     "newText": "Neue Textnotiz",
