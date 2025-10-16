@@ -5,7 +5,9 @@ import Input from "@/components/ui/Input";
 import React, {
   createContext,
   ReactNode,
+  useCallback,
   useContext,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -30,22 +32,37 @@ type ModalOptions = {
   twoPlusOneForThree?: boolean;
 };
 
+type ConfirmAsyncOptions = {
+  title?: string;
+  message?: string;
+  confirmText?: string;
+  cancelText?: string;
+  destructive?: boolean;
+};
+
+type PromptOpts = {
+  title: string;
+  message?: string;
+  placeholder?: string;
+  defaultValue?: string;
+  submitLabel?: string;
+  cancelLabel?: string;
+  onSubmit: (value: string) => void;
+  submitVariant?: ButtonVariant;
+  cancelVariant?: ButtonVariant;
+};
+
 type ModalContextType = {
   openModal: (options: ModalOptions) => void;
   closeModal: () => void;
-  confirm: (message: string, onConfirm: () => void, title?: string) => void;
+
+  // Overload 1: stari API (void)
+  confirm(message: string, onConfirm: () => void, title?: string): void;
+  // Overload 2: novi API (Promise<boolean>)
+  confirm(opts: ConfirmAsyncOptions): Promise<boolean>;
+
   alert: (message: string, title?: string) => void;
-  prompt: (opts: {
-    title: string;
-    message?: string;
-    placeholder?: string;
-    defaultValue?: string;
-    submitLabel?: string;
-    cancelLabel?: string;
-    onSubmit: (value: string) => void;
-    submitVariant?: ButtonVariant;
-    cancelVariant?: ButtonVariant;
-  }) => void;
+  prompt: (opts: PromptOpts) => void;
 };
 
 const ModalContext = createContext<ModalContextType | undefined>(undefined);
@@ -54,81 +71,156 @@ export function ModalProvider({ children }: { children: ReactNode }) {
   const [visible, setVisible] = useState(false);
   const [options, setOptions] = useState<ModalOptions>({});
   const latestInputRef = useRef<string>("");
+  const confirmResolverRef = useRef<((v: boolean) => void) | undefined>(
+    undefined
+  );
 
-  const openModal = (opts: ModalOptions) => {
+  const openModal = useCallback((opts: ModalOptions) => {
     setOptions(opts);
     setVisible(true);
-  };
+  }, []);
 
-  const closeModal = () => setVisible(false);
+  const hardReset = useCallback(() => {
+    setOptions({});
+    confirmResolverRef.current = undefined;
+  }, []);
 
-  const confirm = (
-    message: string,
-    onConfirm: () => void,
-    title = "Potvrda"
-  ) => {
-    openModal({
+  const closeModal = useCallback(() => {
+    setVisible(false);
+    requestAnimationFrame(() => {
+      hardReset();
+    });
+  }, [hardReset]);
+
+  /** Promisified confirm (unutrašnja implementacija) */
+  const confirmAsyncImpl = useCallback(
+    (opts: ConfirmAsyncOptions) => {
+      // ako postoji aktivan resolver – cancel
+      if (confirmResolverRef.current) {
+        try {
+          confirmResolverRef.current(false);
+        } catch {}
+        confirmResolverRef.current = undefined;
+      }
+
+      const {
+        title = "Potvrda",
+        message = "Da li si siguran?",
+        confirmText = "Potvrdi",
+        cancelText = "Otkaži",
+        destructive = false,
+      } = opts || {};
+
+      return new Promise<boolean>((resolve) => {
+        confirmResolverRef.current = resolve;
+
+        openModal({
+          title,
+          message,
+          actions: [
+            {
+              label: cancelText,
+              variant: "secondary",
+              onPress: () => {
+                resolve(false);
+                confirmResolverRef.current = undefined;
+                closeModal();
+              },
+            },
+            {
+              label: confirmText,
+              variant: destructive ? "destructive" : "primary",
+              onPress: () => {
+                resolve(true);
+                confirmResolverRef.current = undefined;
+                closeModal();
+              },
+            },
+          ],
+        });
+      });
+    },
+    [openModal, closeModal]
+  );
+
+  /** Public confirm sa overloadima */
+  function confirm(
+    messageOrOpts: string | ConfirmAsyncOptions,
+    onConfirm?: () => void,
+    title?: string
+  ): void | Promise<boolean> {
+    // Novi stil: confirm({ ... }): Promise<boolean>
+    if (typeof messageOrOpts === "object") {
+      return confirmAsyncImpl(messageOrOpts);
+    }
+    // Stari stil: confirm("msg", () => {}, "Title"): void
+    const msg = messageOrOpts as string;
+    const ttl = title ?? "Potvrda";
+    const cb = onConfirm ?? (() => {});
+    // koristimo promisified ispod haube
+    void confirmAsyncImpl({
+      title: ttl,
+      message: msg,
+      confirmText: "Potvrdi",
+      cancelText: "Otkaži",
+    })
+      .then((ok) => {
+        if (ok) cb();
+      })
+      .catch(() => {});
+  }
+
+  const alert = useCallback(
+    (message: string, title = "Info") => {
+      openModal({
+        title,
+        message,
+        actions: [{ label: "OK", onPress: closeModal, variant: "primary" }],
+      });
+    },
+    [openModal, closeModal]
+  );
+
+  const prompt = useCallback(
+    ({
       title,
       message,
-      actions: [
-        { label: "Otkaži", onPress: closeModal, variant: "secondary" },
-        {
-          label: "Potvrdi",
-          onPress: () => {
-            closeModal();
-            onConfirm();
+      placeholder = "Placeholder",
+      defaultValue = "",
+      submitLabel = "Continue",
+      cancelLabel = "Cancel",
+      onSubmit,
+      submitVariant = "primary",
+      cancelVariant = "secondary",
+    }: PromptOpts) => {
+      latestInputRef.current = defaultValue;
+
+      openModal({
+        title,
+        message,
+        content: (
+          <Input
+            placeholder={placeholder}
+            defaultValue={defaultValue}
+            onChangeText={(t) => (latestInputRef.current = t)}
+          />
+        ),
+        actions: [
+          { label: cancelLabel, onPress: closeModal, variant: cancelVariant },
+          {
+            label: submitLabel,
+            onPress: () => {
+              const v = latestInputRef.current ?? "";
+              closeModal();
+              onSubmit(v);
+            },
+            variant: submitVariant,
           },
-          variant: "primary",
-        },
-      ],
-    });
-  };
-
-  const alert = (message: string, title = "Info") => {
-    openModal({
-      title,
-      message,
-      actions: [{ label: "OK", onPress: closeModal, variant: "primary" }],
-    });
-  };
-
-  const prompt: ModalContextType["prompt"] = ({
-    title,
-    message,
-    placeholder = "Placeholder",
-    defaultValue = "",
-    submitLabel = "Continue",
-    cancelLabel = "Cancel",
-    onSubmit,
-    submitVariant = "primary",
-    cancelVariant = "secondary",
-  }) => {
-    latestInputRef.current = defaultValue;
-
-    openModal({
-      title,
-      message,
-      content: (
-        <Input
-          placeholder={placeholder}
-          defaultValue={defaultValue}
-          onChangeText={(t) => (latestInputRef.current = t)}
-        />
-      ),
-      actions: [
-        { label: cancelLabel, onPress: closeModal, variant: cancelVariant },
-        {
-          label: submitLabel,
-          onPress: () => {
-            const v = latestInputRef.current ?? "";
-            closeModal();
-            onSubmit(v);
-          },
-          variant: submitVariant,
-        },
-      ],
-    });
-  };
+        ],
+      });
+    },
+    [openModal, closeModal]
+  );
 
   const renderActions = (actions?: Action[], twoPlusOneForThree?: boolean) => {
     if (!actions?.length) return null;
@@ -211,14 +303,32 @@ export function ModalProvider({ children }: { children: ReactNode }) {
     );
   };
 
+  const value = useMemo<ModalContextType>(
+    () => ({
+      openModal,
+      closeModal,
+      confirm: confirm as ModalContextType["confirm"], // cast zbog overload tipa
+      alert,
+      prompt,
+    }),
+    [openModal, closeModal, alert, prompt]
+  );
+
   return (
-    <ModalContext.Provider
-      value={{ openModal, closeModal, confirm, alert, prompt }}
-    >
+    <ModalContext.Provider value={value}>
       {children}
       <AppModal
         visible={visible}
-        onClose={closeModal}
+        onClose={() => {
+          // ako je aktivan confirmAsync i korisnik tapne overlay → Cancel
+          if (confirmResolverRef.current) {
+            try {
+              confirmResolverRef.current(false);
+            } catch {}
+            confirmResolverRef.current = undefined;
+          }
+          closeModal();
+        }}
         title={options.title}
         message={options.message}
       >

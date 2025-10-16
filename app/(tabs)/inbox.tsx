@@ -1,124 +1,68 @@
 // app/(tabs)/inbox.tsx
+import EmptyInbox from "@/components/EmptyInbox";
+import Header from "@/components/Header";
 import NoteCard from "@/components/NoteCard";
-import ScreenScroll from "@/components/ScreenScroll";
-import { useModal } from "@/context/ModalContext";
+import ScreenBackground from "@/components/ScreenBackground";
+import ScreenFlatList from "@/components/ScreenFlatList";
 import { useNotes } from "@/context/NotesContext";
-import Header from "@components/Header";
-import ScreenBackground from "@components/ScreenBackground";
-import { Ionicons } from "@expo/vector-icons";
-import { BlurView } from "expo-blur";
-import { useRouter } from "expo-router";
-import React, { useEffect } from "react";
-import { useTranslation } from "react-i18next";
-import { Text, View } from "react-native";
-import Animated, {
-  Easing,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withSequence,
-  withTiming,
-} from "react-native-reanimated";
+import React, { useMemo } from "react";
+import { View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function InboxScreen() {
-  const { t } = useTranslation("common");
-  const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const headerHeight = insets.top + 44;
   const { notes, deleteNote } = useNotes();
-  const { confirm } = useModal();
 
-  const isEmpty = !notes || notes.length === 0;
+  // (opciono) Ako želiš najnovije prve i ovde – mada već radimo sort u Context-u
+  const data = useMemo(() => (Array.isArray(notes) ? [...notes] : []), [notes]);
 
-  // Pulse animacija za plavi blob
-  const pulse = useSharedValue(1);
-  useEffect(() => {
-    pulse.value = withRepeat(
-      withSequence(
-        withTiming(1.06, { duration: 1100, easing: Easing.inOut(Easing.quad) }),
-        withTiming(1.0, { duration: 1100, easing: Easing.inOut(Easing.quad) })
-      ),
-      -1,
-      false
-    );
-  }, [pulse]);
-
-  const blob1Style = useAnimatedStyle(() => ({
-    transform: [{ scale: pulse.value }],
-  }));
+  const isEmpty = !data || data.length === 0;
 
   return (
     <ScreenBackground variant="grouped">
-      <Header
-        title={t("screen.inbox.title")}
-        rightIcon="settings-outline"
-        onRightPress={() => router.push("/settings")}
-      />
+      <Header title="Inbox" />
 
-      <ScreenScroll
-        contentContainerStyle={{
-          paddingHorizontal: 16,
-          paddingBottom: 120,
-        }}
-        showsVerticalScrollIndicator={false}
-      >
-        {isEmpty ? (
-          <View className="items-center mt-4">
-            {/* Frosted art kartica */}
-            <View className="w-40 h-40 rounded-3xl overflow-hidden border border-black/10 dark:border-white/10 relative mb-5">
-              <BlurView
-                intensity={24}
-                tint="light"
-                className="absolute inset-0"
+      {isEmpty ? (
+        <View style={{ paddingTop: headerHeight, flex: 1 }}>
+          <EmptyInbox />
+        </View>
+      ) : (
+        <>
+          {/* DEV traka – vidi realan count; ukloni kad sve radi */}
+          {/* <Text className="mx-4 mt-3 mb-1 text-xs text-ios-secondary dark:text-iosd-label2">
+            Notes: {data.length}
+          </Text> */}
+
+          <ScreenFlatList
+            data={data}
+            keyExtractor={(n) => n.id}
+            renderItem={({ item }) => (
+              <NoteCard
+                note={item}
+                onPress={() => {
+                  // po želji: otvori detalj/uređivanje
+                  // router.push({ pathname: "/note-compose", params: { id: item.id } });
+                }}
+                onEdit={() => {
+                  // router.push({ pathname: "/note-compose", params: { id: item.id } });
+                }}
+                onDelete={async () => {
+                  await deleteNote(item.id);
+                  // ⬅️ nema router.push – state već osvežava listu
+                }}
+                className="mx-4"
               />
-
-              {/* Pulse-ujući plavi blob */}
-              <Animated.View
-                style={blob1Style}
-                className="absolute -top-6 -left-8 w-28 h-28 rounded-full bg-ios-blue/20 dark:bg-iosd-blue/15"
-              />
-              {/* Sivi blob za dubinu */}
-              <View className="absolute -bottom-8 -right-6 w-24 h-24 rounded-full bg-black/5 dark:bg-white/5" />
-
-              {/* Ikonica */}
-              <View className="flex-1 items-center justify-center">
-                <Ionicons
-                  name="document-text-outline"
-                  size={44}
-                  color={"#7b7b7c"}
-                />
-              </View>
-            </View>
-
-            {/* Naslov / podnaslov */}
-            <Text className="text-[22px] mb-6 font-semibold text-ios-label dark:text-iosd-label">
-              {t("inbox.empty.title")}
-            </Text>
-            <Text className="text-[17px] mt-1 text-ios-label dark:text-iosd-label text-center px-3">
-              {t("inbox.empty.subtitle")}
-            </Text>
-
-            <Text className="text-[15px] mt-4 text-ios-label dark:text-iosd-label text-center">
-              {t("inbox.empty.hint")}
-            </Text>
-          </View>
-        ) : (
-          // prikaz beleški ako postoje
-          notes.map((note) => (
-            <NoteCard
-              key={note.id}
-              note={note}
-              onPress={() => router.push(`/note-edit/${note.id}`)} // ili šta već koristiš
-              onEdit={() => router.push(`/note-edit/${note.id}`)}
-              onDelete={() =>
-                confirm(
-                  "Obrisati ovu belešku?",
-                  () => deleteNote(note.id),
-                  "Brisanje"
-                )
-              }
-            />
-          ))
-        )}
-      </ScreenScroll>
+            )}
+            extraTop={12}
+            contentContainerStyle={{ paddingBottom: 100 }}
+            // (stabilnost/performanse)
+            initialNumToRender={10}
+            windowSize={10}
+            removeClippedSubviews
+          />
+        </>
+      )}
     </ScreenBackground>
   );
 }

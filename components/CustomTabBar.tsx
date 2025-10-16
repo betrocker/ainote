@@ -1,3 +1,4 @@
+// components/CustomTabBar.tsx
 import { useTab } from "@/context/TabContext";
 import FabMenu from "@components/FabMenu";
 import { Ionicons } from "@expo/vector-icons";
@@ -18,6 +19,7 @@ import Animated, {
   FadeOut,
   LinearTransition,
   useAnimatedStyle,
+  useDerivedValue,
   useSharedValue,
   withSequence,
   withSpring,
@@ -71,37 +73,40 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
         : ANDROID_FALLBACK_BOTTOM
       : insets.bottom;
 
+  // ====== Shared i anim vrednosti ======
   const segmentW = useSharedValue(0);
   const pillX = useSharedValue(0);
   const pillScale = useSharedValue(1);
-  const prevWidth = useRef(0);
+  const currentIdxSV = useSharedValue(currentIndex);
 
-  const movePill = useCallback(
-    (index: number) => {
-      if (segmentW.value <= 0) return;
-      const newWidth = segmentW.value * 0.9;
-      const segmentCenter = index * segmentW.value + segmentW.value / 2;
-      const targetX = segmentCenter - newWidth / 2;
-      pillX.value = withTiming(targetX, {
-        duration: 260,
-        easing: Easing.out(Easing.cubic),
-      });
-    },
-    [segmentW]
-  );
+  // mirroring currentIndex → shared (da bude dostupan u workletima)
+  useEffect(() => {
+    currentIdxSV.value = currentIndex;
+  }, [currentIndex, currentIdxSV]);
 
+  // “bounce” efekat na tap
   const triggerBounce = useCallback(() => {
     pillScale.value = withSequence(
       withTiming(0.9, { duration: 80 }),
       withTiming(1.05, { duration: 110 }),
       withSpring(1, { damping: 16, stiffness: 220 })
     );
-  }, []);
+  }, [pillScale]);
 
-  useEffect(() => {
-    movePill(currentIndex);
-  }, [currentIndex, movePill]);
+  // Reaktivno postavljanje X pil-a (samo u worklet kontekstu)
+  useDerivedValue(() => {
+    if (segmentW.value <= 0) return;
+    const newWidth = segmentW.value * 0.9;
+    const segmentCenter =
+      currentIdxSV.value * segmentW.value + segmentW.value / 2;
+    const targetX = segmentCenter - newWidth / 2;
+    pillX.value = withTiming(targetX, {
+      duration: 260,
+      easing: Easing.out(Easing.cubic),
+    });
+  });
 
+  // Stil za pil (čita .value unutar useAnimatedStyle – ispravno)
   const pillStyle = useAnimatedStyle(() => {
     if (segmentW.value <= 0) return {};
     return {
@@ -118,6 +123,8 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
     };
   });
 
+  // onLayout računa širinu segmenata i postavlja početni X
+  const prevWidth = useRef(0);
   const onLayout = useCallback(
     (event: any) => {
       const w = event.nativeEvent.layout.width;
@@ -125,12 +132,14 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
         prevWidth.current = w;
         const segWidth = w / tabs.length;
         segmentW.value = segWidth;
+
+        // inicijalni X (da ne “iskoči” na prvi frame)
         const newWidth = segWidth * 0.9;
         const segmentCenter = currentIndex * segWidth + segWidth / 2;
         pillX.value = segmentCenter - newWidth / 2;
       }
     },
-    [tabs.length, currentIndex]
+    [tabs.length, currentIndex, segmentW, pillX]
   );
 
   return (
@@ -162,7 +171,7 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
           entering={FadeIn.duration(220)}
           exiting={FadeOut.duration(220)}
           className="absolute left-4 w-[70%] rounded-full overflow-visible"
-          style={{ bottom: bottomSpace + 4 }} // umesto bottom-4
+          style={{ bottom: bottomSpace + 4 }}
           pointerEvents="box-none"
         >
           <BlurView
@@ -223,7 +232,7 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
       {/* FAB – desno, pozicioniran iznad nav bara */}
       <View
         className="absolute right-6 z-50"
-        style={{ bottom: bottomSpace + 6 }} // umesto bottom-4
+        style={{ bottom: bottomSpace + 6 }}
         pointerEvents="box-none"
       >
         <FabMenu />

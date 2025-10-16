@@ -1,11 +1,15 @@
-// components/NoteCard.tsx
-import Card from "@/components/ui/Card";
-import Label from "@/components/ui/Label";
-import SubLabel from "@/components/ui/SubLabel";
+import { useModal } from "@/context/ModalContext";
 import type { Note } from "@/context/NotesContext";
+import { useNotes } from "@/context/NotesContext";
 import { Ionicons } from "@expo/vector-icons";
-import React from "react";
-import { TouchableOpacity, View } from "react-native";
+import {
+  Audio,
+  AVPlaybackStatusSuccess,
+  InterruptionModeAndroid,
+  InterruptionModeIOS,
+} from "expo-av";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Text, TouchableOpacity, View } from "react-native";
 
 type Props = {
   note: Note;
@@ -13,41 +17,6 @@ type Props = {
   onEdit?: () => void;
   onDelete?: () => void | Promise<void>;
   className?: string;
-};
-
-const typeMeta: Record<
-  Note["type"],
-  {
-    icon: keyof typeof Ionicons.glyphMap;
-    color: string;
-    badgeLight: string; // light theme badge bg
-    badgeDark: string; // dark theme badge bg
-  }
-> = {
-  text: {
-    icon: "document-text-outline",
-    color: "#0A84FF",
-    badgeLight: "bg-ios-blue/15",
-    badgeDark: "bg-ios-blue/22",
-  },
-  audio: {
-    icon: "mic-outline",
-    color: "#A855F7",
-    badgeLight: "bg-purple-500/15",
-    badgeDark: "bg-purple-500/22",
-  },
-  photo: {
-    icon: "camera-outline",
-    color: "#F59E0B",
-    badgeLight: "bg-orange-500/15",
-    badgeDark: "bg-orange-500/22",
-  },
-  video: {
-    icon: "videocam-outline",
-    color: "#10B981",
-    badgeLight: "bg-emerald-500/15",
-    badgeDark: "bg-emerald-500/22",
-  },
 };
 
 function formatDate(ts: number) {
@@ -67,55 +36,201 @@ export default function NoteCard({
   onDelete,
   className = "",
 }: Props) {
-  const meta = typeMeta[note.type] ?? typeMeta.text;
+  const { deleteNote } = useNotes();
+  const { confirm } = useModal();
+
+  const isAudio = note.type === "audio";
+  const hasUri = !!note.fileUri;
+
+  // --- expo-av playback (bez Reanimated) ---
+  const soundRef = useRef<Audio.Sound | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const load = async () => {
+      if (!isAudio || !hasUri) return;
+
+      // Playback režim i speaker rutiranje
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        playsInSilentModeIOS: true,
+        staysActiveInBackground: false,
+        interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+        shouldDuckAndroid: false,
+        playThroughEarpieceAndroid: false, // SPEAKER, ne earpiece
+        interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
+      });
+
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: note.fileUri! },
+        { shouldPlay: false, progressUpdateIntervalMillis: 250 },
+        (status) => {
+          if (!mounted || !status.isLoaded) return;
+          const st = status as AVPlaybackStatusSuccess;
+          setIsLoaded(true);
+          setIsPlaying(st.isPlaying);
+          if (st.didJustFinish) {
+            setIsPlaying(false);
+            soundRef.current?.setPositionAsync(0);
+          }
+        }
+      );
+      soundRef.current = sound;
+    };
+
+    load().catch(() => {});
+
+    return () => {
+      mounted = false;
+      (async () => {
+        try {
+          await soundRef.current?.unloadAsync();
+        } catch {}
+        soundRef.current = null;
+      })();
+    };
+  }, [isAudio, hasUri, note.fileUri]);
+
+  const togglePlayback = async () => {
+    if (!isLoaded || !soundRef.current) return;
+    try {
+      if (isPlaying) {
+        await soundRef.current.pauseAsync();
+        setIsPlaying(false);
+      } else {
+        const st =
+          (await soundRef.current.getStatusAsync()) as AVPlaybackStatusSuccess;
+        if (
+          st.isLoaded &&
+          st.positionMillis >= (st.durationMillis ?? 0) - 150
+        ) {
+          await soundRef.current.setPositionAsync(0);
+        }
+        await soundRef.current.playAsync();
+        setIsPlaying(true);
+      }
+    } catch {}
+  };
+  // -----------------------------------------
+
+  // Delete sa potvrdom
+  const handleDelete = useMemo(
+    () => async () => {
+      const ok = await confirm({
+        title: "Delete note?",
+        message: "This action cannot be undone.",
+        confirmText: "Delete",
+        cancelText: "Cancel",
+        destructive: true,
+      });
+      if (!ok) return;
+
+      if (onDelete) return onDelete();
+
+      try {
+        await deleteNote(note.id);
+      } catch {}
+    },
+    [confirm, onDelete, deleteNote, note.id]
+  );
 
   return (
-    <Card
-      onPress={onPress ? () => onPress(note) : undefined}
-      padding="lg"
-      withBorder
+    <View
+      onTouchEnd={onPress ? () => onPress(note) : undefined}
       className={[
-        // izgled “kao confirm modal”
-        "rounded-[24px] overflow-hidden",
-        "mb-3", // razmak između kartica
-        "backdrop-blur-md",
-        "bg-white/85 dark:bg-black/35", // JASNIJA razlika po temi
+        "mx-4 mb-3 rounded-[24px] overflow-hidden",
+        "bg-white/85 dark:bg-black/35",
         "border border-black/10 dark:border-white/15",
-        "shadow-sm dark:shadow-none", // suptilno u light, čisto u dark
-        "active:scale-[0.99] transition-transform",
+        "p-4",
         className,
       ].join(" ")}
     >
       <View className="flex-row items-start">
-        {/* Tip badge */}
+        {/* tip ikona */}
         <View
           className={[
             "w-10 h-10 rounded-2xl mr-3 items-center justify-center",
-            meta.badgeLight,
-            "dark:" + meta.badgeDark,
+            isAudio
+              ? "bg-purple-500/15 dark:bg-purple-500/22"
+              : "bg-ios-blue/15 dark:bg-ios-blue/22",
             "border border-black/10 dark:border-white/12",
           ].join(" ")}
         >
-          <Ionicons name={meta.icon} size={20} color={meta.color} />
+          <Ionicons
+            name={isAudio ? "mic-outline" : "document-text-outline"}
+            size={20}
+            color={isAudio ? "#A855F7" : "#0A84FF"}
+          />
         </View>
 
-        {/* Tekstualni deo */}
-        <View className="flex-1">
-          <Label size="lg" numberOfLines={1}>
-            {note.title?.trim() || "Untitled"}
-          </Label>
-          <SubLabel
-            size="sm"
-            tone="secondary"
-            numberOfLines={1}
-            className="mt-0.5"
-          >
+        {/* tekstualni deo */}
+        <View className="flex-1 pr-2">
+          <View className="flex-row items-center">
+            <Text
+              className="flex-1 text-lg font-semibold text-ios-label dark:text-iosd-label"
+              numberOfLines={1}
+            >
+              {note.title?.trim() || "Untitled"}
+            </Text>
+          </View>
+
+          <Text className="mt-0.5 text-xs text-ios-secondary dark:text-iosd-label2">
             {formatDate(note.createdAt)}
-          </SubLabel>
+          </Text>
+
+          {/* AUDIO mini-player */}
+          {isAudio && (
+            <View className="mt-3 flex-row items-center gap-3">
+              <TouchableOpacity
+                onPress={togglePlayback}
+                disabled={!hasUri || !isLoaded}
+                accessibilityLabel={isPlaying ? "Pause" : "Play"}
+                activeOpacity={0.9}
+                className={[
+                  "w-11 h-11 rounded-full items-center justify-center",
+                  isPlaying ? "bg-red-500" : "bg-ios-blue",
+                  !hasUri || !isLoaded ? "opacity-50" : "opacity-100",
+                ].join(" ")}
+              >
+                <Ionicons
+                  name={isPlaying ? "pause" : "play"}
+                  size={20}
+                  color="white"
+                />
+              </TouchableOpacity>
+
+              <View className="flex-1">
+                <Text className="text-ios-label dark:text-iosd-label font-medium">
+                  Voice note
+                </Text>
+                {note.type === "audio" && !!note.text && (
+                  <Text
+                    numberOfLines={2}
+                    className="mt-2 text-[13px] leading-5 text-ios-secondary dark:text-iosd-label2"
+                  >
+                    {note.text}
+                  </Text>
+                )}
+              </View>
+            </View>
+          )}
+
+          {/* TEXT preview */}
+          {note.type === "text" && !!note.text && (
+            <Text
+              numberOfLines={2}
+              className="mt-2 text-[13px] leading-5 text-ios-secondary dark:text-iosd-label2"
+            >
+              {note.text}
+            </Text>
+          )}
         </View>
 
         {/* Akcije */}
-        <View className="flex-row items-center ml-3">
+        <View className="flex-row items-center ml-1 self-center">
           {onEdit && (
             <TouchableOpacity
               accessibilityLabel="Edit note"
@@ -126,18 +241,16 @@ export default function NoteCard({
               <Ionicons name="create-outline" size={18} color="#6B7280" />
             </TouchableOpacity>
           )}
-          {onDelete && (
-            <TouchableOpacity
-              accessibilityLabel="Delete note"
-              onPress={onDelete}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-              className="w-9 h-9 rounded-xl items-center justify-center bg-red-500/12 dark:bg-red-500/20 border border-red-500/25 dark:border-red-500/30 active:opacity-90"
-            >
-              <Ionicons name="trash-outline" size={18} color="#EF4444" />
-            </TouchableOpacity>
-          )}
+          <TouchableOpacity
+            accessibilityLabel="Delete note"
+            onPress={handleDelete}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            className="w-9 h-9 rounded-xl items-center justify-center bg-red-500/12 dark:bg-red-500/20 border border-red-500/25 dark:border-red-500/30 active:opacity-90"
+          >
+            <Ionicons name="trash-outline" size={18} color="#EF4444" />
+          </TouchableOpacity>
         </View>
       </View>
-    </Card>
+    </View>
   );
 }

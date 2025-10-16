@@ -1,16 +1,18 @@
+import { useModal } from "@/context/ModalContext";
 import { useNotes } from "@/context/NotesContext";
 import { useTab } from "@/context/TabContext";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
-import { router } from "expo-router";
+import * as ImagePicker from "expo-image-picker";
+import { useRouter } from "expo-router";
 import { useColorScheme } from "nativewind";
 import React from "react";
-import { useTranslation } from "react-i18next";
 import {
   LayoutChangeEvent,
   Platform,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -22,36 +24,29 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
+/** ========== Konstante / stil ========== */
 const FAB_SIZE = 56;
-
-// Blur – radi stabilnosti držimo ga konstantnim (nema “flash” efekta)
 const BLUR_INTENSITY = 20;
-
-// Minimalne mere (ako merenje na prvom frame-u vrati 0)
 const MIN_MENU_W = 160;
 const MIN_MENU_H = 44;
-
-// Padding i radijus u otvorenom stanju
 const MENU_PAD_H = 30;
 const MENU_PAD_V = 15;
 const ITEM_VPAD = 10;
 const OPEN_RADIUS = 30;
-
-// Easing kriva “iOS-asta”
 const EASE = Easing.bezier(0.22, 0.95, 0.21, 1);
 
 export default function FabMenu() {
-  const { t } = useTranslation("common");
   const { menuOpen, setMenuOpen } = useTab();
-  const { addNote } = useNotes();
+  const { addNote, addNoteFromText, addNoteFromPhoto, addNoteFromVideo } =
+    useNotes();
+  const { openModal, closeModal, alert } = useModal();
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === "dark";
   const blurTint: "dark" | "light" = isDark ? "dark" : "light";
+  const router = useRouter();
 
-  // Jedan “progress” umesto više odvojenih animacija
+  /** ========== Animacija ========== */
   const open = useSharedValue(0);
-
-  // Prirodne (izmerene) dimenzije sadržaja
   const [naturalW, setNaturalW] = React.useState<number>(MIN_MENU_W);
   const [naturalH, setNaturalH] = React.useState<number>(MIN_MENU_H);
   const targetW = Math.max(MIN_MENU_W, Math.ceil(naturalW));
@@ -61,12 +56,10 @@ export default function FabMenu() {
     open.value = withTiming(menuOpen ? 1 : 0, { duration: 280, easing: EASE });
   }, [menuOpen]);
 
-  // Kontejner: interpoliramo širinu/visinu/radius iz open (0→1)
   const containerStyle = useAnimatedStyle(() => {
     const w = interpolate(open.value, [0, 1], [FAB_SIZE, targetW]);
     const h = interpolate(open.value, [0, 1], [FAB_SIZE, targetH]);
     const r = interpolate(open.value, [0, 1], [FAB_SIZE / 2, OPEN_RADIUS]);
-
     return {
       width: w,
       height: h,
@@ -74,8 +67,6 @@ export default function FabMenu() {
       position: "absolute",
       bottom: 0,
       right: 0,
-      // samo kad je skoro zatvoreno stavljamo staklasti fill,
-      // u otvorenom stanju rely na overlay (ispod).
       backgroundColor:
         open.value < 0.02
           ? isDark
@@ -85,7 +76,6 @@ export default function FabMenu() {
     };
   });
 
-  // Outline uvek prisutan, radius prati interpolaciju
   const outlineStyle = useAnimatedStyle(() => {
     const r = interpolate(open.value, [0, 1], [FAB_SIZE / 2, OPEN_RADIUS]);
     return {
@@ -98,38 +88,15 @@ export default function FabMenu() {
     };
   });
 
-  // Overlay preko blura – animiramo samo opacity (0→1)
   const OPEN_TINT = isDark ? "rgba(0,0,0,0.12)" : "rgba(255,255,255,0.06)";
-  const overlayStyle = useAnimatedStyle(() => ({
-    opacity: open.value, // linearno 0→1
-  }));
+  const overlayStyle = useAnimatedStyle(() => ({ opacity: open.value }));
 
   const toggle = () => setMenuOpen(!menuOpen);
-
-  const addTextNote = () => {
-    addNote?.({ type: "text", title: t("note.untitled"), content: "" });
-    setMenuOpen(false);
-  };
-  const addAudioNote = () => {
-    addNote?.({ type: "audio", title: t("fab.newAudio"), content: "" });
-    setMenuOpen(false);
-  };
-  const addPhotoNote = () => {
-    addNote?.({ type: "photo", title: t("fab.newPhoto"), content: "" });
-    setMenuOpen(false);
-  };
-  const addVideoNote = () => {
-    addNote?.({ type: "video", title: t("fab.newVideo"), content: "" });
-    setMenuOpen(false);
-  };
-
-  const afterTwoFrames = (cb: () => void) =>
-    requestAnimationFrame(() => requestAnimationFrame(cb));
+  const rAF = (cb: () => void) => requestAnimationFrame(cb);
 
   const iconColor = isDark ? "#FFF" : "#111";
   const textColor = isDark ? "text-white" : "text-black";
   const sepColor = isDark ? "rgba(235,235,245,0.28)" : "rgba(60,60,67,0.18)";
-
   const Divider = () => (
     <View
       style={{
@@ -141,6 +108,170 @@ export default function FabMenu() {
     />
   );
 
+  /** ========== Akcije ========== */
+
+  // TEXT (quick add preko modala)
+  const onText = () => {
+    rAF(() => {
+      let draft = "";
+      openModal({
+        title: "Quick Text",
+        content: (
+          <View className="px-2 pt-2">
+            <Text className="text-ios-secondary dark:text-iosd-label2 mb-2 px-2">
+              Zabeleži misao (npr. “sledeća zamena ulja na 100000 km”)
+            </Text>
+            <TextInput
+              autoFocus
+              placeholder="Upiši ovde…"
+              placeholderTextColor="#8E8E93"
+              onChangeText={(t) => (draft = t)}
+              className="rounded-xl px-4 py-3 bg-ios-fill dark:bg-iosd-fill text-ios-label dark:text-iosd-label border border-ios-sepSoft dark:border-iosd-sepSoft"
+            />
+            <View className="flex-row justify-center gap-3 mt-4">
+              <TouchableOpacity
+                onPress={closeModal}
+                className="min-w-[120px] px-6 py-3 rounded-full items-center justify-center bg-[#2C2C2E]"
+                activeOpacity={0.9}
+              >
+                <Text className="text-white font-semibold">Otkaži</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={async () => {
+                  const text = (draft || "").trim();
+                  if (!text) return;
+
+                  if (typeof addNoteFromText === "function") {
+                    await addNoteFromText(text);
+                  } else {
+                    await addNote({
+                      type: "text",
+                      title: text.split("\n")[0]?.slice(0, 80) || "New note",
+                      text,
+                    });
+                  }
+
+                  closeModal();
+                  setMenuOpen(false);
+                }}
+                className="min-w-[120px] px-6 py-3 rounded-full items-center justify-center bg-[#007AFF]"
+                activeOpacity={0.9}
+              >
+                <Text className="text-white font-semibold">Sačuvaj</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ),
+      });
+    });
+  };
+
+  // AUDIO – placeholder (čuva se na posebnom ekranu)
+  const onAudio = () => {
+    setMenuOpen(false);
+    rAF(() => router.push("/audio-capture"));
+  };
+
+  // PHOTO/VIDEO – direktno kroz ImagePicker i kreiranje note
+  const onCamera = () => {
+    rAF(() => {
+      openModal({
+        title: "Camera",
+        message: "Šta želiš da zabeležiš?",
+        content: (
+          <View className="px-2 pt-2">
+            <TouchableOpacity
+              className="flex-row items-center justify-between px-4 py-3 rounded-2xl bg-white/70 dark:bg-white/10 border border-black/10 dark:border-white/10 active:opacity-90"
+              onPress={async () => {
+                try {
+                  const { status } =
+                    await ImagePicker.requestCameraPermissionsAsync();
+                  if (status !== "granted") {
+                    alert("Kamera nije dozvoljena.");
+                    return;
+                  }
+                  const res = await ImagePicker.launchCameraAsync({
+                    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                    quality: 0.9,
+                  });
+                  if (!res.canceled && res.assets?.[0]?.uri) {
+                    if (typeof addNoteFromPhoto === "function") {
+                      await addNoteFromPhoto(res.assets[0].uri);
+                    } else {
+                      await addNote({
+                        type: "photo",
+                        title: "Photo",
+                        fileUri: res.assets[0].uri,
+                      });
+                    }
+                  }
+                } catch (e) {
+                  console.log("Photo capture error", e);
+                } finally {
+                  closeModal();
+                  setMenuOpen(false);
+                }
+              }}
+            >
+              <View className="flex-row items-center">
+                <Ionicons name="camera-outline" size={18} color={iconColor} />
+                <Text className={`ml-2 text-base ${textColor}`}>
+                  Take Photo
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color="#999" />
+            </TouchableOpacity>
+
+            <View className="h-2" />
+
+            <TouchableOpacity
+              className="flex-row items-center justify-between px-4 py-3 rounded-2xl bg-white/70 dark:bg-white/10 border border-black/10 dark:border-white/10 active:opacity-90"
+              onPress={async () => {
+                try {
+                  const { status } =
+                    await ImagePicker.requestCameraPermissionsAsync();
+                  if (status !== "granted") {
+                    alert("Kamera nije dozvoljena.");
+                    return;
+                  }
+                  const res = await ImagePicker.launchCameraAsync({
+                    mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+                    videoMaxDuration: 60,
+                  });
+                  if (!res.canceled && res.assets?.[0]?.uri) {
+                    if (typeof addNoteFromVideo === "function") {
+                      await addNoteFromVideo(res.assets[0].uri);
+                    } else {
+                      await addNote({
+                        type: "video",
+                        title: "Video",
+                        fileUri: res.assets[0].uri,
+                      });
+                    }
+                  }
+                } catch (e) {
+                  console.log("Video capture error", e);
+                } finally {
+                  closeModal();
+                  setMenuOpen(false);
+                }
+              }}
+            >
+              <View className="flex-row items-center">
+                <Ionicons name="videocam-outline" size={18} color={iconColor} />
+                <Text className={`ml-2 text-base ${textColor}`}>
+                  Record Video
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color="#999" />
+            </TouchableOpacity>
+          </View>
+        ),
+      });
+    });
+  };
+
+  /** ========== Meni sadržaj (3 akcije) ========== */
   const MenuContent = () => (
     <View
       style={{
@@ -150,67 +281,42 @@ export default function FabMenu() {
       }}
     >
       <TouchableOpacity
-        onPress={addAudioNote}
+        onPress={onText}
+        activeOpacity={0.85}
+        className="flex-row items-center"
+        style={{ paddingVertical: ITEM_VPAD }}
+      >
+        <Ionicons name="create-outline" size={20} color={iconColor} />
+        <Text className={`ml-2 text-base ${textColor}`}>Zabelezi misao</Text>
+      </TouchableOpacity>
+
+      <Divider />
+
+      <TouchableOpacity
+        onPress={onAudio}
         activeOpacity={0.85}
         className="flex-row items-center"
         style={{ paddingVertical: ITEM_VPAD }}
       >
         <Ionicons name="mic-outline" size={20} color={iconColor} />
-        <Text className={`ml-2 text-base ${textColor}`}>
-          {t("fab.newAudio")}
-        </Text>
+        <Text className={`ml-2 text-base ${textColor}`}>Audio</Text>
       </TouchableOpacity>
 
       <Divider />
 
       <TouchableOpacity
-        onPress={addPhotoNote}
+        onPress={onCamera}
         activeOpacity={0.85}
         className="flex-row items-center"
         style={{ paddingVertical: ITEM_VPAD }}
       >
         <Ionicons name="camera-outline" size={20} color={iconColor} />
-        <Text className={`ml-2 text-base ${textColor}`}>
-          {t("fab.newPhoto")}
-        </Text>
-      </TouchableOpacity>
-
-      <Divider />
-
-      <TouchableOpacity
-        onPress={addVideoNote}
-        activeOpacity={0.85}
-        className="flex-row items-center"
-        style={{ paddingVertical: ITEM_VPAD }}
-      >
-        <Ionicons name="videocam-outline" size={20} color={iconColor} />
-        <Text className={`ml-2 text-base ${textColor}`}>
-          {t("fab.newVideo")}
-        </Text>
-      </TouchableOpacity>
-
-      <Divider />
-
-      <TouchableOpacity
-        onPress={() => {
-          setMenuOpen(false); // zatvori meni
-          afterTwoFrames(() => {
-            router.push("/note-compose"); // tek onda navigiraj
-          });
-        }}
-        activeOpacity={0.85}
-        className="flex-row items-center"
-        style={{ paddingVertical: ITEM_VPAD }}
-      >
-        <Ionicons name="document-text-outline" size={20} color={iconColor} />
-        <Text className={`ml-2 text-base ${textColor}`}>
-          {t("fab.newText")}
-        </Text>
+        <Text className={`ml-2 text-base ${textColor}`}>Camera</Text>
       </TouchableOpacity>
     </View>
   );
 
-  // Ghost measurer – merimo prirodne mere; dok je otvoren, ignorišemo update da ne “preskače”
+  /** ========== Merenje prirodnih dimenzija ========== */
   const onGhostLayout = (e: LayoutChangeEvent) => {
     if (menuOpen) return;
     const { width: w, height: h } = e.nativeEvent.layout;
@@ -220,9 +326,10 @@ export default function FabMenu() {
     }
   };
 
+  /** ========== Render ========== */
   return (
     <>
-      {/* Ghost measurer (nevidljiv) – isti sadržaj/padding kao pravi meni */}
+      {/* Nevidljivi “ghost” za merenje */}
       <View
         style={{
           position: "absolute",
@@ -241,14 +348,12 @@ export default function FabMenu() {
           style={containerStyle}
           className="overflow-hidden shadow-md shadow-black/40"
         >
-          {/* Blur sa konstantnim intensity da ne “flashuje” */}
           <BlurView
             intensity={BLUR_INTENSITY}
             tint={blurTint}
             className="absolute inset-0"
           />
 
-          {/* Overlay tint – animirani opacity (0→1) */}
           <Animated.View
             pointerEvents="none"
             style={[
@@ -257,14 +362,12 @@ export default function FabMenu() {
             ]}
           />
 
-          {/* Outline uvek prisutan */}
           <Animated.View
             pointerEvents="none"
             style={[{ position: "absolute", inset: 0 }, outlineStyle]}
           />
 
-          {/* Sadržaj */}
-          {!menuOpen ? ( // ✅ koristi boolean iz React state-a/konteksta
+          {!menuOpen ? (
             <View className="absolute inset-0 items-center justify-center">
               <Ionicons name="add" size={26} color={iconColor} />
             </View>

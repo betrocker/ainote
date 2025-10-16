@@ -83,28 +83,6 @@ export default function EmptyInbox({ title, message, onAdd }: Props) {
               </Svg>
             </View>
 
-            {/* Prečice – po želji zadrži ili ukloni */}
-            <View className="flex-row">
-              <Action
-                icon="document-text-outline"
-                label={t("types.text")}
-                onPress={() => setMenuOpen(true)}
-                bg="bg-ios-blue/90"
-              />
-              <Action
-                icon="mic-outline"
-                label={t("types.audio")}
-                onPress={() => setMenuOpen(true)}
-                bg="bg-purple-500/90"
-              />
-              <Action
-                icon="camera-outline"
-                label={t("types.photo")}
-                onPress={() => setMenuOpen(true)}
-                bg="bg-green-500/90"
-              />
-            </View>
-
             <TouchableOpacity
               onPress={onAdd ?? (() => setMenuOpen(true))}
               activeOpacity={0.9}
