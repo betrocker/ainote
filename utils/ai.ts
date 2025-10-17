@@ -1,6 +1,100 @@
 // utils/ai.ts
 import Constants from "expo-constants";
 
+const KNOWN_CITIES = [
+  "beograd",
+  "novi sad",
+  "niš",
+  "nis",
+  "kragujevac",
+  "subotica",
+  "leskovac",
+  "zrenjanin",
+  "pančevo",
+  "pancevo",
+  "čačak",
+  "cacak",
+  "kruševac",
+  "krusevac",
+  "kraljevo",
+  "smederevo",
+  "jagodina",
+  "valjevo",
+  "užice",
+  "uzice",
+  "vranje",
+  "šabac",
+  "sabac",
+  "sombor",
+  "požarevac",
+  "pozarevac",
+  "pirot",
+  "zaječar",
+  "zajecar",
+];
+
+const SERBIAN_NUMBERS: Record<string, number> = {
+  // Jednostavni brojevi
+  jedan: 1,
+  jedna: 1,
+  jedno: 1,
+  dva: 2,
+  dve: 2,
+  tri: 3,
+  četiri: 4,
+  cetiri: 4,
+  pet: 5,
+  šest: 6,
+  sest: 6,
+  sedam: 7,
+  osam: 8,
+  devet: 9,
+  deset: 10,
+  jedanaest: 11,
+  dvanaest: 12,
+  trinaest: 13,
+  četrnaest: 14,
+  cetrnaest: 14,
+  petnaest: 15,
+  šesnaest: 16,
+  sesnaest: 16,
+  sedamnaest: 17,
+  osamnaest: 18,
+  devetnaest: 19,
+  dvadeset: 20,
+  trideset: 30,
+  četrdeset: 40,
+  cetrdeset: 40,
+  pedeset: 50,
+  šezdeset: 60,
+  sezdeset: 60,
+  sedamdeset: 70,
+  osamdeset: 80,
+  devedeset: 90,
+};
+
+function parseCompoundNumber(text: string): string {
+  let result = text;
+
+  // Pattern: "dvadeset tri" → 23
+  const compoundPattern =
+    /\b(dvadeset|trideset|četrdeset|cetrdeset|pedeset|šezdeset|sezdeset|sedamdeset|osamdeset|devedeset)\s+(jedan|jedna|jedno|dva|dve|tri|četiri|cetiri|pet|šest|sest|sedam|osam|devet)\b/gi;
+
+  result = result.replace(compoundPattern, (match, tens, ones) => {
+    const tensNum = SERBIAN_NUMBERS[tens.toLowerCase()] || 0;
+    const onesNum = SERBIAN_NUMBERS[ones.toLowerCase()] || 0;
+    return String(tensNum + onesNum);
+  });
+
+  console.log(
+    "🔢 [parseCompoundNumber]:",
+    text.slice(0, 40),
+    "→",
+    result.slice(0, 40)
+  );
+  return result;
+}
+
 export type Fact = {
   subject: string;
   predicate: "due_on" | "number" | "note_contains" | "topic";
@@ -62,10 +156,12 @@ export function genFactsFromText(text: string, noteId?: string): Fact[] {
   const raw = (text || "").trim();
   if (!raw) return facts;
 
+  // ⭐ NORMALIZUJ TEKSTUALNE BROJEVE
+  const normalized = normalizeNumberWords(raw);
   const now = new Date();
 
-  // 1) relativne reči
-  for (const t of raw.split(/\s+/)) {
+  // 1) Relativne reči (danas, sutra, itd.)
+  for (const t of normalized.split(/\s+/)) {
     const rel = relativeKeywordToISO(t, now);
     if (rel) {
       facts.push({
@@ -89,9 +185,9 @@ export function genFactsFromText(text: string, noteId?: string): Fact[] {
     }
   }
 
-  // 2) relativne fraze "za X dana / nedelja"
+  // 2) Relativne fraze "za X dana / nedelja"
   for (const rule of REL_IN_X) {
-    const m = raw.match(rule.re);
+    const m = normalized.match(rule.re);
     if (m) {
       const n = Number(m[1]);
       const days = rule.unit === "day" ? n : n * 7;
@@ -106,10 +202,10 @@ export function genFactsFromText(text: string, noteId?: string): Fact[] {
     }
   }
 
-  // 3) brojevi (npr. kilometraža)
-  const nums = raw.match(/\b(\d{4,6})\b/g);
-  if (nums)
-    for (const n of nums)
+  // 3) Brojevi (kilometraža, cene, itd.)
+  const nums = normalized.match(/\b(\d{4,6})\b/g);
+  if (nums) {
+    for (const n of nums) {
       facts.push({
         subject: raw.slice(0, 50),
         predicate: "number",
@@ -117,8 +213,28 @@ export function genFactsFromText(text: string, noteId?: string): Fact[] {
         weight: 1,
         sourceNoteId: noteId,
       });
+    }
+  }
 
-  // 4) sadržaj kao fallback
+  // ⭐ 4) EKSTRAKTUJ IMENA MESTA - Prioritet: Poznati gradovi
+  const textLower = raw.toLowerCase();
+  const foundPlaces = new Set<string>();
+
+  for (const city of KNOWN_CITIES) {
+    if (textLower.includes(city)) {
+      foundPlaces.add(city);
+      facts.push({
+        subject: raw.slice(0, 50),
+        predicate: "topic",
+        object: city,
+        weight: 3.0, // Najviši weight za verifikovane gradove
+        sourceNoteId: noteId,
+      });
+      console.log(`📍 [genFactsFromText] Found known city: ${city}`);
+    }
+  }
+
+  // 5) Sadržaj kao fallback (uvek dodaj za pretragu)
   facts.push({
     subject: raw.slice(0, 50),
     predicate: "note_contains",
@@ -127,9 +243,9 @@ export function genFactsFromText(text: string, noteId?: string): Fact[] {
     sourceNoteId: noteId,
   });
 
-  // 5) teme auto-servisa (heuristike)
+  // 6) Teme auto-servisa
   if (
-    /\b(zamena|promena|servis|ulje|filter|kočnice|gume|točkova|menjača|vode)\b/i.test(
+    /\b(zamena|promena|servis|ulje|filter|kočnice|gume|točkova|menjača|vode|brisač|brisača)\b/i.test(
       raw
     )
   ) {
@@ -142,6 +258,15 @@ export function genFactsFromText(text: string, noteId?: string): Fact[] {
     });
   }
 
+  console.log(
+    `📊 [genFactsFromText] Generated ${facts.length} facts for note ${noteId?.slice(0, 8)}`
+  );
+  facts.forEach((f, i) => {
+    console.log(
+      `  [${i}] ${f.predicate}: ${f.object.slice(0, 40)} (weight: ${f.weight})`
+    );
+  });
+
   return facts;
 }
 
@@ -153,11 +278,53 @@ type NoteLike = {
   ai?: { facts?: Fact[] };
 };
 
+// ⭐ NOVA funkcija za normalizaciju
+function normalizeNumberWords(text: string): string {
+  let normalized = text;
+
+  // ⭐ PRVO parsiraj složene brojeve
+  normalized = parseCompoundNumber(normalized);
+
+  // Zatim zameni preostale jednostavne tekstualne brojeve
+  for (const [word, num] of Object.entries(SERBIAN_NUMBERS)) {
+    // "za pet dana" → "za 5 dana"
+    const dayRegex = new RegExp(`\\bza\\s+${word}\\s+(dan|dana)\\b`, "gi");
+    normalized = normalized.replace(dayRegex, `za ${num} dana`);
+
+    // "za pet nedelja" → "za 5 nedelje"
+    const weekRegex = new RegExp(
+      `\\bza\\s+${word}\\s+(nedelju|nedelje|nedelja|ned|n\\.)\\b`,
+      "gi"
+    );
+    normalized = normalized.replace(weekRegex, `za ${num} nedelje`);
+  }
+
+  // Kilometraža
+  normalized = normalized.replace(/\bpedeset\s+hiljada\b/gi, "50000");
+  normalized = normalized.replace(/\bsto\s+hiljada\b/gi, "100000");
+
+  console.log("🔢 [normalizeNumberWords] Original:", text.slice(0, 60));
+  console.log("🔢 [normalizeNumberWords] Normalized:", normalized.slice(0, 60));
+
+  return normalized;
+}
+
 function score(query: string, note: NoteLike, f: Fact): number {
   const q = query.toLowerCase();
   let s = f.weight ?? 0;
-  if (f.object?.includes(q)) s += 1.2;
-  if (f.subject?.toLowerCase().includes(q)) s += 0.8;
+
+  // ⭐ Boost za exact match u object-u
+  if (f.object?.toLowerCase() === q) {
+    s += 3; // Jako povećaj score za tačan match
+  } else if (f.object?.toLowerCase().includes(q)) {
+    s += 1.5; // Srednji boost za parcijalni match
+  }
+
+  // Subject match
+  if (f.subject?.toLowerCase().includes(q)) {
+    s += 0.8;
+  }
+
   return s;
 }
 
@@ -191,15 +358,16 @@ export function ask(query: string, notes: NoteLike[]) {
     let total = 0;
     const why: string[] = [];
 
-    // 1) facts score
+    // 1) Facts score
     for (const f of facts) {
       const sc = score(query, n, f);
       if (sc > 0) {
         total += sc;
         if (f.predicate === "due_on") {
           why.push(`datum:${formatHuman(f.object)}`);
+        } else if (f.predicate === "number") {
+          why.push(`broj:${f.object}`);
         } else {
-          // skraćeni “explain”
           const obj =
             f.object.length > 40 ? f.object.slice(0, 40) + "…" : f.object;
           why.push(`${f.predicate}:${obj}`);
@@ -207,43 +375,71 @@ export function ask(query: string, notes: NoteLike[]) {
       }
     }
 
-    // 2) plain text uvek (NE samo kad nema facts)
+    // 2) Plain text - multiword query match
     if (n.text) {
-      const hit = n.text.toLowerCase().includes(q);
-      if (hit) {
-        total += 0.9; // malo veći boost da se ne izgubi iza facts
-        why.push("plain_text_hit");
+      const textLower = n.text.toLowerCase();
+      const queryWords = q.split(/\s+/).filter((w) => w.length > 2);
+
+      // ⭐ BONUS: Ako beleška sadrži SVE reči iz upita - veliki boost
+      const allWordsMatch = queryWords.every((word) =>
+        textLower.includes(word)
+      );
+      if (allWordsMatch && queryWords.length >= 2) {
+        total += 3.0; // ⭐ Veliki bonus za potpuni match
+        why.push(`full_query_match`);
+      }
+
+      // Regular word matching
+      for (const word of queryWords) {
+        if (textLower.includes(word)) {
+          total += 1.2;
+          why.push(`text_match:${word}`);
+        }
       }
     }
 
-    // 3) title match (često dovoljna sugestija)
+    // 3) Title match
     if (n.title && n.title.toLowerCase().includes(q)) {
       total += 0.8;
       why.push("title_match");
     }
 
-    if (total > 0) entries.push({ noteId: n.id, score: total, why });
+    if (total > 0) {
+      console.log(
+        `🔍 [ask] Note ${n.id.slice(0, 8)}: score=${total.toFixed(1)}, why=${why.join(", ")}`
+      );
+      entries.push({ noteId: n.id, score: total, why });
+    }
   }
 
   entries.sort((a, b) => b.score - a.score);
   const top = entries[0];
   const topNote = top ? notes.find((n) => n.id === top.noteId) : undefined;
 
-  // pokušaj da izvučeš due_on za top note
+  // Izvuci due_on
   let dueOn: string | null = null;
   if (topNote?.ai?.facts) {
     const due = topNote.ai.facts.find((f) => f.predicate === "due_on");
     if (due) dueOn = due.object;
   }
 
+  // Pretty output
   const pretty = topNote
     ? [
-        topNote.title || "Beleška",
+        topNote.title &&
+        topNote.title !== "Voice note" &&
+        topNote.title !== "Audio"
+          ? topNote.title
+          : topNote.text?.slice(0, 80) || "Beleška",
         dueOn ? `• rok: ${formatHuman(dueOn)}` : null,
       ]
         .filter(Boolean)
         .join(" ")
     : "Nisam našao relevantne beleške.";
+
+  console.log(
+    `🎯 [ask] Top match: ${top?.noteId.slice(0, 8)} (score: ${top?.score.toFixed(1)})`
+  );
 
   return {
     matches: entries,
@@ -253,14 +449,6 @@ export function ask(query: string, notes: NoteLike[]) {
   };
 }
 
-/**
- * Transkribuje lokalni audio fajl (uri: file://…) preko OpenAI Whisper API-ja.
- * Vraća plain text ili "" ako nešto pođe po zlu (ne diže error u UI-u).
- *
- * API ključ:
- * - EXPO_PUBLIC_OPENAI_API_KEY (env)
- * - ili app.json/app.config.js: extra.OPENAI_API_KEY
- */
 export async function transcribeAudio(
   uri: string,
   opts?: {
@@ -271,8 +459,14 @@ export async function transcribeAudio(
     temperature?: number;
   }
 ): Promise<string> {
+  console.log("🔊 [transcribeAudio] Called with:");
+  console.log("  URI:", uri);
+  console.log("  Options:", opts);
   try {
-    if (!uri) return "";
+    if (!uri) {
+      console.log("🔊 [transcribeAudio] Empty URI - returning");
+      return "";
+    }
 
     const apiKey =
       opts?.apiKey ||
@@ -282,15 +476,19 @@ export async function transcribeAudio(
       (Constants as any)?.manifest2?.extra?.OPENAI_API_KEY ||
       "";
 
+    console.log("🔊 [transcribeAudio] API key exists:", !!apiKey);
+    console.log("🔊 [transcribeAudio] API key length:", apiKey?.length || 0);
+
     if (!apiKey) {
       if (__DEV__) {
-        console.log("[transcribeAudio] No API key found (DEV fallback).");
-        return "DEV transcript: snimljena glasovna beleška"; // ⭐ vidiš odmah u UI + ASK radi
+        console.log("🔊 [transcribeAudio] DEV fallback - no key");
+        return "DEV transcript: snimljena glasovna beleška";
       }
-      console.log("[transcribeAudio] No API key found.");
+      console.log("🔊 [transcribeAudio] No API key - returning empty");
       return "";
     }
 
+    // ⭐ MIME TYPE correction
     const guessMime = (u: string) => {
       const name = (u.split("?")[0] || "").split("/").pop() || "";
       const ext = name.toLowerCase().split(".").pop();
@@ -303,24 +501,29 @@ export async function transcribeAudio(
           return "audio/mpeg";
         case "wav":
           return "audio/wav";
-        case "ogg":
-          return "audio/ogg";
-        case "webm":
-          return "audio/webm";
-        case "caf":
-          return "audio/x-caf";
         default:
-          return "application/octet-stream";
+          return "audio/m4a"; // ⭐ default za expo-av
       }
     };
 
-    const filename = (uri.split("?")[0] || "").split("/").pop() || "note.m4a";
+    const filename = (uri.split("?")[0] || "").split("/").pop() || "audio.m4a";
     const mime = guessMime(uri);
 
-    const form = new FormData();
-    const fileAny: any = { uri, name: filename, type: mime };
-    (form as any).append("file", fileAny);
+    console.log("[transcribeAudio] Starting:");
+    console.log("  URI:", uri);
+    console.log("  Filename:", filename);
+    console.log("  MIME:", mime);
 
+    const form = new FormData();
+
+    // ⭐ KLJUČNA PROMENA: React Native FormData format
+    const fileData: any = {
+      uri,
+      name: filename,
+      type: mime,
+    };
+
+    form.append("file", fileData);
     form.append("model", opts?.model ?? "whisper-1");
     if (opts?.language) form.append("language", opts.language);
     if (opts?.prompt) form.append("prompt", opts.prompt);
@@ -329,22 +532,69 @@ export async function transcribeAudio(
 
     const res = await fetch("https://api.openai.com/v1/audio/transcriptions", {
       method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}` } as any,
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        // ⭐ NE dodavaj Content-Type - fetch automatski postavlja za FormData
+      } as any,
       body: form as any,
     });
 
+    // ⭐ DETALJNO LOGOVANJE
+    console.log("[transcribeAudio] Response status:", res.status);
+    console.log("[transcribeAudio] Rate limit headers:");
+    console.log(
+      "  Remaining requests:",
+      res.headers.get("x-ratelimit-remaining-requests")
+    );
+    console.log(
+      "  Limit requests:",
+      res.headers.get("x-ratelimit-limit-requests")
+    );
+    console.log(
+      "  Reset requests:",
+      res.headers.get("x-ratelimit-reset-requests")
+    );
+
     if (!res.ok) {
       const errText = await res.text().catch(() => "");
-      console.log("[transcribeAudio] Whisper error:", res.status, errText);
+      console.log("[transcribeAudio] ❌ ERROR:", res.status);
+      console.log("[transcribeAudio] Body:", errText);
+
+      try {
+        const errJson = JSON.parse(errText);
+        console.log("[transcribeAudio] Error type:", errJson.error?.type);
+        console.log("[transcribeAudio] Error message:", errJson.error?.message);
+
+        // User-friendly poruke
+        if (errJson.error?.type === "insufficient_quota") {
+          return "Nedovoljno kredita. Dodaj $5 na platform.openai.com.";
+        }
+        if (res.status === 429) {
+          return "Rate limit (3 req/min na free tier). Dodaj kredit za više.";
+        }
+        if (errJson.error?.message?.includes("Invalid file format")) {
+          return "Neispravan audio format. Pokušaj ponovo.";
+        }
+      } catch {}
+
       return "";
     }
 
     const data = (await res.json()) as { text?: string };
-    const out = (data?.text || "").trim();
-    if (!out) console.log("[transcribeAudio] Empty transcription.");
-    return out;
-  } catch (e) {
-    console.log("[transcribeAudio] Exception:", e);
+    const transcript = (data?.text || "").trim();
+
+    console.log("[transcribeAudio] ✅ Success");
+    console.log("  Length:", transcript.length, "chars");
+    console.log("  Preview:", transcript.slice(0, 100));
+
+    if (!transcript) {
+      console.log("[transcribeAudio] ⚠️ Empty transcription");
+      return "";
+    }
+
+    return transcript;
+  } catch (e: any) {
+    console.log("[transcribeAudio] ❌ Exception:", e?.message || e);
     return "";
   }
 }

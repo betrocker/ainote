@@ -5,20 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4626ac8a-c00b-4985-b68a-659b18d1a37a" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/components/ContextMenu.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/components/ui/NoteCard.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/context/NotesContext.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(tabs)/inbox.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(tabs)/inbox.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/_layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/_layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/settings.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/settings.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/CustomTabBar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/CustomTabBar.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/FabMenu.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/FabMenu.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/ScreenBackground.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/ScreenBackground.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/ui/Input.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/ui/Input.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tailwind.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/tailwind.config.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -110,6 +97,7 @@
       <workItem from="1759340606443" duration="11656000" />
       <workItem from="1759419452718" duration="13844000" />
       <workItem from="1759434295155" duration="546000" />
+      <workItem from="1760716906448" duration="9000" />
     </task>
     <servers />
   </component>

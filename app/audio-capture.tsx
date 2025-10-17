@@ -1,7 +1,6 @@
 import Header from "@/components/Header";
 import ScreenBackground from "@/components/ScreenBackground";
 import { useNotes } from "@/context/NotesContext";
-import { transcribeAudio } from "@/utils/ai";
 import { Ionicons } from "@expo/vector-icons";
 import {
   AudioModule,
@@ -18,7 +17,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 export default function AudioCapture() {
   const insets = useSafeAreaInsets();
   const headerHeight = insets.top + 60;
-  const { addNoteFromAudio, editNote } = useNotes();
+  const { addNoteFromAudio, editNote, transcribeNote } = useNotes();
 
   const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const recState = useAudioRecorderState(recorder);
@@ -42,6 +41,37 @@ export default function AudioCapture() {
       } as any);
       setReady(true);
     })();
+  }, []);
+
+  const testWhisperAuth = async () => {
+    try {
+      const apiKey = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
+      if (!apiKey) {
+        console.log("❌ API key nije definisan");
+        return;
+      }
+
+      const res = await fetch("https://api.openai.com/v1/models", {
+        headers: { Authorization: `Bearer ${apiKey}` },
+      });
+
+      if (res.ok) {
+        console.log("✅ API key validan");
+        console.log(
+          "✅ Tier info dostupan na platform.openai.com/settings/organization/limits"
+        );
+      } else {
+        const err = await res.json();
+        console.log("❌ API error:", err);
+      }
+    } catch (e) {
+      console.log("❌ Network error:", e);
+    }
+  };
+
+  // Pozovi na mount (DEV only)
+  useEffect(() => {
+    if (__DEV__) testWhisperAuth();
   }, []);
 
   const startTimer = () => {
@@ -68,44 +98,46 @@ export default function AudioCapture() {
   const stopRecording = async () => {
     if (!recState.isRecording) return;
 
+    console.log("🎙️ [1] Stopping recording...");
+
     try {
       await recorder.stop();
     } finally {
       stopTimer();
     }
 
+    console.log("🎙️ [2] Recording stopped");
+
     requestAnimationFrame(async () => {
       const uri = recorder.uri;
+      console.log("🎙️ [3] Recorder URI:", uri);
+
       if (!uri) {
+        console.log("🎙️ [4] No URI - exiting");
         requestAnimationFrame(() => router.back());
         return;
       }
 
-      // 1) Sačuvaj audio belešku
+      console.log("🎙️ [5] Saving audio note...");
       const id = await addNoteFromAudio(uri);
+      console.log("🎙️ [6] Note saved with ID:", id);
 
-      // 2) Best-effort transkripcija
-      try {
-        const text = await transcribeAudio(uri, {
-          language: "sr",
-          prompt:
-            "Kratka glasovna beleška, upiši čist tekst bez vremenskih oznaka.",
-        });
-        if (text?.trim()) {
-          await editNote(id, { text }); // NotesContext će generisati facts za ASK
-        }
-      } catch {}
+      // ⭐ Prosleđuj URI direktno
+      console.log("🎙️ [7] Starting background transcription...");
+      transcribeNote(id, uri).catch((err) => {
+        console.log("🎙️ [ERROR] Transcription failed:", err);
+      });
 
-      // 3) Vrati playback mod i speaker rutiranje
+      console.log("🎙️ [8] Restoring audio mode...");
       try {
         await setAudioModeAsync({
           allowsRecording: false,
           playsInSilentMode: true,
-          shouldRouteThroughEarpiece: false, // ANDROID → speaker
+          shouldRouteThroughEarpiece: false,
         } as any);
       } catch {}
 
-      // 4) Back
+      console.log("🎙️ [9] Going back...");
       requestAnimationFrame(() => router.back());
     });
   };

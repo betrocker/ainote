@@ -36,11 +36,25 @@ export default function NoteCard({
   onDelete,
   className = "",
 }: Props) {
-  const { deleteNote } = useNotes();
+  const { deleteNote, transcribingNotes } = useNotes();
   const { confirm } = useModal();
 
   const isAudio = note.type === "audio";
+  const isTranscribing = transcribingNotes.has(note.id);
+  const hasTranscription = isAudio && !!note.text && note.text !== "Voice note";
   const hasUri = !!note.fileUri;
+
+  // ⭐ DEBUG LOG
+  useEffect(() => {
+    if (isAudio) {
+      console.log(`📝 [NoteCard ${note.id.slice(0, 8)}]:`, {
+        text: note.text,
+        hasTranscription,
+        isTranscribing,
+        textLength: note.text?.length || 0,
+      });
+    }
+  }, [note.text, isAudio, hasTranscription, isTranscribing]);
 
   // --- expo-av playback (bez Reanimated) ---
   const soundRef = useRef<Audio.Sound | null>(null);
@@ -206,12 +220,29 @@ export default function NoteCard({
                 <Text className="text-ios-label dark:text-iosd-label font-medium">
                   Voice note
                 </Text>
-                {note.type === "audio" && !!note.text && (
+                {/* ⭐ Status transkripcije */}
+                {isTranscribing && (
+                  <View className="mt-2 space-y-2">
+                    <View className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full w-full animate-pulse" />
+                    <View className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full w-3/4 animate-pulse" />
+                  </View>
+                )}
+
+                {/* ⭐ Prikaz transkripcije (prve 2 linije) */}
+                {!isTranscribing && hasTranscription && (
                   <Text
                     numberOfLines={2}
+                    ellipsizeMode="tail"
                     className="mt-2 text-[13px] leading-5 text-ios-secondary dark:text-iosd-label2"
                   >
                     {note.text}
+                  </Text>
+                )}
+
+                {/* ⭐ Placeholder ako nema transkripcije */}
+                {!isTranscribing && !hasTranscription && (
+                  <Text className="mt-2 text-[13px] leading-5 text-ios-label dark:text-iosd-label italic">
+                    Nema transkripcije
                   </Text>
                 )}
               </View>
@@ -228,6 +259,12 @@ export default function NoteCard({
             </Text>
           )}
         </View>
+
+        {isTranscribing && (
+          <View className="mt-2 h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+            <View className="h-full bg-ios-blue w-2/3 animate-pulse" />
+          </View>
+        )}
 
         {/* Akcije */}
         <View className="flex-row items-center ml-1 self-center">

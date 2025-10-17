@@ -1,6 +1,5 @@
 import { ModalProvider } from "@/context/ModalContext";
 import { NotesProvider } from "@/context/NotesContext";
-import { SemanticNotesProvider } from "@/context/SemanticNotesContext";
 import { TabProvider } from "@/context/TabContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import "@/i18n";
@@ -47,20 +46,18 @@ export default function RootLayout() {
           telemetry={false}
         >
           <NotesProvider>
-            <SemanticNotesProvider>
-              <TabProvider>
-                <ModalProvider>
-                  <SafeAreaProvider>
-                    <Stack screenOptions={{ headerShown: false }}>
-                      <Stack.Screen name="index" />
-                      <Stack.Screen name="(auth)" />
-                      <Stack.Screen name="(tabs)" />
-                      <Stack.Screen name="settings" />
-                    </Stack>
-                  </SafeAreaProvider>
-                </ModalProvider>
-              </TabProvider>
-            </SemanticNotesProvider>
+            <TabProvider>
+              <ModalProvider>
+                <SafeAreaProvider>
+                  <Stack screenOptions={{ headerShown: false }}>
+                    <Stack.Screen name="index" />
+                    <Stack.Screen name="(auth)" />
+                    <Stack.Screen name="(tabs)" />
+                    <Stack.Screen name="settings" />
+                  </Stack>
+                </SafeAreaProvider>
+              </ModalProvider>
+            </TabProvider>
           </NotesProvider>
         </ClerkProvider>
       </ThemeProvider>
