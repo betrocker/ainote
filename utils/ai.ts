@@ -1,5 +1,6 @@
 // utils/ai.ts
-import Constants from "expo-constants";
+import { File } from "expo-file-system";
+import * as ImageManipulator from "expo-image-manipulator";
 
 const KNOWN_CITIES = [
   "beograd",
@@ -278,6 +279,72 @@ type NoteLike = {
   ai?: { facts?: Fact[] };
 };
 
+export async function extractTextFromImage(
+  imageUri: string
+): Promise<string | null> {
+  try {
+    const apiKey = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
+    if (!apiKey) throw new Error("OpenAI API key not found");
+
+    // ⭐ Konvertuj sliku u JPEG format (garantovano podržan)
+    const manipResult = await ImageManipulator.manipulateAsync(
+      imageUri,
+      [], // nema transformacija, samo konverzija
+      {
+        compress: 0.9, // visok kvalitet za OCR
+        format: ImageManipulator.SaveFormat.JPEG,
+      }
+    );
+
+    // Učitaj konvertovanu sliku kao base64
+    const file = new File(manipResult.uri);
+    const base64 = await file.base64();
+
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: "Izvuci sav tekst sa ove slike. Vrati samo tekst bez objašnjenja.",
+              },
+              {
+                type: "image_url",
+                image_url: {
+                  url: `data:image/jpeg;base64,${base64}`, // ⭐ Sada sigurno JPEG
+                  detail: "high",
+                },
+              },
+            ],
+          },
+        ],
+        max_tokens: 1000,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error?.message || "Vision API error");
+    }
+
+    const data = await response.json();
+    const extractedText = data.choices?.[0]?.message?.content?.trim();
+
+    return extractedText || null;
+  } catch (error) {
+    console.error("OCR extraction error:", error);
+    throw error;
+  }
+}
+
 // ⭐ NOVA funkcija za normalizaciju
 function normalizeNumberWords(text: string): string {
   let normalized = text;
@@ -450,151 +517,54 @@ export function ask(query: string, notes: NoteLike[]) {
 }
 
 export async function transcribeAudio(
-  uri: string,
-  opts?: {
-    language?: string;
-    prompt?: string;
-    apiKey?: string;
-    model?: string;
-    temperature?: number;
-  }
+  audioUri: string,
+  options?: { language?: string; prompt?: string }
 ): Promise<string> {
-  console.log("🔊 [transcribeAudio] Called with:");
-  console.log("  URI:", uri);
-  console.log("  Options:", opts);
   try {
-    if (!uri) {
-      console.log("🔊 [transcribeAudio] Empty URI - returning");
-      return "";
+    const apiKey = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
+    if (!apiKey) throw new Error("OpenAI API key not found");
+
+    // ⭐ Kreiraj FormData
+    const formData = new FormData();
+
+    // ⭐ Dodaj audio fajl
+    formData.append("file", {
+      uri: audioUri,
+      type: "audio/m4a", // ili "audio/mpeg" za mp3
+      name: "audio.m4a",
+    } as any);
+
+    formData.append("model", "whisper-1");
+
+    if (options?.language) {
+      formData.append("language", options.language);
     }
 
-    const apiKey =
-      opts?.apiKey ||
-      (process.env.EXPO_PUBLIC_OPENAI_API_KEY as string | undefined) ||
-      (Constants?.expoConfig?.extra?.OPENAI_API_KEY as string | undefined) ||
-      // @ts-ignore
-      (Constants as any)?.manifest2?.extra?.OPENAI_API_KEY ||
-      "";
+    if (options?.prompt) {
+      formData.append("prompt", options.prompt);
+    }
 
-    console.log("🔊 [transcribeAudio] API key exists:", !!apiKey);
-    console.log("🔊 [transcribeAudio] API key length:", apiKey?.length || 0);
-
-    if (!apiKey) {
-      if (__DEV__) {
-        console.log("🔊 [transcribeAudio] DEV fallback - no key");
-        return "DEV transcript: snimljena glasovna beleška";
+    const response = await fetch(
+      "https://api.openai.com/v1/audio/transcriptions",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          // ⚠️ NE postavljaj Content-Type - FormData automatski postavlja
+        },
+        body: formData,
       }
-      console.log("🔊 [transcribeAudio] No API key - returning empty");
-      return "";
-    }
-
-    // ⭐ MIME TYPE correction
-    const guessMime = (u: string) => {
-      const name = (u.split("?")[0] || "").split("/").pop() || "";
-      const ext = name.toLowerCase().split(".").pop();
-      switch (ext) {
-        case "m4a":
-          return "audio/m4a";
-        case "mp4":
-          return "audio/mp4";
-        case "mp3":
-          return "audio/mpeg";
-        case "wav":
-          return "audio/wav";
-        default:
-          return "audio/m4a"; // ⭐ default za expo-av
-      }
-    };
-
-    const filename = (uri.split("?")[0] || "").split("/").pop() || "audio.m4a";
-    const mime = guessMime(uri);
-
-    console.log("[transcribeAudio] Starting:");
-    console.log("  URI:", uri);
-    console.log("  Filename:", filename);
-    console.log("  MIME:", mime);
-
-    const form = new FormData();
-
-    // ⭐ KLJUČNA PROMENA: React Native FormData format
-    const fileData: any = {
-      uri,
-      name: filename,
-      type: mime,
-    };
-
-    form.append("file", fileData);
-    form.append("model", opts?.model ?? "whisper-1");
-    if (opts?.language) form.append("language", opts.language);
-    if (opts?.prompt) form.append("prompt", opts.prompt);
-    form.append("temperature", String(opts?.temperature ?? 0));
-    form.append("response_format", "json");
-
-    const res = await fetch("https://api.openai.com/v1/audio/transcriptions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        // ⭐ NE dodavaj Content-Type - fetch automatski postavlja za FormData
-      } as any,
-      body: form as any,
-    });
-
-    // ⭐ DETALJNO LOGOVANJE
-    console.log("[transcribeAudio] Response status:", res.status);
-    console.log("[transcribeAudio] Rate limit headers:");
-    console.log(
-      "  Remaining requests:",
-      res.headers.get("x-ratelimit-remaining-requests")
-    );
-    console.log(
-      "  Limit requests:",
-      res.headers.get("x-ratelimit-limit-requests")
-    );
-    console.log(
-      "  Reset requests:",
-      res.headers.get("x-ratelimit-reset-requests")
     );
 
-    if (!res.ok) {
-      const errText = await res.text().catch(() => "");
-      console.log("[transcribeAudio] ❌ ERROR:", res.status);
-      console.log("[transcribeAudio] Body:", errText);
-
-      try {
-        const errJson = JSON.parse(errText);
-        console.log("[transcribeAudio] Error type:", errJson.error?.type);
-        console.log("[transcribeAudio] Error message:", errJson.error?.message);
-
-        // User-friendly poruke
-        if (errJson.error?.type === "insufficient_quota") {
-          return "Nedovoljno kredita. Dodaj $5 na platform.openai.com.";
-        }
-        if (res.status === 429) {
-          return "Rate limit (3 req/min na free tier). Dodaj kredit za više.";
-        }
-        if (errJson.error?.message?.includes("Invalid file format")) {
-          return "Neispravan audio format. Pokušaj ponovo.";
-        }
-      } catch {}
-
-      return "";
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error?.message || "Whisper API error");
     }
 
-    const data = (await res.json()) as { text?: string };
-    const transcript = (data?.text || "").trim();
-
-    console.log("[transcribeAudio] ✅ Success");
-    console.log("  Length:", transcript.length, "chars");
-    console.log("  Preview:", transcript.slice(0, 100));
-
-    if (!transcript) {
-      console.log("[transcribeAudio] ⚠️ Empty transcription");
-      return "";
-    }
-
-    return transcript;
-  } catch (e: any) {
-    console.log("[transcribeAudio] ❌ Exception:", e?.message || e);
-    return "";
+    const data = await response.json();
+    return data.text?.trim() || "";
+  } catch (error) {
+    console.error("Transcription error:", error);
+    throw error;
   }
 }

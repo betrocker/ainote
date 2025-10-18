@@ -1,4 +1,3 @@
-import { useModal } from "@/context/ModalContext";
 import type { Note } from "@/context/NotesContext";
 import { useNotes } from "@/context/NotesContext";
 import { Ionicons } from "@expo/vector-icons";
@@ -8,14 +7,22 @@ import {
   InterruptionModeAndroid,
   InterruptionModeIOS,
 } from "expo-av";
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Href, useRouter } from "expo-router";
+import * as VideoThumbnails from "expo-video-thumbnails";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  Image,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import ImageFullscreenViewer from "./ImageFullscreenViewer";
+import VideoFullscreenPlayer from "./VideoFullscreenPlayer";
 
 type Props = {
   note: Note;
   onPress?: (n: Note) => void;
-  onEdit?: () => void;
-  onDelete?: () => void | Promise<void>;
   className?: string;
 };
 
@@ -29,20 +36,81 @@ function formatDate(ts: number) {
   });
 }
 
-export default function NoteCard({
-  note,
-  onPress,
-  onEdit,
-  onDelete,
-  className = "",
-}: Props) {
-  const { deleteNote, transcribingNotes } = useNotes();
-  const { confirm } = useModal();
+export default function NoteCard({ note, onPress, className = "" }: Props) {
+  const { transcribingNotes, extractPhotoText } = useNotes();
+  const router = useRouter();
+
+  // ⭐ DEBUG - dodaj ovo na početku komponente
+  useEffect(() => {
+    console.log("🎯 [NoteCard] Debug info:", {
+      id: note.id.slice(0, 8),
+      type: note.type,
+      typeOf: typeof note.type,
+      title: note.title,
+      hasUri: !!note.fileUri,
+    });
+  }, [note.type, note.id, note.title, note.fileUri]);
 
   const isAudio = note.type === "audio";
+  const isVideo = note.type === "video";
+  const isPhoto = note.type === "photo";
+
+  // ⭐ DEBUG - proveri vrednosti
+  console.log("🔍 Type checks:", {
+    isAudio,
+    isVideo,
+    isPhoto,
+    actualType: note.type,
+  });
+
   const isTranscribing = transcribingNotes.has(note.id);
   const hasTranscription = isAudio && !!note.text && note.text !== "Voice note";
   const hasUri = !!note.fileUri;
+
+  const [showImageFullscreen, setShowImageFullscreen] = useState(false);
+  const [showVideoFullscreen, setShowVideoFullscreen] = useState(false);
+
+  const iconName = isAudio
+    ? "mic-outline"
+    : isPhoto
+      ? "image-outline"
+      : isVideo
+        ? "videocam-outline"
+        : "document-text-outline";
+
+  const iconColor = isAudio
+    ? "#A855F7"
+    : isPhoto
+      ? "#10B981"
+      : isVideo
+        ? "#F59E0B"
+        : "#0A84FF";
+
+  const bgColor = isAudio
+    ? "bg-purple-500/15 dark:bg-purple-500/22"
+    : isPhoto
+      ? "bg-green-500/15 dark:bg-green-500/22"
+      : isVideo
+        ? "bg-amber-500/15 dark:bg-amber-500/22"
+        : "bg-ios-blue/15 dark:bg-ios-blue/22";
+
+  // ⭐ DODAJ - Video thumbnail state
+  const [videoThumb, setVideoThumb] = useState<string | null>(null);
+  const [thumbLoading, setThumbLoading] = useState(false);
+
+  // ⭐ DODAJ - Generisanje video thumbnail-a
+  useEffect(() => {
+    if (isVideo && hasUri) {
+      setThumbLoading(true);
+      VideoThumbnails.getThumbnailAsync(note.fileUri!, {
+        time: 0, // prvi frejm
+        quality: 0.7,
+      })
+        .then(({ uri }) => setVideoThumb(uri))
+        .catch((err) => console.log("Video thumbnail error:", err))
+        .finally(() => setThumbLoading(false));
+    }
+  }, [isVideo, hasUri, note.fileUri]);
 
   // ⭐ DEBUG LOG
   useEffect(() => {
@@ -128,32 +196,26 @@ export default function NoteCard({
       }
     } catch {}
   };
-  // -----------------------------------------
 
-  // Delete sa potvrdom
-  const handleDelete = useMemo(
-    () => async () => {
-      const ok = await confirm({
-        title: "Delete note?",
-        message: "This action cannot be undone.",
-        confirmText: "Delete",
-        cancelText: "Cancel",
-        destructive: true,
-      });
-      if (!ok) return;
+  const handlePress = () => {
+    console.log("🔵 [NoteCard] Pressed note:", note.id.slice(0, 8));
 
-      if (onDelete) return onDelete();
-
-      try {
-        await deleteNote(note.id);
-      } catch {}
-    },
-    [confirm, onDelete, deleteNote, note.id]
-  );
+    if (onPress) {
+      console.log("🔵 [NoteCard] Using custom onPress");
+      onPress(note);
+    } else {
+      console.log("🔵 [NoteCard] Navigating to detail view");
+      // ⭐ Koristi href objekat umesto stringa
+      router.push({
+        pathname: "/note/[id]",
+        params: { id: note.id },
+      } as Href);
+    }
+  };
 
   return (
-    <View
-      onTouchEnd={onPress ? () => onPress(note) : undefined}
+    <TouchableOpacity
+      onPress={handlePress}
       className={[
         "mx-4 mb-3 rounded-[24px] overflow-hidden",
         "bg-white/85 dark:bg-black/35",
@@ -167,16 +229,14 @@ export default function NoteCard({
         <View
           className={[
             "w-10 h-10 rounded-2xl mr-3 items-center justify-center",
-            isAudio
-              ? "bg-purple-500/15 dark:bg-purple-500/22"
-              : "bg-ios-blue/15 dark:bg-ios-blue/22",
+            bgColor, // ⭐ NE getBgColor() !!!
             "border border-black/10 dark:border-white/12",
           ].join(" ")}
         >
           <Ionicons
-            name={isAudio ? "mic-outline" : "document-text-outline"}
+            name={iconName} // ⭐ NE getIconName() !!!
             size={20}
-            color={isAudio ? "#A855F7" : "#0A84FF"}
+            color={iconColor} // ⭐ NE getIconColor() !!!
           />
         </View>
 
@@ -194,6 +254,124 @@ export default function NoteCard({
           <Text className="mt-0.5 text-xs text-ios-secondary dark:text-iosd-label2">
             {formatDate(note.createdAt)}
           </Text>
+
+          {/* ⭐ PHOTO preview - dodaj onPress */}
+          {isPhoto && hasUri && (
+            <TouchableOpacity
+              onPress={() => setShowImageFullscreen(true)}
+              activeOpacity={0.9}
+              className="mt-3 rounded-2xl overflow-hidden"
+            >
+              <Image
+                source={{ uri: note.fileUri }}
+                style={{ width: "100%", aspectRatio: 16 / 9 }}
+                resizeMode="cover"
+              />
+              {/* Zoom indikator ikona */}
+              <View className="absolute top-2 right-2 bg-black/50 rounded-full p-2">
+                <Ionicons name="expand-outline" size={16} color="#FFF" />
+              </View>
+            </TouchableOpacity>
+          )}
+
+          {/* ⭐ OCR dugme za fotografije */}
+          {isPhoto && hasUri && !note.text && (
+            <TouchableOpacity
+              onPress={() => extractPhotoText(note.id, note.fileUri!)}
+              disabled={isTranscribing}
+              className="mt-2 flex-row items-center justify-center py-2 px-4 rounded-xl bg-green-500/15 dark:bg-green-500/22"
+            >
+              {isTranscribing ? (
+                <>
+                  <ActivityIndicator size="small" color="#10B981" />
+                  <Text className="ml-2 text-green-600 dark:text-green-400">
+                    OCR u toku...
+                  </Text>
+                </>
+              ) : (
+                <>
+                  <Ionicons name="scan-outline" size={18} color="#10B981" />
+                  <Text className="ml-2 text-green-600 dark:text-green-400">
+                    Izvuci tekst sa slike
+                  </Text>
+                </>
+              )}
+            </TouchableOpacity>
+          )}
+
+          {/* Prikaz OCR teksta */}
+          {isPhoto && note.text && (
+            <Text
+              numberOfLines={3}
+              className="mt-2 text-[13px] leading-5 text-ios-secondary dark:text-iosd-label2"
+            >
+              {note.text}
+            </Text>
+          )}
+
+          {/* ⭐ VIDEO preview - dodaj onPress */}
+          {isVideo && (
+            <TouchableOpacity
+              onPress={() => setShowVideoFullscreen(true)}
+              activeOpacity={0.9}
+              className="mt-3 rounded-2xl overflow-hidden relative"
+            >
+              {thumbLoading ? (
+                <View
+                  style={{ width: "100%", aspectRatio: 16 / 9 }}
+                  className="bg-ios-fill dark:bg-iosd-fill items-center justify-center"
+                >
+                  <ActivityIndicator size="small" />
+                </View>
+              ) : videoThumb ? (
+                <>
+                  <Image
+                    source={{ uri: videoThumb }}
+                    style={{ width: "100%", aspectRatio: 16 / 9 }}
+                    resizeMode="cover"
+                  />
+                  {/* Play ikona overlay */}
+                  <View className="absolute inset-0 items-center justify-center">
+                    <View className="bg-black/60 rounded-full p-3">
+                      <Ionicons name="play" size={28} color="white" />
+                    </View>
+                  </View>
+                </>
+              ) : (
+                <View
+                  style={{ width: "100%", aspectRatio: 16 / 9 }}
+                  className="bg-ios-fill dark:bg-iosd-fill items-center justify-center"
+                >
+                  <Ionicons name="videocam-outline" size={40} color="#999" />
+                </View>
+              )}
+            </TouchableOpacity>
+          )}
+
+          {/* ⭐ Dugme za transkripciju videa */}
+          {/* Privremeno onemogući video transkripciju */}
+          {isVideo && hasUri && !note.text && (
+            <View className="mt-2 flex-row items-center justify-center py-2 px-4 rounded-xl bg-gray-500/15 dark:bg-gray-500/22">
+              <Ionicons
+                name="information-circle-outline"
+                size={18}
+                color="#666"
+              />
+              <Text className="ml-2 text-gray-600 dark:text-gray-400 text-sm">
+                Video transkripcija dolazi uskoro
+              </Text>
+            </View>
+          )}
+
+          {/* Prikaz transkripcije ako postoji */}
+          {isVideo && note.text && (
+            <Text
+              numberOfLines={3}
+              className="mt-2 text-[13px] leading-5 text-ios-secondary dark:text-iosd-label2"
+            >
+              {note.text}
+            </Text>
+          )}
 
           {/* AUDIO mini-player */}
           {isAudio && (
@@ -266,28 +444,23 @@ export default function NoteCard({
           </View>
         )}
 
-        {/* Akcije */}
-        <View className="flex-row items-center ml-1 self-center">
-          {onEdit && (
-            <TouchableOpacity
-              accessibilityLabel="Edit note"
-              onPress={onEdit}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-              className="w-9 h-9 rounded-xl items-center justify-center bg-white/60 dark:bg-white/10 border border-black/10 dark:border-white/12 active:opacity-90 mr-1.5"
-            >
-              <Ionicons name="create-outline" size={18} color="#6B7280" />
-            </TouchableOpacity>
-          )}
-          <TouchableOpacity
-            accessibilityLabel="Delete note"
-            onPress={handleDelete}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            className="w-9 h-9 rounded-xl items-center justify-center bg-red-500/12 dark:bg-red-500/20 border border-red-500/25 dark:border-red-500/30 active:opacity-90"
-          >
-            <Ionicons name="trash-outline" size={18} color="#EF4444" />
-          </TouchableOpacity>
-        </View>
+        {/* ⭐ Fullscreen modali */}
+        {isPhoto && hasUri && (
+          <ImageFullscreenViewer
+            visible={showImageFullscreen}
+            imageUri={note.fileUri!}
+            onClose={() => setShowImageFullscreen(false)}
+          />
+        )}
+
+        {isVideo && hasUri && (
+          <VideoFullscreenPlayer
+            visible={showVideoFullscreen}
+            videoUri={note.fileUri!}
+            onClose={() => setShowVideoFullscreen(false)}
+          />
+        )}
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }

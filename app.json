@@ -47,9 +47,12 @@
         "expo-audio",
         {
           "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone.",
-          "UIBackgroundModes": ["audio"]
+          "UIBackgroundModes": [
+            "audio"
+          ]
         }
-      ]
+      ],
+      "expo-video"
     ],
     "experiments": {
       "typedRoutes": true,

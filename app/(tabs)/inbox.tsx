@@ -37,23 +37,7 @@ export default function InboxScreen() {
           <ScreenFlatList
             data={data}
             keyExtractor={(n) => n.id}
-            renderItem={({ item }) => (
-              <NoteCard
-                note={item}
-                onPress={() => {
-                  // po želji: otvori detalj/uređivanje
-                  // router.push({ pathname: "/note-compose", params: { id: item.id } });
-                }}
-                onEdit={() => {
-                  // router.push({ pathname: "/note-compose", params: { id: item.id } });
-                }}
-                onDelete={async () => {
-                  await deleteNote(item.id);
-                  // ⬅️ nema router.push – state već osvežava listu
-                }}
-                className="mx-4"
-              />
-            )}
+            renderItem={({ item }) => <NoteCard note={item} className="mx-4" />}
             extraTop={12}
             contentContainerStyle={{ paddingBottom: 100 }}
             // (stabilnost/performanse)

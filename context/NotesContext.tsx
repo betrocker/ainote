@@ -1,5 +1,11 @@
 // context/NotesContext.tsx
-import { Fact, genFactsFromText, transcribeAudio } from "@/utils/ai";
+import {
+  extractTextFromImage,
+  Fact,
+  genFactsFromText,
+  transcribeAudio,
+} from "@/utils/ai";
+// import { extractAudioFromVideo } from "@/utils/videoAudio";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, {
   createContext,
@@ -36,26 +42,22 @@ export type NotesContextType = {
 
   /** Kreiraj belešku iz parcijalnih podataka (text/photo/video/audio) */
   addNote: (note: NewNoteInput) => Promise<string>;
-
-  /** Brzi helperi za različite izvore */
   addNoteFromText: (text: string, opts?: { title?: string }) => Promise<string>;
   addNoteFromPhoto: (uri: string, opts?: { title?: string }) => Promise<string>;
   addNoteFromVideo: (uri: string, opts?: { title?: string }) => Promise<string>;
   addNoteFromAudio: (uri: string, opts?: { title?: string }) => Promise<string>;
-
-  /** Izmeni postojeću belešku (automatski regeneriše AI facts kad menjaš text) */
   editNote: (
     id: string,
     updates: Partial<
       Pick<Note, "title" | "text" | "content" | "fileUri" | "type" | "ai">
     >
   ) => Promise<void>;
-
-  /** Obriši jednu / sve beleške */
   deleteNote: (id: string) => Promise<void>;
   clearAll: () => Promise<void>;
   transcribingNotes: Set<string>;
   transcribeNote: (noteId: string, audioUri: string) => Promise<void>;
+  //   transcribeVideo: (noteId: string, videoUri: string) => Promise<void>;
+  extractPhotoText: (noteId: string, photoUri: string) => Promise<void>;
 };
 
 /** ===================== Kontekst ===================== */
@@ -291,6 +293,83 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
     [editNote]
   );
 
+  //   const transcribeVideo = useCallback(
+  //     async (noteId: string, videoUri: string) => {
+  //       console.log("🎬 [transcribeVideo] Called for:", noteId.slice(0, 8));
+
+  //       if (!videoUri) {
+  //         console.log("🎬 [transcribeVideo] No URI - skipping");
+  //         return;
+  //       }
+
+  //       setTranscribingNotes((prev) => {
+  //         const next = new Set(prev);
+  //         next.add(noteId);
+  //         return next;
+  //       });
+
+  //       try {
+  //         // ⭐ Ekstraktuj audio iz videa
+  //         console.log("🎬 [transcribeVideo] Extracting audio...");
+  //         const audioUri = await extractAudioFromVideo(videoUri);
+  //         console.log("🎬 [transcribeVideo] Audio extracted:", audioUri);
+
+  //         // Sada transkribuj audio
+  //         console.log("🎬 [transcribeVideo] Transcribing...");
+  //         const text = await transcribeAudio(audioUri, {
+  //           language: "sr",
+  //           prompt: "Video zapis, upiši čist tekst sa audio zapisa.",
+  //         });
+
+  //         console.log("🎬 [transcribeVideo] Result:", text?.slice(0, 50));
+
+  //         if (text?.trim()) {
+  //           await editNote(noteId, { text });
+  //           console.log("🎬 [transcribeVideo] Update complete");
+  //         }
+  //       } catch (error) {
+  //         console.log("🎬 [transcribeVideo] Error:", error);
+  //       } finally {
+  //         setTranscribingNotes((prev) => {
+  //           const next = new Set(prev);
+  //           next.delete(noteId);
+  //           return next;
+  //         });
+  //       }
+  //     },
+  //     [editNote]
+  //   );
+
+  const extractPhotoText = useCallback(
+    async (noteId: string, photoUri: string) => {
+      console.log("📸 [extractPhotoText] Called for:", noteId.slice(0, 8));
+
+      if (!photoUri) return;
+
+      setTranscribingNotes((prev) => new Set(prev).add(noteId));
+
+      try {
+        const text = await extractTextFromImage(photoUri);
+
+        if (text?.trim()) {
+          await editNote(noteId, { text });
+          console.log("📸 [extractPhotoText] OCR complete");
+        } else {
+          console.log("📸 [extractPhotoText] No text found in image");
+        }
+      } catch (error) {
+        console.log("📸 [extractPhotoText] Error:", error);
+      } finally {
+        setTranscribingNotes((prev) => {
+          const next = new Set(prev);
+          next.delete(noteId);
+          return next;
+        });
+      }
+    },
+    [editNote]
+  );
+
   // brisanje
   const deleteNote = useCallback(
     async (id: string) => {
@@ -321,6 +400,8 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
         clearAll,
         transcribingNotes,
         transcribeNote,
+        // transcribeVideo,
+        extractPhotoText,
       }}
     >
       {children}
