@@ -32,6 +32,7 @@ export type Note = {
     tags?: string[];
     facts?: Fact[];
   };
+  description?: string;
 };
 
 export type NewNoteInput = Omit<Note, "id" | "createdAt" | "updatedAt" | "ai">;
@@ -48,9 +49,7 @@ export type NotesContextType = {
   addNoteFromAudio: (uri: string, opts?: { title?: string }) => Promise<string>;
   editNote: (
     id: string,
-    updates: Partial<
-      Pick<Note, "title" | "text" | "content" | "fileUri" | "type" | "ai">
-    >
+    updates: Partial<Omit<Note, "id" | "createdAt">> // ⭐ Dozvoli izmenu svega osim id i createdAt
   ) => Promise<void>;
   deleteNote: (id: string) => Promise<void>;
   clearAll: () => Promise<void>;

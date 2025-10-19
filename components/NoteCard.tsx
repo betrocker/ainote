@@ -17,6 +17,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import EditNoteModal from "./EditNoteModal";
 import ImageFullscreenViewer from "./ImageFullscreenViewer";
 import VideoFullscreenPlayer from "./VideoFullscreenPlayer";
 
@@ -37,8 +38,10 @@ function formatDate(ts: number) {
 }
 
 export default function NoteCard({ note, onPress, className = "" }: Props) {
-  const { transcribingNotes, extractPhotoText } = useNotes();
+  const { transcribingNotes, extractPhotoText, editNote } = useNotes();
   const router = useRouter();
+
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
 
   // ⭐ DEBUG - dodaj ovo na početku komponente
   useEffect(() => {
@@ -213,6 +216,17 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
     }
   };
 
+  // Dodaj handler za save
+  const handleSave = async (id: string, title: string, description: string) => {
+    await editNote(id, { title, description }); // ⭐ Koristi editNote
+  };
+
+  // Dodaj handler da spreči propagaciju event-a
+  const handleEditPress = (e: any) => {
+    e.stopPropagation(); // Spreči otvaranje detail view-a
+    setIsEditModalVisible(true);
+  };
+
   return (
     <TouchableOpacity
       onPress={handlePress}
@@ -242,14 +256,34 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
 
         {/* tekstualni deo */}
         <View className="flex-1 pr-2">
-          <View className="flex-row items-center">
+          {/* ⭐ DODAJ Edit dugme u header */}
+          <View className="flex-row items-center justify-between">
             <Text
               className="flex-1 text-lg font-semibold text-ios-label dark:text-iosd-label"
               numberOfLines={1}
             >
               {note.title?.trim() || "Untitled"}
             </Text>
+
+            {/* Edit dugme */}
+            <TouchableOpacity
+              onPress={handleEditPress}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              className="ml-2 p-1"
+            >
+              <Ionicons name="pencil-outline" size={18} color={iconColor} />
+            </TouchableOpacity>
           </View>
+
+          {/* ⭐ Prikaz opisa ako postoji */}
+          {note.description && (
+            <Text
+              className="mt-1 text-xs text-ios-secondary dark:text-iosd-label2"
+              numberOfLines={1}
+            >
+              {note.description}
+            </Text>
+          )}
 
           <Text className="mt-0.5 text-xs text-ios-secondary dark:text-iosd-label2">
             {formatDate(note.createdAt)}
@@ -460,6 +494,19 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
             onClose={() => setShowVideoFullscreen(false)}
           />
         )}
+
+        {/* ⭐ DODAJ Modal na kraju */}
+        <EditNoteModal
+          isVisible={isEditModalVisible}
+          note={{
+            id: note.id,
+            title: note.title,
+            description: note.description,
+            type: note.type,
+          }}
+          onClose={() => setIsEditModalVisible(false)}
+          onSave={handleSave}
+        />
       </View>
     </TouchableOpacity>
   );

@@ -311,6 +311,24 @@ export default function NoteDetailScreen() {
 
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         <View className="p-4">
+          {/* ⭐ DODAJ: Description kartica */}
+          {note.description && (
+            <View className="mb-4 p-4 bg-white/70 dark:bg-white/5 rounded-2xl border border-ios-sep dark:border-iosd-sep">
+              <View className="flex-row items-center mb-2">
+                <Ionicons
+                  name="document-text-outline"
+                  size={16}
+                  color="#6B7280"
+                />
+                <Text className="ml-2 text-xs font-semibold text-ios-secondary dark:text-iosd-label2 uppercase tracking-wide">
+                  Opis
+                </Text>
+              </View>
+              <Text className="text-base text-ios-label dark:text-iosd-label leading-6">
+                {note.description}
+              </Text>
+            </View>
+          )}
           {/* ⭐ PHOTO content */}
           {note.type === "photo" && note.fileUri && (
             <View className="mb-6">
