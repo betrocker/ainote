@@ -19,6 +19,7 @@ import {
 } from "react-native";
 import EditNoteModal from "./EditNoteModal";
 import ImageFullscreenViewer from "./ImageFullscreenViewer";
+import TagChip from "./TagChip";
 import VideoFullscreenPlayer from "./VideoFullscreenPlayer";
 
 type Props = {
@@ -38,33 +39,20 @@ function formatDate(ts: number) {
 }
 
 export default function NoteCard({ note, onPress, className = "" }: Props) {
-  const { transcribingNotes, extractPhotoText, editNote } = useNotes();
+  const {
+    transcribingNotes,
+    extractPhotoText,
+    transcribeNote,
+    editNote,
+    togglePinNote,
+  } = useNotes();
   const router = useRouter();
 
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
 
-  // ⭐ DEBUG - dodaj ovo na početku komponente
-  useEffect(() => {
-    console.log("🎯 [NoteCard] Debug info:", {
-      id: note.id.slice(0, 8),
-      type: note.type,
-      typeOf: typeof note.type,
-      title: note.title,
-      hasUri: !!note.fileUri,
-    });
-  }, [note.type, note.id, note.title, note.fileUri]);
-
   const isAudio = note.type === "audio";
   const isVideo = note.type === "video";
   const isPhoto = note.type === "photo";
-
-  // ⭐ DEBUG - proveri vrednosti
-  console.log("🔍 Type checks:", {
-    isAudio,
-    isVideo,
-    isPhoto,
-    actualType: note.type,
-  });
 
   const isTranscribing = transcribingNotes.has(note.id);
   const hasTranscription = isAudio && !!note.text && note.text !== "Voice note";
@@ -114,18 +102,6 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
         .finally(() => setThumbLoading(false));
     }
   }, [isVideo, hasUri, note.fileUri]);
-
-  // ⭐ DEBUG LOG
-  useEffect(() => {
-    if (isAudio) {
-      console.log(`📝 [NoteCard ${note.id.slice(0, 8)}]:`, {
-        text: note.text,
-        hasTranscription,
-        isTranscribing,
-        textLength: note.text?.length || 0,
-      });
-    }
-  }, [note.text, isAudio, hasTranscription, isTranscribing]);
 
   // --- expo-av playback (bez Reanimated) ---
   const soundRef = useRef<Audio.Sound | null>(null);
@@ -233,30 +209,38 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
       className={[
         "mx-4 mb-3 rounded-[24px] overflow-hidden",
         "bg-white/85 dark:bg-black/35",
-        "border border-black/10 dark:border-white/15",
+        // ⭐ Zlatna ivica ako je pinned
+        note.pinned
+          ? "border-2 border-amber-500/60 dark:border-amber-400/60"
+          : "border border-black/10 dark:border-white/15",
         "p-4",
         className,
       ].join(" ")}
     >
       <View className="flex-row items-start">
-        {/* tip ikona */}
-        <View
-          className={[
-            "w-10 h-10 rounded-2xl mr-3 items-center justify-center",
-            bgColor, // ⭐ NE getBgColor() !!!
-            "border border-black/10 dark:border-white/12",
-          ].join(" ")}
-        >
-          <Ionicons
-            name={iconName} // ⭐ NE getIconName() !!!
-            size={20}
-            color={iconColor} // ⭐ NE getIconColor() !!!
-          />
+        {/* ⭐ tip ikona sa pin badge-om */}
+        <View className="relative">
+          <View
+            className={[
+              "w-10 h-10 rounded-2xl mr-3 items-center justify-center",
+              bgColor,
+              "border border-black/10 dark:border-white/12",
+            ].join(" ")}
+          >
+            <Ionicons name={iconName} size={20} color={iconColor} />
+          </View>
+
+          {/* ⭐ Mali pin badge u gornjem desnom uglu */}
+          {note.pinned && (
+            <View className="absolute top-0 right-1 w-4 h-4 rounded-full bg-amber-500 items-center justify-center border border-white dark:border-black">
+              <Ionicons name="pin" size={8} color="#FFF" />
+            </View>
+          )}
         </View>
 
         {/* tekstualni deo */}
         <View className="flex-1 pr-2">
-          {/* ⭐ DODAJ Edit dugme u header */}
+          {/* ⭐ Header sa title, pin i edit dugmićima */}
           <View className="flex-row items-center justify-between">
             <Text
               className="flex-1 text-lg font-semibold text-ios-label dark:text-iosd-label"
@@ -265,17 +249,35 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
               {note.title?.trim() || "Untitled"}
             </Text>
 
-            {/* Edit dugme */}
-            <TouchableOpacity
-              onPress={handleEditPress}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              className="ml-2 p-1"
-            >
-              <Ionicons name="pencil-outline" size={18} color={iconColor} />
-            </TouchableOpacity>
+            <View className="flex-row items-center">
+              {/* Pin dugme */}
+              <TouchableOpacity
+                onPress={(e) => {
+                  e.stopPropagation();
+                  togglePinNote(note.id);
+                }}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                className="mr-2 p-1"
+              >
+                <Ionicons
+                  name={note.pinned ? "pin" : "pin-outline"}
+                  size={18}
+                  color={note.pinned ? "#F59E0B" : iconColor}
+                />
+              </TouchableOpacity>
+
+              {/* Edit dugme */}
+              <TouchableOpacity
+                onPress={handleEditPress}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                className="ml-2 p-1"
+              >
+                <Ionicons name="pencil-outline" size={18} color={iconColor} />
+              </TouchableOpacity>
+            </View>
           </View>
 
-          {/* ⭐ Prikaz opisa ako postoji */}
+          {/* Prikaz opisa ako postoji */}
           {note.description && (
             <Text
               className="mt-1 text-xs text-ios-secondary dark:text-iosd-label2"
@@ -289,7 +291,23 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
             {formatDate(note.createdAt)}
           </Text>
 
-          {/* ⭐ PHOTO preview - dodaj onPress */}
+          {/* TAGOVI */}
+          {note.tags && note.tags.length > 0 && (
+            <View className="flex-row flex-wrap mt-2">
+              {note.tags.slice(0, 3).map((tag) => (
+                <TagChip key={tag} tag={tag} variant="default" />
+              ))}
+              {note.tags.length > 3 && (
+                <View className="px-2 py-1 rounded-full bg-ios-fill dark:bg-iosd-fill">
+                  <Text className="text-xs text-ios-secondary dark:text-iosd-label2">
+                    +{note.tags.length - 3}
+                  </Text>
+                </View>
+              )}
+            </View>
+          )}
+
+          {/* PHOTO preview */}
           {isPhoto && hasUri && (
             <TouchableOpacity
               onPress={() => setShowImageFullscreen(true)}
@@ -301,14 +319,13 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
                 style={{ width: "100%", aspectRatio: 16 / 9 }}
                 resizeMode="cover"
               />
-              {/* Zoom indikator ikona */}
               <View className="absolute top-2 right-2 bg-black/50 rounded-full p-2">
                 <Ionicons name="expand-outline" size={16} color="#FFF" />
               </View>
             </TouchableOpacity>
           )}
 
-          {/* ⭐ OCR dugme za fotografije */}
+          {/* OCR dugme za fotografije */}
           {isPhoto && hasUri && !note.text && (
             <TouchableOpacity
               onPress={() => extractPhotoText(note.id, note.fileUri!)}
@@ -335,15 +352,47 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
 
           {/* Prikaz OCR teksta */}
           {isPhoto && note.text && (
-            <Text
-              numberOfLines={3}
-              className="mt-2 text-[13px] leading-5 text-ios-secondary dark:text-iosd-label2"
-            >
-              {note.text}
-            </Text>
+            <>
+              <Text
+                numberOfLines={3}
+                className="mt-2 text-[13px] leading-5 text-ios-secondary dark:text-iosd-label2"
+              >
+                {note.text}
+              </Text>
+
+              {/* RE-EXTRACT dugme */}
+              <TouchableOpacity
+                onPress={(e) => {
+                  e.stopPropagation();
+                  extractPhotoText(note.id, note.fileUri!);
+                }}
+                disabled={isTranscribing}
+                className="mt-2 flex-row items-center justify-center py-1.5 px-3 rounded-xl bg-green-500/10 dark:bg-green-500/20 border border-green-500/30"
+              >
+                {isTranscribing ? (
+                  <>
+                    <ActivityIndicator size="small" color="#10B981" />
+                    <Text className="ml-2 text-xs text-green-600 dark:text-green-400">
+                      Processing...
+                    </Text>
+                  </>
+                ) : (
+                  <>
+                    <Ionicons
+                      name="refresh-outline"
+                      size={14}
+                      color="#10B981"
+                    />
+                    <Text className="ml-1.5 text-xs text-green-600 dark:text-green-400 font-medium">
+                      Re-extract
+                    </Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            </>
           )}
 
-          {/* ⭐ VIDEO preview - dodaj onPress */}
+          {/* VIDEO preview */}
           {isVideo && (
             <TouchableOpacity
               onPress={() => setShowVideoFullscreen(true)}
@@ -364,7 +413,6 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
                     style={{ width: "100%", aspectRatio: 16 / 9 }}
                     resizeMode="cover"
                   />
-                  {/* Play ikona overlay */}
                   <View className="absolute inset-0 items-center justify-center">
                     <View className="bg-black/60 rounded-full p-3">
                       <Ionicons name="play" size={28} color="white" />
@@ -382,8 +430,7 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
             </TouchableOpacity>
           )}
 
-          {/* ⭐ Dugme za transkripciju videa */}
-          {/* Privremeno onemogući video transkripciju */}
+          {/* Dugme za transkripciju videa - privremeno onemogućeno */}
           {isVideo && hasUri && !note.text && (
             <View className="mt-2 flex-row items-center justify-center py-2 px-4 rounded-xl bg-gray-500/15 dark:bg-gray-500/22">
               <Ionicons
@@ -432,7 +479,8 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
                 <Text className="text-ios-label dark:text-iosd-label font-medium">
                   Voice note
                 </Text>
-                {/* ⭐ Status transkripcije */}
+
+                {/* Status transkripcije */}
                 {isTranscribing && (
                   <View className="mt-2 space-y-2">
                     <View className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full w-full animate-pulse" />
@@ -440,18 +488,38 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
                   </View>
                 )}
 
-                {/* ⭐ Prikaz transkripcije (prve 2 linije) */}
+                {/* Prikaz transkripcije sa re-transcribe dugmetom */}
                 {!isTranscribing && hasTranscription && (
-                  <Text
-                    numberOfLines={2}
-                    ellipsizeMode="tail"
-                    className="mt-2 text-[13px] leading-5 text-ios-secondary dark:text-iosd-label2"
-                  >
-                    {note.text}
-                  </Text>
+                  <View>
+                    <Text
+                      numberOfLines={2}
+                      ellipsizeMode="tail"
+                      className="mt-2 text-[13px] leading-5 text-ios-secondary dark:text-iosd-label2"
+                    >
+                      {note.text}
+                    </Text>
+
+                    {/* RE-TRANSCRIBE dugme */}
+                    <TouchableOpacity
+                      onPress={(e) => {
+                        e.stopPropagation();
+                        transcribeNote(note.id, note.fileUri!);
+                      }}
+                      className="mt-2 flex-row items-center justify-center py-1.5 px-3 rounded-xl bg-purple-500/10 dark:bg-purple-500/20 border border-purple-500/30"
+                    >
+                      <Ionicons
+                        name="refresh-outline"
+                        size={14}
+                        color="#A855F7"
+                      />
+                      <Text className="ml-1.5 text-xs text-purple-600 dark:text-purple-400 font-medium">
+                        Re-transcribe
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
                 )}
 
-                {/* ⭐ Placeholder ako nema transkripcije */}
+                {/* Placeholder ako nema transkripcije */}
                 {!isTranscribing && !hasTranscription && (
                   <Text className="mt-2 text-[13px] leading-5 text-ios-label dark:text-iosd-label italic">
                     Nema transkripcije
@@ -478,7 +546,7 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
           </View>
         )}
 
-        {/* ⭐ Fullscreen modali */}
+        {/* Fullscreen modali */}
         {isPhoto && hasUri && (
           <ImageFullscreenViewer
             visible={showImageFullscreen}
@@ -495,7 +563,7 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
           />
         )}
 
-        {/* ⭐ DODAJ Modal na kraju */}
+        {/* Edit Modal */}
         <EditNoteModal
           isVisible={isEditModalVisible}
           note={{

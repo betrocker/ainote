@@ -6,6 +6,7 @@ import {
   transcribeAudio,
 } from "@/utils/ai";
 // import { extractAudioFromVideo } from "@/utils/videoAudio";
+import { generateSmartTitle } from "@/utils/ai";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, {
   createContext,
@@ -33,6 +34,8 @@ export type Note = {
     facts?: Fact[];
   };
   description?: string;
+  tags?: string[];
+  pinned?: boolean;
 };
 
 export type NewNoteInput = Omit<Note, "id" | "createdAt" | "updatedAt" | "ai">;
@@ -57,6 +60,12 @@ export type NotesContextType = {
   transcribeNote: (noteId: string, audioUri: string) => Promise<void>;
   //   transcribeVideo: (noteId: string, videoUri: string) => Promise<void>;
   extractPhotoText: (noteId: string, photoUri: string) => Promise<void>;
+  addTagToNote: (noteId: string, tag: string) => Promise<void>;
+  removeTagFromNote: (noteId: string, tag: string) => Promise<void>;
+  getAllTags: () => string[];
+  togglePinNote: (noteId: string) => Promise<void>;
+  generateTitle: (noteId: string) => Promise<void>;
+  generatingTitles: Set<string>;
 };
 
 /** ===================== Kontekst ===================== */
@@ -70,22 +79,9 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
   );
   const STORAGE_KEY = "NOTES_V1";
 
-  // ⭐ DEBUG: prati svaku promenu notes
-  useEffect(() => {
-    console.log("🔄 [NotesContext] State updated:", {
-      count: notes.length,
-      audioNotes: notes.filter((n) => n.type === "audio").length,
-    });
-
-    notes.forEach((n) => {
-      if (n.type === "audio") {
-        console.log(`  Audio note ${n.id.slice(0, 8)}:`, {
-          text: n.text?.slice(0, 30) || "undefined",
-          textLength: n.text?.length || 0,
-        });
-      }
-    });
-  }, [notes]);
+  const [generatingTitles, setGeneratingTitles] = useState<Set<string>>(
+    new Set()
+  );
 
   // učitaj pri mountu
   useEffect(() => {
@@ -244,15 +240,6 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
 
   const transcribeNote = useCallback(
     async (noteId: string, audioUri: string) => {
-      // ⭐ Dodaj audioUri parametar
-      console.log("🔊 [transcribeNote] Called for:", noteId.slice(0, 8));
-      console.log("🔊 [transcribeNote] Audio URI:", audioUri);
-
-      if (!audioUri) {
-        console.log("🔊 [transcribeNote] No URI - skipping");
-        return;
-      }
-
       // Označi da transkripcija počinje
       setTranscribingNotes((prev) => {
         const next = new Set(prev);
@@ -262,21 +249,24 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
       });
 
       try {
-        console.log("🔊 [transcribeNote] Calling transcribeAudio...");
         const text = await transcribeAudio(audioUri, {
           language: "sr",
           prompt: "Kratka glasovna beleška, upiši čist tekst.",
         });
 
-        console.log("🔊 [transcribeNote] Result length:", text?.length || 0);
-        console.log("🔊 [transcribeNote] Result preview:", text?.slice(0, 50));
-
         if (text?.trim()) {
-          console.log("🔊 [transcribeNote] Updating note with text...");
           await editNote(noteId, { text });
-          console.log("🔊 [transcribeNote] Update complete");
+
+          const note = notes.find((n) => n.id === noteId);
+          if (
+            note &&
+            (note.title === "Voice note" || note.title === "Untitled")
+          ) {
+            setTimeout(() => {
+              generateTitle(noteId);
+            }, 500);
+          }
         } else {
-          console.log("🔊 [transcribeNote] Empty text - skipping update");
         }
       } catch (error) {
         console.log("🔊 [transcribeNote] Error:", error);
@@ -284,7 +274,6 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
         setTranscribingNotes((prev) => {
           const next = new Set(prev);
           next.delete(noteId);
-          console.log("🔊 [transcribeNote] Removed from transcribing set");
           return next;
         });
       }
@@ -385,6 +374,127 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
     await save([]);
   }, [save]);
 
+  const addTagToNote = useCallback(async (noteId: string, tag: string) => {
+    const trimmedTag = tag.trim().toLowerCase();
+    if (!trimmedTag) return;
+
+    setNotes((prevNotes) => {
+      const updatedNotes = prevNotes.map((n) => {
+        if (n.id !== noteId) return n;
+
+        const existingTags = n.tags || [];
+        // Spreči duplikate
+        if (existingTags.includes(trimmedTag)) return n;
+
+        return {
+          ...n,
+          tags: [...existingTags, trimmedTag],
+          updatedAt: Date.now(),
+        };
+      });
+
+      // Persist to storage
+      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedNotes)).catch(
+        (err) => console.log("Storage error:", err)
+      );
+
+      return updatedNotes;
+    });
+  }, []);
+
+  // Ukloni tag sa beležke
+  const removeTagFromNote = useCallback(async (noteId: string, tag: string) => {
+    setNotes((prevNotes) => {
+      const updatedNotes = prevNotes.map((n) => {
+        if (n.id !== noteId) return n;
+
+        const existingTags = n.tags || [];
+        return {
+          ...n,
+          tags: existingTags.filter((t) => t !== tag),
+          updatedAt: Date.now(),
+        };
+      });
+
+      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedNotes)).catch(
+        (err) => console.log("Storage error:", err)
+      );
+
+      return updatedNotes;
+    });
+  }, []);
+
+  // Dobavi sve jedinstvene tagove iz svih beleški
+  const getAllTags = useCallback(() => {
+    const allTags = new Set<string>();
+    notes.forEach((note) => {
+      note.tags?.forEach((tag) => allTags.add(tag));
+    });
+    return Array.from(allTags).sort();
+  }, [notes]);
+
+  // context/NotesContext.tsx - dodaj u NotesProvider
+
+  const togglePinNote = useCallback(async (noteId: string) => {
+    setNotes((prevNotes) => {
+      const updatedNotes = prevNotes.map((n) => {
+        if (n.id !== noteId) return n;
+
+        return {
+          ...n,
+          pinned: !n.pinned, // Toggle pinned state
+          updatedAt: Date.now(),
+        };
+      });
+
+      // Persist to storage
+      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedNotes)).catch(
+        (err) => console.log("Storage error:", err)
+      );
+
+      return updatedNotes;
+    });
+  }, []);
+
+  const generateTitle = useCallback(
+    async (noteId: string) => {
+      console.log("🤖 [generateTitle] Called for:", noteId.slice(0, 8));
+
+      const note = notes.find((n) => n.id === noteId);
+      if (!note || !note.text) {
+        console.log("🤖 [generateTitle] No text found");
+        return;
+      }
+
+      // Označi da generisanje počinje
+      setGeneratingTitles((prev) => {
+        const next = new Set(prev);
+        next.add(noteId);
+        return next;
+      });
+
+      try {
+        console.log("🤖 [generateTitle] Generating title...");
+        const generatedTitle = await generateSmartTitle(note.text);
+        console.log("🤖 [generateTitle] Result:", generatedTitle);
+
+        if (generatedTitle && generatedTitle !== "Untitled Note") {
+          await editNote(noteId, { title: generatedTitle });
+          console.log("🤖 [generateTitle] Title updated");
+        }
+      } catch (error) {
+        console.log("🤖 [generateTitle] Error:", error);
+      } finally {
+        setGeneratingTitles((prev) => {
+          const next = new Set(prev);
+          next.delete(noteId);
+          return next;
+        });
+      }
+    },
+    [notes, editNote]
+  );
+
   return (
     <NotesContext.Provider
       value={{
@@ -401,6 +511,12 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
         transcribeNote,
         // transcribeVideo,
         extractPhotoText,
+        addTagToNote,
+        removeTagFromNote,
+        getAllTags,
+        togglePinNote,
+        generateTitle,
+        generatingTitles,
       }}
     >
       {children}

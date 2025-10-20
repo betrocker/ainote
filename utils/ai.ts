@@ -568,3 +568,61 @@ export async function transcribeAudio(
     throw error;
   }
 }
+
+export async function generateSmartTitle(text: string): Promise<string> {
+  const apiKey = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
+  if (!apiKey) throw new Error("OpenAI API key not found");
+
+  if (!text || text.trim().length < 10) {
+    return "Untitled Note";
+  }
+
+  try {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content:
+              "Ti si ekspert za kreiranje kratkih, jasnih i preciznih naslova. " +
+              "Analiziraj tekst i kreiraj naslov od 3-6 reči koji najbolje opisuje suštinu sadržaja. " +
+              "Naslov mora biti na srpskom jeziku. " +
+              "Budi konkretan, izbegavaj generičke fraze. " +
+              "Ako je tekst lista ili zadaci, koristi akcione reči. " +
+              "Vrati SAMO naslov, bez navodnika ili dodatnih objašnjenja.",
+          },
+          {
+            role: "user",
+            content: `Kreiraj naslov za:\n\n${text.slice(0, 500)}`,
+          },
+        ],
+        temperature: 0.7,
+        max_tokens: 30,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error("OpenAI API error:", response.status);
+      return "Untitled Note";
+    }
+
+    const data = await response.json();
+    const generatedTitle = data.choices?.[0]?.message?.content?.trim();
+
+    if (generatedTitle && generatedTitle.length > 0) {
+      // Ukloni navodnike ako postoje
+      return generatedTitle.replace(/^["']|["']$/g, "").slice(0, 80);
+    }
+
+    return "Untitled Note";
+  } catch (error) {
+    console.error("Error generating smart title:", error);
+    return "Untitled Note";
+  }
+}

@@ -1,5 +1,7 @@
 // app/note/[id].tsx
 import ImageFullscreenViewer from "@/components/ImageFullscreenViewer";
+import TagChip from "@/components/TagChip";
+import TagInput from "@/components/TagInput";
 import VideoFullscreenPlayer from "@/components/VideoFullscreenPlayer";
 import { useNotes } from "@/context/NotesContext";
 import { Ionicons } from "@expo/vector-icons";
@@ -11,6 +13,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Pressable,
   ScrollView,
   Share,
   Text,
@@ -47,7 +50,20 @@ function formatDateFromISO(iso: string): string {
 
 export default function NoteDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { notes, editNote, deleteNote } = useNotes();
+  const {
+    notes,
+    editNote,
+    deleteNote,
+    transcribeNote,
+    extractPhotoText,
+    transcribingNotes,
+    addTagToNote,
+    removeTagFromNote,
+    togglePinNote,
+    generateTitle,
+    generatingTitles,
+  } = useNotes();
+
   const router = useRouter();
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === "dark";
@@ -55,6 +71,9 @@ export default function NoteDetailScreen() {
   const note = notes.find((n) => n.id === id);
   const [isEditing, setIsEditing] = useState(false);
   const [editedText, setEditedText] = useState(note?.text || "");
+  const isTranscribing = transcribingNotes.has(id || "");
+
+  const isGeneratingTitle = generatingTitles.has(id || "");
 
   // ⭐ Media state
   const [showImageFullscreen, setShowImageFullscreen] = useState(false);
@@ -247,6 +266,24 @@ export default function NoteDetailScreen() {
 
           {/* Actions */}
           <View className="flex-row gap-2">
+            {/* ⭐ Pin dugme - POBOLJŠANO */}
+            <TouchableOpacity
+              onPress={() => togglePinNote(note.id)}
+              className={[
+                "w-9 h-9 rounded-full items-center justify-center active:opacity-70",
+                note.pinned
+                  ? "bg-amber-500" // ⭐ Puna zlatna pozadina kada je pinned
+                  : "bg-amber-500/15", // Providna kada nije
+              ].join(" ")}
+              activeOpacity={1}
+            >
+              <Ionicons
+                name={note.pinned ? "pin" : "pin-outline"}
+                size={18}
+                color={note.pinned ? "#FFF" : "#F59E0B"} // ⭐ Bela ikona kada je pinned
+              />
+            </TouchableOpacity>
+
             {note.type === "text" && (
               <TouchableOpacity
                 onPress={() => (isEditing ? handleSave() : setIsEditing(true))}
@@ -296,6 +333,31 @@ export default function NoteDetailScreen() {
             </Text>
           </View>
         </View>
+
+        {/* ⭐ Generate Title dugme - samo ako ima tekst */}
+        {note.text && note.text.length > 20 && (
+          <Pressable
+            onPress={() => generateTitle(note.id)}
+            disabled={isGeneratingTitle}
+            className="mt-3 flex-row items-center justify-center px-4 py-2 rounded-xl bg-purple-500/15 dark:bg-purple-500/20 border border-purple-500/30 active:opacity-70"
+          >
+            {isGeneratingTitle ? (
+              <>
+                <ActivityIndicator size="small" color="#A855F7" />
+                <Text className="ml-2 text-sm font-medium text-purple-600 dark:text-purple-400">
+                  Generiše naslov...
+                </Text>
+              </>
+            ) : (
+              <>
+                <Ionicons name="sparkles-outline" size={16} color="#A855F7" />
+                <Text className="ml-2 text-sm font-medium text-purple-600 dark:text-purple-400">
+                  AI Naslov
+                </Text>
+              </>
+            )}
+          </Pressable>
+        )}
 
         {/* Datum kreacije */}
         <Text className="text-xs text-ios-secondary dark:text-iosd-label2 mt-2">
@@ -354,9 +416,39 @@ export default function NoteDetailScreen() {
               {/* Transkripcija (OCR tekst) */}
               {note.text && (
                 <View className="mt-4 p-4 bg-white/70 dark:bg-white/5 rounded-2xl border border-ios-sep dark:border-iosd-sep">
-                  <Text className="text-sm text-ios-secondary dark:text-iosd-label2 mb-2">
-                    Izvučeni tekst:
-                  </Text>
+                  <View className="flex-row items-center justify-between mb-2">
+                    <Text className="text-sm text-ios-secondary dark:text-iosd-label2">
+                      Izvučeni tekst:
+                    </Text>
+
+                    {/* ⭐ RE-EXTRACT dugme */}
+                    <TouchableOpacity
+                      onPress={() => extractPhotoText(note.id, note.fileUri!)}
+                      disabled={isTranscribing}
+                      className="flex-row items-center px-3 py-1.5 rounded-lg bg-green-500/10 dark:bg-green-500/20"
+                    >
+                      {isTranscribing ? (
+                        <>
+                          <ActivityIndicator size="small" color="#10B981" />
+                          <Text className="ml-1.5 text-xs text-green-600 dark:text-green-400 font-medium">
+                            Processing...
+                          </Text>
+                        </>
+                      ) : (
+                        <>
+                          <Ionicons
+                            name="refresh-outline"
+                            size={14}
+                            color="#10B981"
+                          />
+                          <Text className="ml-1.5 text-xs text-green-600 dark:text-green-400 font-medium">
+                            Re-extract
+                          </Text>
+                        </>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+
                   <Text className="text-base leading-6 text-ios-label dark:text-iosd-label">
                     {note.text}
                   </Text>
@@ -395,9 +487,39 @@ export default function NoteDetailScreen() {
               {/* Transkripcija */}
               {note.text && (
                 <View className="mt-4 p-4 bg-white/70 dark:bg-white/5 rounded-2xl border border-ios-sep dark:border-iosd-sep">
-                  <Text className="text-sm text-ios-secondary dark:text-iosd-label2 mb-2">
-                    Transkripcija:
-                  </Text>
+                  <View className="flex-row items-center justify-between mb-2">
+                    <Text className="text-sm text-ios-secondary dark:text-iosd-label2">
+                      Transkripcija:
+                    </Text>
+
+                    {/* ⭐ RE-TRANSCRIBE dugme */}
+                    <TouchableOpacity
+                      onPress={() => transcribeNote(note.id, note.fileUri!)}
+                      disabled={isTranscribing}
+                      className="flex-row items-center px-3 py-1.5 rounded-lg bg-purple-500/10 dark:bg-purple-500/20"
+                    >
+                      {isTranscribing ? (
+                        <>
+                          <ActivityIndicator size="small" color="#A855F7" />
+                          <Text className="ml-1.5 text-xs text-purple-600 dark:text-purple-400 font-medium">
+                            Processing...
+                          </Text>
+                        </>
+                      ) : (
+                        <>
+                          <Ionicons
+                            name="refresh-outline"
+                            size={14}
+                            color="#A855F7"
+                          />
+                          <Text className="ml-1.5 text-xs text-purple-600 dark:text-purple-400 font-medium">
+                            Re-transcribe
+                          </Text>
+                        </>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+
                   <Text className="text-base leading-6 text-ios-label dark:text-iosd-label">
                     {note.text}
                   </Text>
@@ -577,6 +699,46 @@ export default function NoteDetailScreen() {
             </View>
           )}
 
+          {/* ⭐ TAGOVI SEKCIJA */}
+          <View className="mb-6">
+            <View className="flex-row items-center mb-3">
+              <View className="w-8 h-8 rounded-full bg-ios-blue/15 dark:bg-ios-blue/20 items-center justify-center mr-2">
+                <Ionicons name="pricetags" size={16} color="#0A84FF" />
+              </View>
+              <Text className="text-lg font-semibold text-ios-label dark:text-iosd-label">
+                Tagovi
+              </Text>
+            </View>
+
+            <View className="bg-white/70 dark:bg-white/5 rounded-2xl p-4 border border-ios-sep dark:border-iosd-sep">
+              {/* Tag input */}
+              <TagInput
+                onAddTag={(tag) => addTagToNote(note.id, tag)}
+                existingTags={note.tags || []}
+              />
+
+              {/* Existing tags */}
+              {note.tags && note.tags.length > 0 && (
+                <View className="flex-row flex-wrap mt-3">
+                  {note.tags.map((tag) => (
+                    <TagChip
+                      key={tag}
+                      tag={tag}
+                      variant="removable"
+                      onRemove={() => removeTagFromNote(note.id, tag)}
+                    />
+                  ))}
+                </View>
+              )}
+
+              {(!note.tags || note.tags.length === 0) && (
+                <Text className="text-sm text-ios-secondary dark:text-iosd-label2 text-center mt-3">
+                  Nema tagova. Dodaj prvi tag iznad.
+                </Text>
+              )}
+            </View>
+          </View>
+
           {/* ⭐ Metadata sekcija */}
           <View className="mb-6">
             <View className="flex-row items-center mb-3">
@@ -593,6 +755,10 @@ export default function NoteDetailScreen() {
             </View>
 
             <View className="bg-white/70 dark:bg-white/5 rounded-2xl p-4 border border-ios-sep dark:border-iosd-sep">
+              {/* ⭐ DODAJ Pin status kao prvi red */}
+              {note.pinned && (
+                <MetadataRow label="Status" value="Pinned" icon="pin" />
+              )}
               <MetadataRow
                 label="Kreirano"
                 value={new Date(note.createdAt).toLocaleString("sr-RS")}
@@ -655,6 +821,8 @@ function MetadataRow({
   icon?: string;
   isLast?: boolean;
 }) {
+  const isPinned = label === "Status" && value === "Pinned";
+
   return (
     <View
       className={`flex-row items-center justify-between py-3 ${
@@ -666,7 +834,7 @@ function MetadataRow({
           <Ionicons
             name={icon as any}
             size={16}
-            color="#6B7280"
+            color={isPinned ? "#F59E0B" : "#6B7280"}
             style={{ marginRight: 8 }}
           />
         )}
@@ -674,9 +842,18 @@ function MetadataRow({
           {label}
         </Text>
       </View>
-      <Text className="text-sm text-ios-label dark:text-iosd-label font-medium">
-        {value}
-      </Text>
+
+      {/* ⭐ Styled value za Pinned status */}
+      {isPinned ? (
+        <View className="bg-amber-500 rounded-full px-2 py-1 flex-row items-center">
+          <Ionicons name="pin" size={10} color="#FFF" />
+          <Text className="text-xs font-bold text-white ml-1">{value}</Text>
+        </View>
+      ) : (
+        <Text className="text-sm text-ios-label dark:text-iosd-label font-medium">
+          {value}
+        </Text>
+      )}
     </View>
   );
 }
