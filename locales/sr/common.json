@@ -27,11 +27,27 @@
     "version": "AiNote v{{version}}"
   },
   "home": {
-    "welcome": "Dobrodošli nazad 👋",
-    "notesToday": "Danas imate {{count}} beleški",
+    "welcome": "Dobrodošli nazad",
+    "today": "danas",
     "stats": "Statistika",
+    "total": "Ukupno",
+    "withTags": "Tagovi",
     "thisWeek": "Ove nedelje",
-    "total": "Ukupno"
+    "upcoming": "Uskoro",
+    "recent": "Nedavno",
+    "viewAll": "Vidi sve",
+    "overview": "Pregled",
+    "browse": "Pretraži",
+    "allNotes": "Sve beleške",
+    "note": {
+      "one": "beleška",
+      "few": "beleške",
+      "other": "beležaka"
+    },
+    "empty": {
+      "title": "Nema beleški",
+      "subtitle": "Započni kreiranjem prve beleške"
+    }
   },
   "types": {
     "text": "Tekst",
@@ -56,7 +72,17 @@
     "placeholder": {
       "title": "Naslov",
       "body": "Počni da kucaš…"
-    }
+    },
+    "pinned": "Prikovano",
+    "types": {
+      "text": "Tekst",
+      "audio": "Audio",
+      "photo": "Foto",
+      "video": "Video"
+    },
+    "singular": "beležka",
+    "singular_plural": "beležke",
+    "singular_plural_2": "beležaka"
   },
   "fab": {
     "newText": "Nova tekstualna beleška",

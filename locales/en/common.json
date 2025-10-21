@@ -27,11 +27,26 @@
     "version": "AiNote v{{version}}"
   },
   "home": {
-    "welcome": "Welcome back 👋",
-    "notesToday": "You have {{count}} notes today",
-    "stats": "Stats",
-    "thisWeek": "This week",
-    "total": "Total"
+    "welcome": "Welcome back",
+    "today": "today",
+    "stats": "Statistics",
+    "total": "Total",
+    "withTags": "Tagged",
+    "thisWeek": "This Week",
+    "upcoming": "Upcoming",
+    "recent": "Recent",
+    "viewAll": "View all",
+    "overview": "Overview",
+    "browse": "Browse",
+    "allNotes": "All Notes",
+    "note": {
+      "one": "note",
+      "other": "notes"
+    },
+    "empty": {
+      "title": "No notes yet",
+      "subtitle": "Start by creating your first note"
+    }
   },
   "types": {
     "text": "Text",
@@ -56,7 +71,9 @@
     "placeholder": {
       "title": "Title",
       "body": "Start typing…"
-    }
+    },
+    "singular": "note",
+    "singular_plural": "notes"
   },
   "fab": {
     "newText": "New text note",

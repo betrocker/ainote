@@ -62,6 +62,8 @@ export default function NoteDetailScreen() {
     togglePinNote,
     generateTitle,
     generatingTitles,
+    generateNoteSummary,
+    generatingSummaries,
   } = useNotes();
 
   const router = useRouter();
@@ -69,22 +71,27 @@ export default function NoteDetailScreen() {
   const isDark = colorScheme === "dark";
 
   const note = notes.find((n) => n.id === id);
+
+  // ⭐ Svi hooks na vrhu
   const [isEditing, setIsEditing] = useState(false);
   const [editedText, setEditedText] = useState(note?.text || "");
-  const isTranscribing = transcribingNotes.has(id || "");
-
-  const isGeneratingTitle = generatingTitles.has(id || "");
-
-  // ⭐ Media state
   const [showImageFullscreen, setShowImageFullscreen] = useState(false);
   const [showVideoFullscreen, setShowVideoFullscreen] = useState(false);
+  const [isSummaryExpanded, setIsSummaryExpanded] = useState(true);
 
-  // ⭐ Audio player state
+  // Audio state
   const soundRef = useRef<Audio.Sound | null>(null);
   const [audioLoaded, setAudioLoaded] = useState(false);
   const [audioPlaying, setAudioPlaying] = useState(false);
   const [audioDuration, setAudioDuration] = useState(0);
   const [audioPosition, setAudioPosition] = useState(0);
+
+  // ⭐ Derived state sa optional chaining
+  const isTranscribing = transcribingNotes.has(id || "");
+  const isGeneratingTitle = generatingTitles.has(id || "");
+  const isGeneratingSummary = generatingSummaries.has(id || "");
+  const hasSummary = !!note?.ai?.summary && note.ai.summary.length > 0;
+  const canGenerateSummary = !!note?.text && note.text.length > 50;
 
   // ⭐ Load audio ako je audio tip
   useEffect(() => {
@@ -168,6 +175,7 @@ export default function NoteDetailScreen() {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
+  // ⭐ Early return POSLE svih hooks
   if (!note) {
     return (
       <View className="flex-1 bg-ios-bg dark:bg-iosd-bg items-center justify-center">
@@ -266,21 +274,19 @@ export default function NoteDetailScreen() {
 
           {/* Actions */}
           <View className="flex-row gap-2">
-            {/* ⭐ Pin dugme - POBOLJŠANO */}
+            {/* Pin dugme */}
             <TouchableOpacity
               onPress={() => togglePinNote(note.id)}
               className={[
                 "w-9 h-9 rounded-full items-center justify-center active:opacity-70",
-                note.pinned
-                  ? "bg-amber-500" // ⭐ Puna zlatna pozadina kada je pinned
-                  : "bg-amber-500/15", // Providna kada nije
+                note.pinned ? "bg-amber-500" : "bg-amber-500/15",
               ].join(" ")}
               activeOpacity={1}
             >
               <Ionicons
                 name={note.pinned ? "pin" : "pin-outline"}
                 size={18}
-                color={note.pinned ? "#FFF" : "#F59E0B"} // ⭐ Bela ikona kada je pinned
+                color={note.pinned ? "#FFF" : "#F59E0B"}
               />
             </TouchableOpacity>
 
@@ -318,7 +324,7 @@ export default function NoteDetailScreen() {
           </View>
         </View>
 
-        {/* ⭐ Naslov i Type badge u istom redu */}
+        {/* Naslov i Type badge */}
         <View className="flex-row items-center justify-between">
           <Text className="flex-1 text-2xl font-bold text-ios-label dark:text-iosd-label mr-3">
             {note.title}
@@ -334,7 +340,7 @@ export default function NoteDetailScreen() {
           </View>
         </View>
 
-        {/* ⭐ Generate Title dugme - samo ako ima tekst */}
+        {/* Generate Title dugme */}
         {note.text && note.text.length > 20 && (
           <Pressable
             onPress={() => generateTitle(note.id)}
@@ -373,7 +379,7 @@ export default function NoteDetailScreen() {
 
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         <View className="p-4">
-          {/* ⭐ DODAJ: Description kartica */}
+          {/* Description kartica */}
           {note.description && (
             <View className="mb-4 p-4 bg-white/70 dark:bg-white/5 rounded-2xl border border-ios-sep dark:border-iosd-sep">
               <View className="flex-row items-center mb-2">
@@ -391,7 +397,105 @@ export default function NoteDetailScreen() {
               </Text>
             </View>
           )}
-          {/* ⭐ PHOTO content */}
+
+          {/* AI SUMMARY SEKCIJA */}
+          {canGenerateSummary && (
+            <View className="mb-4">
+              {/* Header */}
+              <View className="flex-row items-center justify-between mb-2">
+                <View className="flex-row items-center">
+                  <View className="w-8 h-8 rounded-full bg-purple-500/15 dark:bg-purple-500/20 items-center justify-center mr-2">
+                    <Ionicons name="sparkles" size={16} color="#A855F7" />
+                  </View>
+                  <Text className="text-lg font-semibold text-ios-label dark:text-iosd-label">
+                    AI Sažetak
+                  </Text>
+                </View>
+
+                {!hasSummary ? (
+                  <TouchableOpacity
+                    onPress={() => generateNoteSummary(note.id)}
+                    disabled={isGeneratingSummary}
+                    className="flex-row items-center px-3 py-1.5 rounded-full bg-purple-500/15 dark:bg-purple-500/20"
+                    activeOpacity={0.7}
+                  >
+                    {isGeneratingSummary ? (
+                      <>
+                        <ActivityIndicator size="small" color="#A855F7" />
+                        <Text className="ml-1.5 text-xs text-purple-600 dark:text-purple-400 font-medium">
+                          Generiše...
+                        </Text>
+                      </>
+                    ) : (
+                      <>
+                        <Ionicons
+                          name="add-circle-outline"
+                          size={16}
+                          color="#A855F7"
+                        />
+                        <Text className="ml-1.5 text-xs text-purple-600 dark:text-purple-400 font-medium">
+                          Generiši
+                        </Text>
+                      </>
+                    )}
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity
+                    onPress={() => setIsSummaryExpanded(!isSummaryExpanded)}
+                    className="p-1"
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  >
+                    <Ionicons
+                      name={isSummaryExpanded ? "chevron-up" : "chevron-down"}
+                      size={20}
+                      color="#A855F7"
+                    />
+                  </TouchableOpacity>
+                )}
+              </View>
+
+              {/* Summary Content */}
+              {hasSummary && isSummaryExpanded && (
+                <View className="p-4 bg-white/70 dark:bg-white/5 rounded-2xl border border-ios-sep dark:border-iosd-sep">
+                  <Text className="text-base text-ios-label dark:text-iosd-label leading-6">
+                    {note?.ai?.summary}
+                  </Text>
+
+                  {/* Regenerate dugme */}
+                  <TouchableOpacity
+                    onPress={async () => {
+                      await editNote(note.id, {
+                        ai: { ...(note?.ai || {}), summary: undefined },
+                      });
+                      setTimeout(() => generateNoteSummary(note.id), 100);
+                    }}
+                    disabled={isGeneratingSummary}
+                    className="mt-3 flex-row items-center justify-center py-2 px-3 rounded-xl bg-purple-500/10 dark:bg-purple-500/15 border border-purple-500/30"
+                  >
+                    <Ionicons
+                      name="refresh-outline"
+                      size={14}
+                      color="#A855F7"
+                    />
+                    <Text className="ml-1.5 text-xs text-purple-600 dark:text-purple-400 font-medium">
+                      Regeneriši
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+
+              {/* Collapsed placeholder */}
+              {hasSummary && !isSummaryExpanded && (
+                <View className="p-3 bg-white/70 dark:bg-white/5 rounded-2xl border border-ios-sep dark:border-iosd-sep">
+                  <Text className="text-sm text-ios-secondary dark:text-iosd-label2 italic text-center">
+                    Klikni da vidiš sažetak
+                  </Text>
+                </View>
+              )}
+            </View>
+          )}
+
+          {/* PHOTO content */}
           {note.type === "photo" && note.fileUri && (
             <View className="mb-6">
               <TouchableOpacity
@@ -404,7 +508,6 @@ export default function NoteDetailScreen() {
                   style={{ width: "100%", aspectRatio: 4 / 3 }}
                   contentFit="cover"
                 />
-                {/* Zoom hint overlay */}
                 <View className="absolute bottom-3 right-3 bg-black/60 rounded-full px-3 py-1.5 flex-row items-center">
                   <Ionicons name="expand-outline" size={14} color="#FFF" />
                   <Text className="text-white text-xs font-medium ml-1">
@@ -413,7 +516,6 @@ export default function NoteDetailScreen() {
                 </View>
               </TouchableOpacity>
 
-              {/* Transkripcija (OCR tekst) */}
               {note.text && (
                 <View className="mt-4 p-4 bg-white/70 dark:bg-white/5 rounded-2xl border border-ios-sep dark:border-iosd-sep">
                   <View className="flex-row items-center justify-between mb-2">
@@ -421,7 +523,6 @@ export default function NoteDetailScreen() {
                       Izvučeni tekst:
                     </Text>
 
-                    {/* ⭐ RE-EXTRACT dugme */}
                     <TouchableOpacity
                       onPress={() => extractPhotoText(note.id, note.fileUri!)}
                       disabled={isTranscribing}
@@ -457,7 +558,7 @@ export default function NoteDetailScreen() {
             </View>
           )}
 
-          {/* ⭐ VIDEO content */}
+          {/* VIDEO content */}
           {note.type === "video" && note.fileUri && (
             <View className="mb-6">
               <TouchableOpacity
@@ -465,7 +566,6 @@ export default function NoteDetailScreen() {
                 activeOpacity={0.95}
                 className="rounded-2xl overflow-hidden border border-ios-sep dark:border-iosd-sep bg-black"
               >
-                {/* Video placeholder/thumbnail */}
                 <View
                   style={{ width: "100%", aspectRatio: 16 / 9 }}
                   className="items-center justify-center"
@@ -475,7 +575,6 @@ export default function NoteDetailScreen() {
                   </View>
                 </View>
 
-                {/* Play hint */}
                 <View className="absolute bottom-3 right-3 bg-black/60 rounded-full px-3 py-1.5 flex-row items-center">
                   <Ionicons name="play-circle-outline" size={14} color="#FFF" />
                   <Text className="text-white text-xs font-medium ml-1">
@@ -484,7 +583,6 @@ export default function NoteDetailScreen() {
                 </View>
               </TouchableOpacity>
 
-              {/* Transkripcija */}
               {note.text && (
                 <View className="mt-4 p-4 bg-white/70 dark:bg-white/5 rounded-2xl border border-ios-sep dark:border-iosd-sep">
                   <View className="flex-row items-center justify-between mb-2">
@@ -492,7 +590,6 @@ export default function NoteDetailScreen() {
                       Transkripcija:
                     </Text>
 
-                    {/* ⭐ RE-TRANSCRIBE dugme */}
                     <TouchableOpacity
                       onPress={() => transcribeNote(note.id, note.fileUri!)}
                       disabled={isTranscribing}
@@ -528,13 +625,11 @@ export default function NoteDetailScreen() {
             </View>
           )}
 
-          {/* ⭐ AUDIO content */}
+          {/* AUDIO content */}
           {note.type === "audio" && note.fileUri && (
             <View className="mb-6">
-              {/* Audio player */}
               <View className="p-4 bg-white/70 dark:bg-white/5 rounded-2xl border border-ios-sep dark:border-iosd-sep">
                 <View className="flex-row items-center mb-4">
-                  {/* Play/Pause button */}
                   <TouchableOpacity
                     onPress={toggleAudioPlayback}
                     disabled={!audioLoaded}
@@ -554,7 +649,6 @@ export default function NoteDetailScreen() {
                     )}
                   </TouchableOpacity>
 
-                  {/* Duration info */}
                   <View className="flex-1">
                     <Text className="text-lg font-semibold text-ios-label dark:text-iosd-label">
                       Voice Note
@@ -565,13 +659,11 @@ export default function NoteDetailScreen() {
                     </Text>
                   </View>
 
-                  {/* Waveform icon */}
                   <View className="w-10 h-10 rounded-full bg-purple-500/15 items-center justify-center">
                     <Ionicons name="pulse-outline" size={20} color="#A855F7" />
                   </View>
                 </View>
 
-                {/* Progress bar */}
                 <View className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                   <View
                     className="h-full bg-ios-blue rounded-full"
@@ -585,7 +677,6 @@ export default function NoteDetailScreen() {
                 </View>
               </View>
 
-              {/* Transkripcija */}
               {note.text && (
                 <View className="mt-4 p-4 bg-white/70 dark:bg-white/5 rounded-2xl border border-ios-sep dark:border-iosd-sep">
                   <Text className="text-sm text-ios-secondary dark:text-iosd-label2 mb-2">
@@ -620,7 +711,7 @@ export default function NoteDetailScreen() {
             </View>
           )}
 
-          {/* ⭐ AI Insights sekcija */}
+          {/* AI Insights sekcija */}
           {note.ai?.facts && note.ai.facts.length > 0 && (
             <View className="mb-6">
               <View className="flex-row items-center mb-3">
@@ -699,7 +790,7 @@ export default function NoteDetailScreen() {
             </View>
           )}
 
-          {/* ⭐ TAGOVI SEKCIJA */}
+          {/* TAGOVI SEKCIJA */}
           <View className="mb-6">
             <View className="flex-row items-center mb-3">
               <View className="w-8 h-8 rounded-full bg-ios-blue/15 dark:bg-ios-blue/20 items-center justify-center mr-2">
@@ -711,13 +802,11 @@ export default function NoteDetailScreen() {
             </View>
 
             <View className="bg-white/70 dark:bg-white/5 rounded-2xl p-4 border border-ios-sep dark:border-iosd-sep">
-              {/* Tag input */}
               <TagInput
                 onAddTag={(tag) => addTagToNote(note.id, tag)}
                 existingTags={note.tags || []}
               />
 
-              {/* Existing tags */}
               {note.tags && note.tags.length > 0 && (
                 <View className="flex-row flex-wrap mt-3">
                   {note.tags.map((tag) => (
@@ -739,7 +828,7 @@ export default function NoteDetailScreen() {
             </View>
           </View>
 
-          {/* ⭐ Metadata sekcija */}
+          {/* Metadata sekcija */}
           <View className="mb-6">
             <View className="flex-row items-center mb-3">
               <View className="w-8 h-8 rounded-full bg-gray-500/10 dark:bg-gray-500/20 items-center justify-center mr-2">
@@ -755,7 +844,6 @@ export default function NoteDetailScreen() {
             </View>
 
             <View className="bg-white/70 dark:bg-white/5 rounded-2xl p-4 border border-ios-sep dark:border-iosd-sep">
-              {/* ⭐ DODAJ Pin status kao prvi red */}
               {note.pinned && (
                 <MetadataRow label="Status" value="Pinned" icon="pin" />
               )}
@@ -789,7 +877,7 @@ export default function NoteDetailScreen() {
         </View>
       </ScrollView>
 
-      {/* ⭐ Fullscreen modali na kraju, izvan ScrollView-a */}
+      {/* Fullscreen modali */}
       {note.type === "photo" && note.fileUri && (
         <ImageFullscreenViewer
           visible={showImageFullscreen}
@@ -809,7 +897,6 @@ export default function NoteDetailScreen() {
   );
 }
 
-// ⭐ Ažurirana MetadataRow komponenta
 function MetadataRow({
   label,
   value,
@@ -843,7 +930,6 @@ function MetadataRow({
         </Text>
       </View>
 
-      {/* ⭐ Styled value za Pinned status */}
       {isPinned ? (
         <View className="bg-amber-500 rounded-full px-2 py-1 flex-row items-center">
           <Ionicons name="pin" size={10} color="#FFF" />

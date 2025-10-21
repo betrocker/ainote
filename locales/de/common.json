@@ -27,11 +27,26 @@
     "version": "AiNote v{{version}}"
   },
   "home": {
-    "welcome": "Willkommen zurück 👋",
-    "notesToday": "Du hast heute {{count}} Notizen",
-    "stats": "Statistiken",
+    "welcome": "Willkommen zurück",
+    "today": "heute",
+    "stats": "Statistik",
+    "total": "Gesamt",
+    "withTags": "Tags",
     "thisWeek": "Diese Woche",
-    "total": "Gesamt"
+    "upcoming": "Bevorstehend",
+    "recent": "Kürzlich",
+    "viewAll": "Alle anzeigen",
+    "overview": "Übersicht",
+    "browse": "Durchsuchen",
+    "allNotes": "Alle Notizen",
+    "note": {
+      "one": "Notiz",
+      "other": "Notizen"
+    },
+    "empty": {
+      "title": "Keine Notizen",
+      "subtitle": "Beginne mit der Erstellung deiner ersten Notiz"
+    }
   },
   "types": {
     "text": "Text",
@@ -56,7 +71,16 @@
     "placeholder": {
       "title": "Titel",
       "body": "Schreib los…"
-    }
+    },
+    "pinned": "Angeheftet",
+    "types": {
+      "text": "Text",
+      "audio": "Audio",
+      "photo": "Foto",
+      "video": "Video"
+    },
+    "singular": "Notiz",
+    "singular_plural": "Notizen"
   },
   "fab": {
     "newText": "Neue Textnotiz",

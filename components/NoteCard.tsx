@@ -249,6 +249,13 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
               {note.title?.trim() || "Untitled"}
             </Text>
 
+            {/* ⭐ Summary indikator */}
+            {note.ai?.summary && (
+              <View className="bg-purple-500/15 rounded-full px-1.5 py-0.5">
+                <Ionicons name="sparkles" size={10} color="#A855F7" />
+              </View>
+            )}
+
             <View className="flex-row items-center">
               {/* Pin dugme */}
               <TouchableOpacity

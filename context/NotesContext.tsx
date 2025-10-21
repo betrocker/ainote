@@ -6,7 +6,7 @@ import {
   transcribeAudio,
 } from "@/utils/ai";
 // import { extractAudioFromVideo } from "@/utils/videoAudio";
-import { generateSmartTitle } from "@/utils/ai";
+import { generateSmartTitle, generateSummary } from "@/utils/ai";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, {
   createContext,
@@ -66,6 +66,8 @@ export type NotesContextType = {
   togglePinNote: (noteId: string) => Promise<void>;
   generateTitle: (noteId: string) => Promise<void>;
   generatingTitles: Set<string>;
+  generateNoteSummary: (noteId: string) => Promise<void>;
+  generatingSummaries: Set<string>;
 };
 
 /** ===================== Kontekst ===================== */
@@ -80,6 +82,9 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
   const STORAGE_KEY = "NOTES_V1";
 
   const [generatingTitles, setGeneratingTitles] = useState<Set<string>>(
+    new Set()
+  );
+  const [generatingSummaries, setGeneratingSummaries] = useState<Set<string>>(
     new Set()
   );
 
@@ -495,6 +500,60 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
     [notes, editNote]
   );
 
+  const generateNoteSummary = useCallback(
+    async (noteId: string) => {
+      console.log("📝 [generateNoteSummary] Called for:", noteId.slice(0, 8));
+
+      const note = notes.find((n) => n.id === noteId);
+      if (!note || !note.text) {
+        console.log("📝 [generateNoteSummary] No text found");
+        return;
+      }
+
+      // Proveri da li već ima summary
+      if (note.ai?.summary) {
+        console.log("📝 [generateNoteSummary] Summary already exists");
+        return;
+      }
+
+      // Označi da generisanje počinje
+      setGeneratingSummaries((prev) => {
+        const next = new Set(prev);
+        next.add(noteId);
+        return next;
+      });
+
+      try {
+        console.log("📝 [generateNoteSummary] Generating summary...");
+        const summary = await generateSummary(note.text);
+        console.log(
+          "📝 [generateNoteSummary] Result length:",
+          summary?.length || 0
+        );
+
+        if (summary) {
+          // Update note sa summary
+          await editNote(noteId, {
+            ai: {
+              ...(note.ai || {}),
+              summary,
+            },
+          });
+          console.log("📝 [generateNoteSummary] Summary saved");
+        }
+      } catch (error) {
+        console.log("📝 [generateNoteSummary] Error:", error);
+      } finally {
+        setGeneratingSummaries((prev) => {
+          const next = new Set(prev);
+          next.delete(noteId);
+          return next;
+        });
+      }
+    },
+    [notes, editNote]
+  );
+
   return (
     <NotesContext.Provider
       value={{
@@ -517,6 +576,8 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
         togglePinNote,
         generateTitle,
         generatingTitles,
+        generateNoteSummary,
+        generatingSummaries,
       }}
     >
       {children}
