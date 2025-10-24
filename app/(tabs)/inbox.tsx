@@ -1,224 +1,312 @@
-// app/(tabs)/inbox.tsx
-import EmptyInbox from "@/components/EmptyInbox";
-import FilterChips, { FilterType } from "@/components/FilterChips";
-import Header from "@/components/Header";
+// app/inbox.tsx
+import LargeHeader, { HeaderButton } from "@/components/LargeHeader";
 import NoteCard from "@/components/NoteCard";
-import ScreenBackground from "@/components/ScreenBackground";
-import ScreenFlatList from "@/components/ScreenFlatList";
+import ScreenScroll from "@/components/ScreenScroll";
 import SearchBar from "@/components/SearchBar";
-import SortMenu, { SortOption } from "@/components/SortMenu";
+import SortMenu from "@/components/SortMenu";
 import TagChip from "@/components/TagChip";
 import { useNotes } from "@/context/NotesContext";
-import { useTheme } from "@/context/ThemeContext";
+import { haptics } from "@/utils/haptics";
+import ScreenBackground from "@components/ScreenBackground";
 import { Ionicons } from "@expo/vector-icons";
-import { BlurView } from "expo-blur";
-import React, { useMemo, useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import React, { useMemo, useRef, useState } from "react";
+import { Animated, Text, TouchableOpacity, View } from "react-native";
+
+type FilterType = "all" | "text" | "audio" | "photo" | "video";
+type SortOption = "newest" | "oldest" | "titleAsc" | "titleDesc" | "type";
 
 export default function InboxScreen() {
-  const insets = useSafeAreaInsets();
-  const headerHeight = insets.top + 44;
   const { notes, getAllTags } = useNotes();
-  const { theme } = useTheme();
 
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeFilter, setActiveFilter] = useState<FilterType>("all");
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const [sortOption, setSortOption] = useState<SortOption>("date-desc");
+  const [filterType, setFilterType] = useState<FilterType>("all");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [sortBy, setSortBy] = useState<SortOption>("newest");
+  const [showSortMenu, setShowSortMenu] = useState(false);
 
-  // ⭐ Dobavi sve tagove
-  const allTags = useMemo(() => getAllTags(), [notes]);
+  const allTags = getAllTags();
+  const hasActiveFilters = filterType !== "all" || selectedTags.length > 0;
 
   const filteredNotes = useMemo(() => {
-    if (!Array.isArray(notes)) return [];
+    let filtered = notes;
 
-    let result = [...notes];
-
-    // Filter po tipu
-    if (activeFilter !== "all") {
-      result = result.filter((note) => note.type === activeFilter);
-    }
-
-    // Filter po tagu
-    if (selectedTag) {
-      result = result.filter((note) => note.tags?.includes(selectedTag));
-    }
-
-    // Pretraga
     if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter((note) => {
-        const title = note.title?.toLowerCase() || "";
-        const description = note.description?.toLowerCase() || "";
-        const text = note.text?.toLowerCase() || "";
-
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter((note) => {
         return (
-          title.includes(query) ||
-          description.includes(query) ||
-          text.includes(query)
+          note.title?.toLowerCase().includes(q) ||
+          note.text?.toLowerCase().includes(q) ||
+          note.description?.toLowerCase().includes(q)
         );
       });
     }
 
-    // ⭐ SORTIRANJE
-    result.sort((a, b) => {
-      // Prvo pinned beležke (uvek na vrh)
+    if (filterType !== "all") {
+      filtered = filtered.filter((note) => note.type === filterType);
+    }
+
+    if (selectedTags.length > 0) {
+      filtered = filtered.filter((note) =>
+        selectedTags.every((tag) => note.tags?.includes(tag))
+      );
+    }
+
+    const sorted = [...filtered].sort((a, b) => {
       if (a.pinned && !b.pinned) return -1;
       if (!a.pinned && b.pinned) return 1;
 
-      // Zatim primeni izabrano sortiranje
-      switch (sortOption) {
-        case "date-desc":
+      switch (sortBy) {
+        case "newest":
           return b.createdAt - a.createdAt;
-        case "date-asc":
+        case "oldest":
           return a.createdAt - b.createdAt;
-        case "title-asc":
+        case "titleAsc":
           return (a.title || "").localeCompare(b.title || "");
-        case "title-desc":
+        case "titleDesc":
           return (b.title || "").localeCompare(a.title || "");
         case "type":
-          const typeOrder = { text: 0, audio: 1, photo: 2, video: 3 };
-          return typeOrder[a.type] - typeOrder[b.type];
+          return (a.type || "").localeCompare(b.type || "");
         default:
           return 0;
       }
     });
 
-    return result;
-  }, [notes, activeFilter, searchQuery, selectedTag, sortOption]);
+    return sorted;
+  }, [notes, searchQuery, filterType, selectedTags, sortBy]);
 
-  const isEmpty = filteredNotes.length === 0;
-  const hasNotes = notes && notes.length > 0;
+  const handleTagToggle = (tag: string) => {
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
+  };
 
-  // ⭐ Dinamička visina search/filter sekcije
-  // Dodaj 48px ako ima tagova
-  const baseHeight = 132;
-  const tagRowHeight = allTags.length > 0 ? 48 : 0;
-  const searchFilterHeight = baseHeight + tagRowHeight;
+  const handleClearFilters = () => {
+    setSearchQuery("");
+    setFilterType("all");
+    setSelectedTags([]);
+  };
+
+  const toggleSearch = () => {
+    if (isSearchExpanded) {
+      setIsSearchExpanded(false);
+
+      // ⭐ Brži cleanup (80 + 300 + 50 buffer)
+      setTimeout(() => {
+        setSearchQuery("");
+        setFilterType("all");
+        setSelectedTags([]);
+      }, 450); // ⭐ Bilo 600
+    } else {
+      setIsSearchExpanded(true);
+    }
+  };
 
   return (
     <ScreenBackground variant="grouped">
-      <Header title="Inbox" />
-
-      {/* Search & Filter sekcija */}
-      {hasNotes && (
-        <View
-          style={{
-            position: "absolute",
-            top: headerHeight + 16,
-            left: 0,
-            right: 0,
-            zIndex: 9,
-          }}
-        >
-          <BlurView
-            intensity={60}
-            tint={theme === "dark" ? "dark" : "light"}
-            style={StyleSheet.absoluteFill}
-          />
-
-          <View className="bg-white/20 dark:bg-black/10 border-b border-ios-sep dark:border-iosd-sep">
+      <LargeHeader
+        title="Inbox"
+        isExpanded={isSearchExpanded}
+        rightButtons={
+          <>
+            <HeaderButton
+              icon={isSearchExpanded ? "close" : "search"}
+              onPress={toggleSearch}
+              active={isSearchExpanded}
+            />
+            <HeaderButton
+              icon="swap-vertical"
+              onPress={() => setShowSortMenu(true)}
+            />
+          </>
+        }
+        expandableContent={
+          <>
             <SearchBar
               value={searchQuery}
               onChangeText={setSearchQuery}
-              onClear={() => setSearchQuery("")}
+              placeholder="Search notes..."
+              autoFocus={false}
             />
 
-            <FilterChips
-              activeFilter={activeFilter}
-              onFilterChange={(filter) => {
-                setActiveFilter(filter);
-                // Reset tag filter kada menjamo type filter
-                setSelectedTag(null);
-              }}
-            />
+            {/* Filter Type Pills */}
+            <View className="flex-row gap-2 mt-3 flex-wrap">
+              <FilterPill
+                label="All"
+                active={filterType === "all"}
+                onPress={() => setFilterType("all")}
+                icon="albums-outline"
+              />
+              <FilterPill
+                label="Text"
+                active={filterType === "text"}
+                onPress={() => setFilterType("text")}
+                icon="document-text"
+              />
+              <FilterPill
+                label="Audio"
+                active={filterType === "audio"}
+                onPress={() => setFilterType("audio")}
+                icon="mic"
+              />
+              <FilterPill
+                label="Photo"
+                active={filterType === "photo"}
+                onPress={() => setFilterType("photo")}
+                icon="image"
+              />
+              <FilterPill
+                label="Video"
+                active={filterType === "video"}
+                onPress={() => setFilterType("video")}
+                icon="videocam"
+              />
+            </View>
 
-            {/* TAG FILTER CHIPS */}
+            {/* Tag Filter */}
             {allTags.length > 0 && (
-              <View className="mb-3">
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  className="mx-4"
-                  contentContainerStyle={{ paddingRight: 16 }}
-                >
+              <View className="mt-3">
+                <Text className="text-xs font-semibold text-ios-secondary dark:text-iosd-label2 mb-2">
+                  Filter by tags:
+                </Text>
+                <View className="flex-row flex-wrap gap-2">
                   {allTags.map((tag) => (
                     <TagChip
                       key={tag}
                       tag={tag}
-                      variant="default"
-                      selected={selectedTag === tag} // ⭐ Prikaži selected state
-                      onPress={() => {
-                        setSelectedTag(selectedTag === tag ? null : tag);
-                      }}
+                      variant={
+                        selectedTags.includes(tag) ? "selected" : "default"
+                      }
+                      onPress={() => handleTagToggle(tag)}
                     />
                   ))}
-                </ScrollView>
+                </View>
               </View>
             )}
 
-            {/* Results count */}
-            <View className="mx-4 mb-3 flex-row items-center justify-between">
-              <Text className="text-sm text-ios-secondary dark:text-iosd-label2">
-                {filteredNotes.length}{" "}
-                {filteredNotes.length === 1 ? "beležka" : "beležaka"}
-              </Text>
+            {/* Clear Filters */}
+            {hasActiveFilters && (
+              <TouchableOpacity
+                onPress={handleClearFilters}
+                className="mt-3 py-2 px-3 rounded-full bg-red-500/10 border border-red-500/30 self-start"
+                activeOpacity={0.7}
+              >
+                <Text className="text-xs font-semibold text-red-600 dark:text-red-400">
+                  Clear filters
+                </Text>
+              </TouchableOpacity>
+            )}
 
-              {/* ⭐ Active tag indicator */}
-              {selectedTag && (
-                <View className="flex-row items-center px-2 py-1 rounded-full bg-ios-blue/20 dark:bg-ios-blue/30">
-                  <Ionicons name="pricetag" size={12} color="#0A84FF" />
-                  <Text className="text-xs font-semibold text-ios-blue ml-1">
-                    {selectedTag}
-                  </Text>
-                </View>
-              )}
+            {/* Results counter */}
+            <Text className="text-xs text-ios-secondary dark:text-iosd-label2 mt-2">
+              {filteredNotes.length}{" "}
+              {filteredNotes.length === 1 ? "note" : "notes"}
+            </Text>
+          </>
+        }
+      />
 
-              {/* ⭐ Sort menu */}
-              <SortMenu
-                activeSortOption={sortOption}
-                onSortChange={setSortOption}
+      {/* Notes List */}
+      <ScreenScroll
+        contentContainerStyle={{ paddingBottom: 120 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {filteredNotes.length > 0 ? (
+          filteredNotes.map((note) => <NoteCard key={note.id} note={note} />)
+        ) : (
+          <View className="items-center justify-center py-20 px-8">
+            <View className="w-20 h-20 rounded-full bg-ios-fill dark:bg-iosd-fill items-center justify-center mb-4">
+              <Ionicons
+                name={searchQuery ? "search" : "document-text-outline"}
+                size={40}
+                color="#8E8E93"
               />
             </View>
+            <Text className="text-lg font-semibold text-ios-label dark:text-iosd-label mb-1 text-center">
+              {searchQuery ? "No results" : "No notes yet"}
+            </Text>
+            <Text className="text-sm text-ios-secondary dark:text-iosd-label2 text-center">
+              {searchQuery
+                ? "Try a different search term"
+                : "Create your first note"}
+            </Text>
           </View>
-        </View>
-      )}
+        )}
+      </ScreenScroll>
 
-      {/* Sadržaj */}
-      {isEmpty && !hasNotes ? (
-        <View style={{ paddingTop: headerHeight + 16, flex: 1 }}>
-          <EmptyInbox />
-        </View>
-      ) : isEmpty && hasNotes ? (
-        <View
-          style={{ paddingTop: headerHeight + searchFilterHeight + 32 }}
-          className="items-center justify-center py-20 flex-1"
-        >
-          <View className="w-20 h-20 rounded-full bg-ios-fill dark:bg-iosd-fill items-center justify-center mb-4">
-            <Ionicons name="search-outline" size={40} color="#8E8E93" />
-          </View>
-          <Text className="text-lg font-semibold text-ios-label dark:text-iosd-label mb-1">
-            Nema rezultata
-          </Text>
-          <Text className="text-sm text-ios-secondary dark:text-iosd-label2 text-center px-8">
-            {selectedTag
-              ? `Nema beleški sa tagom "${selectedTag}"`
-              : "Pokušaj sa drugačijim pojmom"}
-          </Text>
-        </View>
-      ) : (
-        <ScreenFlatList
-          data={filteredNotes}
-          keyExtractor={(n) => n.id}
-          renderItem={({ item }) => <NoteCard note={item} className="mx-4" />}
-          extraTop={hasNotes ? searchFilterHeight + 24 : 12}
-          contentContainerStyle={{ paddingBottom: 100 }}
-          initialNumToRender={10}
-          windowSize={10}
-          removeClippedSubviews
-        />
-      )}
+      {/* Sort Menu Modal */}
+      <SortMenu
+        visible={showSortMenu}
+        currentSort={sortBy}
+        onSelectSort={(sort) => {
+          setSortBy(sort);
+          setShowSortMenu(false);
+        }}
+        onClose={() => setShowSortMenu(false)}
+      />
     </ScreenBackground>
+  );
+}
+
+// FilterPill component sa bounce animacijom
+function FilterPill({
+  label,
+  active,
+  onPress,
+  icon,
+}: {
+  label: string;
+  active: boolean;
+  onPress: () => void;
+  icon: string;
+}) {
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  const handlePress = () => {
+    haptics.selection();
+
+    Animated.sequence([
+      Animated.spring(scaleAnim, {
+        toValue: 0.9,
+        tension: 400,
+        friction: 10,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        tension: 200,
+        friction: 8,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    onPress();
+  };
+
+  return (
+    <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+      <TouchableOpacity
+        onPress={handlePress}
+        className={`flex-row items-center px-3 py-1.5 rounded-full border ${
+          active
+            ? "bg-ios-blue border-ios-blue"
+            : "bg-ios-fill dark:bg-iosd-fill border-ios-sep dark:border-iosd-sep"
+        }`}
+        activeOpacity={1}
+      >
+        <Ionicons
+          name={icon as any}
+          size={14}
+          color={active ? "#FFF" : "#8E8E93"}
+        />
+        <Text
+          className={`ml-1.5 text-xs font-semibold ${
+            active ? "text-white" : "text-ios-label dark:text-iosd-label"
+          }`}
+        >
+          {label}
+        </Text>
+      </TouchableOpacity>
+    </Animated.View>
   );
 }

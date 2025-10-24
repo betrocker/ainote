@@ -7,7 +7,7 @@ type Props = {
   tag: string;
   onRemove?: () => void;
   onPress?: () => void;
-  variant?: "default" | "removable";
+  variant?: "default" | "removable" | "selected";
   selected?: boolean; // ⭐ NOVO
 };
 
@@ -26,7 +26,7 @@ export default function TagChip({
       className={[
         "flex-row items-center px-3 py-1.5 rounded-full mr-2 mb-2 border",
         selected
-          ? "bg-ios-blue border-ios-blue" // ⭐ Active state
+          ? "bg-ios-blue border border-ios-blue" // ⭐ Active state
           : "bg-ios-blue/15 dark:bg-ios-blue/20 border-ios-blue/30",
       ].join(" ")}
       activeOpacity={onPress ? 0.7 : 1}

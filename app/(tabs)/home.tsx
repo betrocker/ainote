@@ -1,8 +1,8 @@
 // app/(tabs)/index.tsx
+import LargeHeader, { HeaderButton } from "@/components/LargeHeader";
 import ScreenScroll from "@/components/ScreenScroll";
 import { useNotes } from "@/context/NotesContext";
 import { usePlural } from "@/hooks/usePlural";
-import Header from "@components/Header";
 import ScreenBackground from "@components/ScreenBackground";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -108,10 +108,14 @@ export default function HomeScreen() {
 
   return (
     <ScreenBackground variant="grouped">
-      <Header
-        title={t("screen.home.title")}
-        rightIcon="settings-outline"
-        onRightPress={() => router.push("/settings")}
+      <LargeHeader
+        title="Home"
+        rightButtons={
+          <HeaderButton
+            icon="settings-outline"
+            onPress={() => router.push("/settings")}
+          />
+        }
       />
 
       <ScreenScroll

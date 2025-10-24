@@ -1,7 +1,7 @@
 // app/assistant.tsx
+import LargeHeader, { HeaderButton } from "@/components/LargeHeader";
 import { useNotes } from "@/context/NotesContext";
 import { ask } from "@/utils/ai";
-import Header from "@components/Header";
 import ScreenBackground from "@components/ScreenBackground";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -141,10 +141,11 @@ export default function AssistantScreen() {
 
   return (
     <ScreenBackground variant="grouped">
-      <Header
-        title="AI Assistant"
-        rightIcon={messages.length > 0 ? "trash-outline" : undefined}
-        onRightPress={messages.length > 0 ? handleClear : undefined}
+      <LargeHeader
+        title="Assistant"
+        rightButtons={
+          <HeaderButton icon="trash-outline" onPress={handleClear} />
+        }
       />
 
       <ScrollView

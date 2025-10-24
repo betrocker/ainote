@@ -20,7 +20,8 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.betrocker.ainote"
+      "package": "com.denis.ainote",
+      "versionCode": 2
     },
     "web": {
       "bundler": "metro",
@@ -47,9 +48,7 @@
         "expo-audio",
         {
           "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone.",
-          "UIBackgroundModes": [
-            "audio"
-          ]
+          "UIBackgroundModes": ["audio"]
         }
       ],
       "expo-video"
@@ -64,5 +63,8 @@
         "projectId": "27558d00-dfa9-41e6-82d2-70bdfefb716e"
       }
     }
+  },
+  "cli": {
+    "appVersionSource": "remote"
   }
 }

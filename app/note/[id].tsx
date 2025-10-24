@@ -4,6 +4,7 @@ import TagChip from "@/components/TagChip";
 import TagInput from "@/components/TagInput";
 import VideoFullscreenPlayer from "@/components/VideoFullscreenPlayer";
 import { useNotes } from "@/context/NotesContext";
+import { usePremium } from "@/context/PremiumContext"; // ⭐ Dodato
 import { Ionicons } from "@expo/vector-icons";
 import { Audio, AVPlaybackStatusSuccess } from "expo-av";
 import { Image } from "expo-image";
@@ -21,6 +22,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import RevenueCatUI from "react-native-purchases-ui"; // ⭐ Dodato
 
 function formatDateFromISO(iso: string): string {
   try {
@@ -66,13 +68,14 @@ export default function NoteDetailScreen() {
     generatingSummaries,
   } = useNotes();
 
+  const { isPremium } = usePremium(); // ⭐ Dodato
   const router = useRouter();
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === "dark";
 
   const note = notes.find((n) => n.id === id);
 
-  // ⭐ Svi hooks na vrhu
+  // ⭐ State hooks
   const [isEditing, setIsEditing] = useState(false);
   const [editedText, setEditedText] = useState(note?.text || "");
   const [showImageFullscreen, setShowImageFullscreen] = useState(false);
@@ -86,12 +89,65 @@ export default function NoteDetailScreen() {
   const [audioDuration, setAudioDuration] = useState(0);
   const [audioPosition, setAudioPosition] = useState(0);
 
-  // ⭐ Derived state sa optional chaining
+  // ⭐ Derived state
   const isTranscribing = transcribingNotes.has(id || "");
   const isGeneratingTitle = generatingTitles.has(id || "");
   const isGeneratingSummary = generatingSummaries.has(id || "");
   const hasSummary = !!note?.ai?.summary && note.ai.summary.length > 0;
   const canGenerateSummary = !!note?.text && note.text.length > 50;
+
+  // ⭐ Premium check helper
+  const checkPremiumAndProceed = async (
+    action: () => void,
+    featureName: string
+  ) => {
+    console.log("🎯 [Note] Checking premium for:", featureName);
+
+    if (!isPremium) {
+      console.log("❌ [Note] User is not premium, showing paywall");
+
+      try {
+        // ⭐ presentPaywall() ne prima parametre u novijoj verziji
+        const result = await RevenueCatUI.presentPaywall();
+
+        console.log("💳 [Note] Paywall result:", result);
+
+        if (result === "PURCHASED" || result === "RESTORED") {
+          console.log(
+            "✅ [Note] Purchase successful, proceeding with:",
+            featureName
+          );
+          action();
+        } else {
+          console.log("⏭️ [Note] User dismissed paywall");
+        }
+      } catch (error) {
+        console.error("❌ [Note] Paywall error:", error);
+        Alert.alert("Error", "Failed to show subscription options");
+      }
+
+      return;
+    }
+
+    console.log("✅ [Note] User has premium, proceeding with:", featureName);
+    action();
+  };
+
+  // ⭐ Log kada se otvori screen
+  useEffect(() => {
+    if (id) {
+      console.log("📝 NoteDetailScreen opened with ID:", id);
+      console.log("📝 Note found:", !!note);
+      console.log("🎯 Premium status:", isPremium);
+    }
+  }, [id, note, isPremium]);
+
+  // ⭐ Update editedText kada se note promeni
+  useEffect(() => {
+    if (note?.text) {
+      setEditedText(note.text);
+    }
+  }, [note?.text]);
 
   // ⭐ Load audio ako je audio tip
   useEffect(() => {
@@ -127,7 +183,7 @@ export default function NoteDetailScreen() {
           );
           soundRef.current = sound;
         } catch (error) {
-          console.log("Audio load error:", error);
+          console.error("❌ Audio load error:", error);
         }
       };
 
@@ -163,7 +219,7 @@ export default function NoteDetailScreen() {
         await soundRef.current.playAsync();
       }
     } catch (error) {
-      console.log("Audio playback error:", error);
+      console.error("❌ Audio playback error:", error);
     }
   };
 
@@ -176,10 +232,30 @@ export default function NoteDetailScreen() {
   };
 
   // ⭐ Early return POSLE svih hooks
+  if (!id) {
+    return (
+      <View className="flex-1 bg-ios-bg dark:bg-iosd-bg items-center justify-center p-4">
+        <Ionicons name="alert-circle-outline" size={64} color="#EF4444" />
+        <Text className="text-lg font-semibold text-ios-label dark:text-iosd-label mt-4 text-center">
+          Nevažeći ID beleške
+        </Text>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          className="mt-6 px-6 py-3 bg-ios-blue rounded-full"
+        >
+          <Text className="text-white font-semibold">Nazad</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   if (!note) {
     return (
-      <View className="flex-1 bg-ios-bg dark:bg-iosd-bg items-center justify-center">
-        <ActivityIndicator size="large" />
+      <View className="flex-1 bg-ios-bg dark:bg-iosd-bg items-center justify-center p-4">
+        <ActivityIndicator size="large" color="#0A84FF" />
+        <Text className="text-sm text-ios-secondary dark:text-iosd-label2 mt-4">
+          Učitavanje beleške...
+        </Text>
       </View>
     );
   }
@@ -196,7 +272,7 @@ export default function NoteDetailScreen() {
       const message = `${note.title}\n\n${note.text || ""}`;
       await Share.share({ message });
     } catch (error) {
-      console.log("Share error:", error);
+      console.error("❌ Share error:", error);
     }
   };
 
@@ -220,6 +296,43 @@ export default function NoteDetailScreen() {
       ],
       { cancelable: true }
     );
+  };
+
+  // ⭐ AI Feature handlers sa premium check
+  const handleGenerateTitle = () => {
+    checkPremiumAndProceed(() => generateTitle(note.id), "Generate Title");
+  };
+
+  const handleGenerateSummary = () => {
+    checkPremiumAndProceed(
+      () => generateNoteSummary(note.id),
+      "Generate Summary"
+    );
+  };
+
+  const handleTranscribe = () => {
+    if (!note.fileUri) return;
+    checkPremiumAndProceed(
+      () => transcribeNote(note.id, note.fileUri!),
+      "Transcribe"
+    );
+  };
+
+  const handleExtractText = () => {
+    if (!note.fileUri) return;
+    checkPremiumAndProceed(
+      () => extractPhotoText(note.id, note.fileUri!),
+      "Extract Text"
+    );
+  };
+
+  const handleRegenerateSummary = async () => {
+    checkPremiumAndProceed(async () => {
+      await editNote(note.id, {
+        ai: { ...(note?.ai || {}), summary: undefined },
+      });
+      setTimeout(() => generateNoteSummary(note.id), 100);
+    }, "Regenerate Summary");
   };
 
   // Helper za boje prema tipu
@@ -274,6 +387,13 @@ export default function NoteDetailScreen() {
 
           {/* Actions */}
           <View className="flex-row gap-2">
+            {/* ⭐ Premium Badge (ako nema premium) */}
+            {!isPremium && (
+              <View className="px-2 py-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mr-1">
+                <Text className="text-white text-[10px] font-bold">FREE</Text>
+              </View>
+            )}
+
             {/* Pin dugme */}
             <TouchableOpacity
               onPress={() => togglePinNote(note.id)}
@@ -340,10 +460,10 @@ export default function NoteDetailScreen() {
           </View>
         </View>
 
-        {/* Generate Title dugme */}
+        {/* ⭐ Generate Title dugme - SA PREMIUM LOCK */}
         {note.text && note.text.length > 20 && (
           <Pressable
-            onPress={() => generateTitle(note.id)}
+            onPress={handleGenerateTitle}
             disabled={isGeneratingTitle}
             className="mt-3 flex-row items-center justify-center px-4 py-2 rounded-xl bg-purple-500/15 dark:bg-purple-500/20 border border-purple-500/30 active:opacity-70"
           >
@@ -360,6 +480,11 @@ export default function NoteDetailScreen() {
                 <Text className="ml-2 text-sm font-medium text-purple-600 dark:text-purple-400">
                   AI Naslov
                 </Text>
+                {!isPremium && (
+                  <View className="ml-2 bg-yellow-500 rounded-full px-1.5 py-0.5">
+                    <Text className="text-[9px] font-bold text-white">PRO</Text>
+                  </View>
+                )}
               </>
             )}
           </Pressable>
@@ -398,7 +523,7 @@ export default function NoteDetailScreen() {
             </View>
           )}
 
-          {/* AI SUMMARY SEKCIJA */}
+          {/* ⭐ AI SUMMARY SEKCIJA - SA PREMIUM LOCK */}
           {canGenerateSummary && (
             <View className="mb-4">
               {/* Header */}
@@ -410,11 +535,18 @@ export default function NoteDetailScreen() {
                   <Text className="text-lg font-semibold text-ios-label dark:text-iosd-label">
                     AI Sažetak
                   </Text>
+                  {!isPremium && (
+                    <View className="ml-2 bg-yellow-500 rounded-full px-2 py-0.5">
+                      <Text className="text-[9px] font-bold text-white">
+                        PRO
+                      </Text>
+                    </View>
+                  )}
                 </View>
 
                 {!hasSummary ? (
                   <TouchableOpacity
-                    onPress={() => generateNoteSummary(note.id)}
+                    onPress={handleGenerateSummary}
                     disabled={isGeneratingSummary}
                     className="flex-row items-center px-3 py-1.5 rounded-full bg-purple-500/15 dark:bg-purple-500/20"
                     activeOpacity={0.7}
@@ -463,12 +595,7 @@ export default function NoteDetailScreen() {
 
                   {/* Regenerate dugme */}
                   <TouchableOpacity
-                    onPress={async () => {
-                      await editNote(note.id, {
-                        ai: { ...(note?.ai || {}), summary: undefined },
-                      });
-                      setTimeout(() => generateNoteSummary(note.id), 100);
-                    }}
+                    onPress={handleRegenerateSummary}
                     disabled={isGeneratingSummary}
                     className="mt-3 flex-row items-center justify-center py-2 px-3 rounded-xl bg-purple-500/10 dark:bg-purple-500/15 border border-purple-500/30"
                   >
@@ -495,7 +622,7 @@ export default function NoteDetailScreen() {
             </View>
           )}
 
-          {/* PHOTO content */}
+          {/* ⭐ PHOTO content - SA PREMIUM LOCK za extract */}
           {note.type === "photo" && note.fileUri && (
             <View className="mb-6">
               <TouchableOpacity
@@ -519,12 +646,21 @@ export default function NoteDetailScreen() {
               {note.text && (
                 <View className="mt-4 p-4 bg-white/70 dark:bg-white/5 rounded-2xl border border-ios-sep dark:border-iosd-sep">
                   <View className="flex-row items-center justify-between mb-2">
-                    <Text className="text-sm text-ios-secondary dark:text-iosd-label2">
-                      Izvučeni tekst:
-                    </Text>
+                    <View className="flex-row items-center">
+                      <Text className="text-sm text-ios-secondary dark:text-iosd-label2">
+                        Izvučeni tekst:
+                      </Text>
+                      {!isPremium && (
+                        <View className="ml-2 bg-yellow-500 rounded-full px-1.5 py-0.5">
+                          <Text className="text-[8px] font-bold text-white">
+                            PRO
+                          </Text>
+                        </View>
+                      )}
+                    </View>
 
                     <TouchableOpacity
-                      onPress={() => extractPhotoText(note.id, note.fileUri!)}
+                      onPress={handleExtractText}
                       disabled={isTranscribing}
                       className="flex-row items-center px-3 py-1.5 rounded-lg bg-green-500/10 dark:bg-green-500/20"
                     >
@@ -558,7 +694,7 @@ export default function NoteDetailScreen() {
             </View>
           )}
 
-          {/* VIDEO content */}
+          {/* ⭐ VIDEO content - SA PREMIUM LOCK za transcribe */}
           {note.type === "video" && note.fileUri && (
             <View className="mb-6">
               <TouchableOpacity
@@ -586,12 +722,21 @@ export default function NoteDetailScreen() {
               {note.text && (
                 <View className="mt-4 p-4 bg-white/70 dark:bg-white/5 rounded-2xl border border-ios-sep dark:border-iosd-sep">
                   <View className="flex-row items-center justify-between mb-2">
-                    <Text className="text-sm text-ios-secondary dark:text-iosd-label2">
-                      Transkripcija:
-                    </Text>
+                    <View className="flex-row items-center">
+                      <Text className="text-sm text-ios-secondary dark:text-iosd-label2">
+                        Transkripcija:
+                      </Text>
+                      {!isPremium && (
+                        <View className="ml-2 bg-yellow-500 rounded-full px-1.5 py-0.5">
+                          <Text className="text-[8px] font-bold text-white">
+                            PRO
+                          </Text>
+                        </View>
+                      )}
+                    </View>
 
                     <TouchableOpacity
-                      onPress={() => transcribeNote(note.id, note.fileUri!)}
+                      onPress={handleTranscribe}
                       disabled={isTranscribing}
                       className="flex-row items-center px-3 py-1.5 rounded-lg bg-purple-500/10 dark:bg-purple-500/20"
                     >
@@ -625,7 +770,7 @@ export default function NoteDetailScreen() {
             </View>
           )}
 
-          {/* AUDIO content */}
+          {/* ⭐ AUDIO content - SA PREMIUM LOCK za transcribe */}
           {note.type === "audio" && note.fileUri && (
             <View className="mb-6">
               <View className="p-4 bg-white/70 dark:bg-white/5 rounded-2xl border border-ios-sep dark:border-iosd-sep">
@@ -679,9 +824,46 @@ export default function NoteDetailScreen() {
 
               {note.text && (
                 <View className="mt-4 p-4 bg-white/70 dark:bg-white/5 rounded-2xl border border-ios-sep dark:border-iosd-sep">
-                  <Text className="text-sm text-ios-secondary dark:text-iosd-label2 mb-2">
-                    Transkripcija:
-                  </Text>
+                  <View className="flex-row items-center justify-between mb-2">
+                    <View className="flex-row items-center">
+                      <Text className="text-sm text-ios-secondary dark:text-iosd-label2">
+                        Transkripcija:
+                      </Text>
+                      {!isPremium && (
+                        <View className="ml-2 bg-yellow-500 rounded-full px-1.5 py-0.5">
+                          <Text className="text-[8px] font-bold text-white">
+                            PRO
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+
+                    <TouchableOpacity
+                      onPress={handleTranscribe}
+                      disabled={isTranscribing}
+                      className="flex-row items-center px-3 py-1.5 rounded-lg bg-purple-500/10 dark:bg-purple-500/20"
+                    >
+                      {isTranscribing ? (
+                        <>
+                          <ActivityIndicator size="small" color="#A855F7" />
+                          <Text className="ml-1.5 text-xs text-purple-600 dark:text-purple-400 font-medium">
+                            Processing...
+                          </Text>
+                        </>
+                      ) : (
+                        <>
+                          <Ionicons
+                            name="refresh-outline"
+                            size={14}
+                            color="#A855F7"
+                          />
+                          <Text className="ml-1.5 text-xs text-purple-600 dark:text-purple-400 font-medium">
+                            Re-transcribe
+                          </Text>
+                        </>
+                      )}
+                    </TouchableOpacity>
+                  </View>
                   <Text className="text-base leading-6 text-ios-label dark:text-iosd-label">
                     {note.text}
                   </Text>

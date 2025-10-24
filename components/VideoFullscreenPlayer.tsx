@@ -28,7 +28,6 @@ export default function VideoFullscreenPlayer({
           shouldDuckAndroid: true,
           playThroughEarpieceAndroid: false,
         });
-        console.log("✅ Audio mode set to speaker");
       } catch (error) {
         console.error("Audio mode error:", error);
       }

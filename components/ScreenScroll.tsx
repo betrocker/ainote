@@ -10,15 +10,11 @@ export default function ScreenScroll({
   ...rest
 }: Props) {
   const insets = useSafeAreaInsets();
-  const headerHeight = insets.top + 60;
 
   return (
     <ScrollView
       {...rest}
-      contentContainerStyle={[
-        { paddingTop: headerHeight + extraTop },
-        contentContainerStyle,
-      ]}
+      contentContainerStyle={[{ paddingTop: extraTop }, contentContainerStyle]}
     />
   );
 }
