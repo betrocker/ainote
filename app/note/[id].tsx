@@ -643,54 +643,51 @@ export default function NoteDetailScreen() {
                 </View>
               </TouchableOpacity>
 
-              {note.text && (
-                <View className="mt-4 p-4 bg-white/70 dark:bg-white/5 rounded-2xl border border-ios-sep dark:border-iosd-sep">
-                  <View className="flex-row items-center justify-between mb-2">
-                    <View className="flex-row items-center">
-                      <Text className="text-sm text-ios-secondary dark:text-iosd-label2">
-                        Izvučeni tekst:
-                      </Text>
-                      {!isPremium && (
-                        <View className="ml-2 bg-yellow-500 rounded-full px-1.5 py-0.5">
-                          <Text className="text-[8px] font-bold text-white">
-                            PRO
-                          </Text>
-                        </View>
-                      )}
-                    </View>
-
-                    <TouchableOpacity
-                      onPress={handleExtractText}
-                      disabled={isTranscribing}
-                      className="flex-row items-center px-3 py-1.5 rounded-lg bg-green-500/10 dark:bg-green-500/20"
-                    >
-                      {isTranscribing ? (
-                        <>
-                          <ActivityIndicator size="small" color="#10B981" />
-                          <Text className="ml-1.5 text-xs text-green-600 dark:text-green-400 font-medium">
-                            Processing...
-                          </Text>
-                        </>
-                      ) : (
-                        <>
-                          <Ionicons
-                            name="refresh-outline"
-                            size={14}
-                            color="#10B981"
-                          />
-                          <Text className="ml-1.5 text-xs text-green-600 dark:text-green-400 font-medium">
-                            Re-extract
-                          </Text>
-                        </>
-                      )}
-                    </TouchableOpacity>
+              <View className="mt-4 p-4 bg-white/70 dark:bg-white/5 rounded-2xl border border-ios-sep dark:border-iosd-sep">
+                <View className="flex-row items-center justify-between mb-2">
+                  <View className="flex-row items-center">
+                    <Text className="text-sm text-ios-secondary dark:text-iosd-label2">
+                      {note.text ? "Izvučeni tekst" : "Izvuci tekst"}
+                    </Text>
+                    {!isPremium && (
+                      <View className="ml-2 bg-yellow-500 rounded-full px-1.5 py-0.5">
+                        <Text className="text-[8px] font-bold text-white">
+                          PRO
+                        </Text>
+                      </View>
+                    )}
                   </View>
 
+                  <TouchableOpacity
+                    onPress={handleExtractText}
+                    disabled={isTranscribing}
+                    className="flex-row items-center px-3 py-1.5 rounded-lg bg-green-500/10 dark:bg-green-500/20"
+                  >
+                    {isTranscribing ? (
+                      <ActivityIndicator size="small" color="#10B981" />
+                    ) : (
+                      <Ionicons
+                        name={note.text ? "refresh-outline" : "scan-outline"}
+                        size={14}
+                        color="#10B981"
+                      />
+                    )}
+                    <Text className="ml-1.5 text-xs text-green-600 dark:text-green-400 font-medium">
+                      {isTranscribing
+                        ? "Processing..."
+                        : note.text
+                          ? "Re-extract"
+                          : "Extract Text"}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                {note.text && (
                   <Text className="text-base leading-6 text-ios-label dark:text-iosd-label">
                     {note.text}
                   </Text>
-                </View>
-              )}
+                )}
+              </View>
             </View>
           )}
 
@@ -719,54 +716,51 @@ export default function NoteDetailScreen() {
                 </View>
               </TouchableOpacity>
 
-              {note.text && (
-                <View className="mt-4 p-4 bg-white/70 dark:bg-white/5 rounded-2xl border border-ios-sep dark:border-iosd-sep">
-                  <View className="flex-row items-center justify-between mb-2">
-                    <View className="flex-row items-center">
-                      <Text className="text-sm text-ios-secondary dark:text-iosd-label2">
-                        Transkripcija:
-                      </Text>
-                      {!isPremium && (
-                        <View className="ml-2 bg-yellow-500 rounded-full px-1.5 py-0.5">
-                          <Text className="text-[8px] font-bold text-white">
-                            PRO
-                          </Text>
-                        </View>
-                      )}
-                    </View>
-
-                    <TouchableOpacity
-                      onPress={handleTranscribe}
-                      disabled={isTranscribing}
-                      className="flex-row items-center px-3 py-1.5 rounded-lg bg-purple-500/10 dark:bg-purple-500/20"
-                    >
-                      {isTranscribing ? (
-                        <>
-                          <ActivityIndicator size="small" color="#A855F7" />
-                          <Text className="ml-1.5 text-xs text-purple-600 dark:text-purple-400 font-medium">
-                            Processing...
-                          </Text>
-                        </>
-                      ) : (
-                        <>
-                          <Ionicons
-                            name="refresh-outline"
-                            size={14}
-                            color="#A855F7"
-                          />
-                          <Text className="ml-1.5 text-xs text-purple-600 dark:text-purple-400 font-medium">
-                            Re-transcribe
-                          </Text>
-                        </>
-                      )}
-                    </TouchableOpacity>
+              <View className="mt-4 p-4 bg-white/70 dark:bg-white/5 rounded-2xl border border-ios-sep dark:border-iosd-sep">
+                <View className="flex-row items-center justify-between mb-2">
+                  <View className="flex-row items-center">
+                    <Text className="text-sm text-ios-secondary dark:text-iosd-label2">
+                      {note.text ? "Transkripcija" : "Transkribuj"}
+                    </Text>
+                    {!isPremium && (
+                      <View className="ml-2 bg-yellow-500 rounded-full px-1.5 py-0.5">
+                        <Text className="text-[8px] font-bold text-white">
+                          PRO
+                        </Text>
+                      </View>
+                    )}
                   </View>
 
+                  <TouchableOpacity
+                    onPress={handleTranscribe}
+                    disabled={isTranscribing}
+                    className="flex-row items-center px-3 py-1.5 rounded-lg bg-purple-500/10 dark:bg-purple-500/20"
+                  >
+                    {isTranscribing ? (
+                      <ActivityIndicator size="small" color="#A855F7" />
+                    ) : (
+                      <Ionicons
+                        name={note.text ? "refresh-outline" : "mic-outline"}
+                        size={14}
+                        color="#A855F7"
+                      />
+                    )}
+                    <Text className="ml-1.5 text-xs text-purple-600 dark:text-purple-400 font-medium">
+                      {isTranscribing
+                        ? "Processing..."
+                        : note.text
+                          ? "Re-transcribe"
+                          : "Transcribe"}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                {note.text && (
                   <Text className="text-base leading-6 text-ios-label dark:text-iosd-label">
                     {note.text}
                   </Text>
-                </View>
-              )}
+                )}
+              </View>
             </View>
           )}
 
@@ -822,53 +816,51 @@ export default function NoteDetailScreen() {
                 </View>
               </View>
 
-              {note.text && (
-                <View className="mt-4 p-4 bg-white/70 dark:bg-white/5 rounded-2xl border border-ios-sep dark:border-iosd-sep">
-                  <View className="flex-row items-center justify-between mb-2">
-                    <View className="flex-row items-center">
-                      <Text className="text-sm text-ios-secondary dark:text-iosd-label2">
-                        Transkripcija:
-                      </Text>
-                      {!isPremium && (
-                        <View className="ml-2 bg-yellow-500 rounded-full px-1.5 py-0.5">
-                          <Text className="text-[8px] font-bold text-white">
-                            PRO
-                          </Text>
-                        </View>
-                      )}
-                    </View>
-
-                    <TouchableOpacity
-                      onPress={handleTranscribe}
-                      disabled={isTranscribing}
-                      className="flex-row items-center px-3 py-1.5 rounded-lg bg-purple-500/10 dark:bg-purple-500/20"
-                    >
-                      {isTranscribing ? (
-                        <>
-                          <ActivityIndicator size="small" color="#A855F7" />
-                          <Text className="ml-1.5 text-xs text-purple-600 dark:text-purple-400 font-medium">
-                            Processing...
-                          </Text>
-                        </>
-                      ) : (
-                        <>
-                          <Ionicons
-                            name="refresh-outline"
-                            size={14}
-                            color="#A855F7"
-                          />
-                          <Text className="ml-1.5 text-xs text-purple-600 dark:text-purple-400 font-medium">
-                            Re-transcribe
-                          </Text>
-                        </>
-                      )}
-                    </TouchableOpacity>
+              <View className="mt-4 p-4 bg-white/70 dark:bg-white/5 rounded-2xl border border-ios-sep dark:border-iosd-sep">
+                <View className="flex-row items-center justify-between mb-2">
+                  <View className="flex-row items-center">
+                    <Text className="text-sm text-ios-secondary dark:text-iosd-label2">
+                      {note.text ? "Transkripcija" : "Transkribuj"}
+                    </Text>
+                    {!isPremium && (
+                      <View className="ml-2 bg-yellow-500 rounded-full px-1.5 py-0.5">
+                        <Text className="text-[8px] font-bold text-white">
+                          PRO
+                        </Text>
+                      </View>
+                    )}
                   </View>
+
+                  <TouchableOpacity
+                    onPress={handleTranscribe}
+                    disabled={isTranscribing}
+                    className="flex-row items-center px-3 py-1.5 rounded-lg bg-purple-500/10 dark:bg-purple-500/20"
+                  >
+                    {isTranscribing ? (
+                      <ActivityIndicator size="small" color="#A855F7" />
+                    ) : (
+                      <Ionicons
+                        name={note.text ? "refresh-outline" : "mic-outline"}
+                        size={14}
+                        color="#A855F7"
+                      />
+                    )}
+                    <Text className="ml-1.5 text-xs text-purple-600 dark:text-purple-400 font-medium">
+                      {isTranscribing
+                        ? "Processing..."
+                        : note.text
+                          ? "Re-transcribe"
+                          : "Transcribe"}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                {note.text && (
                   <Text className="text-base leading-6 text-ios-label dark:text-iosd-label">
                     {note.text}
                   </Text>
-                </View>
-              )}
+                )}
+              </View>
             </View>
           )}
 
