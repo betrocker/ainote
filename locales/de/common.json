@@ -1,6 +1,6 @@
 {
   "screen": {
-    "home": { "title": "Start" },
+    "home": { "title": "Startseite" },
     "inbox": { "title": "Posteingang" },
     "assistant": { "title": "Assistent" },
     "settings": { "title": "Einstellungen" },
@@ -12,14 +12,14 @@
   "appearance": {
     "darkMode": {
       "title": "Dunkelmodus",
-      "subtitle": "Dunklere Darstellung verwenden"
+      "subtitle": "Dunkles Design aktivieren"
     }
   },
   "settings": {
     "sections": {
       "notifications": "Benachrichtigungen",
       "privacy": "Datenschutz",
-      "about": "Info"
+      "about": "Über"
     },
     "logout": "Abmelden"
   },
@@ -27,25 +27,61 @@
     "version": "AiNote v{{version}}"
   },
   "home": {
-    "welcome": "Willkommen zurück",
+    "title": "Startseite",
+    "welcome": "Willkommen zurück!",
     "today": "heute",
+    "todayCount_one": "{{count}} Notiz heute",
+    "todayCount_other": "{{count}} Notizen heute",
     "stats": "Statistik",
     "total": "Gesamt",
-    "withTags": "Tags",
-    "thisWeek": "Diese Woche",
-    "upcoming": "Bevorstehend",
-    "recent": "Kürzlich",
-    "viewAll": "Alle anzeigen",
+    "totalCount_one": "{{count}} insgesamt",
+    "totalCount_other": "{{count}} insgesamt",
     "overview": "Übersicht",
+    "thisWeek": "Diese Woche",
     "browse": "Durchsuchen",
+    "upcoming": "Anstehend",
+    "recent": "Kürzlich",
     "allNotes": "Alle Notizen",
+    "viewAll": "Alle anzeigen",
+    "withTags": "Tags",
+    "withDueDates_one": "{{count}} mit Frist",
+    "withDueDates_other": "{{count}} mit Fristen",
+    "pinnedCount_one": "{{count}} angeheftet",
+    "pinnedCount_other": "{{count}} angeheftet",
+    "taggedCount_one": "{{count}} mit Tag",
+    "taggedCount_other": "{{count}} mit Tags",
+    "aiCount_one": "{{count}} KI",
+    "aiCount_other": "{{count}} KI",
+    "types": {
+      "text": "Text",
+      "audio": "Audio",
+      "photo": "Foto",
+      "video": "Video"
+    },
+    "links": {
+      "pinned": "Angeheftete Notizen"
+    },
     "note": {
       "one": "Notiz",
       "other": "Notizen"
     },
     "empty": {
-      "title": "Keine Notizen",
-      "subtitle": "Beginne mit der Erstellung deiner ersten Notiz"
+      "title": "Willkommen bei AiNote!",
+      "subtitle": "Dein intelligenter Notiz-Assistent. Erfasse Ideen mit Sprache, Bildern oder Text.",
+      "tutorial": {
+        "step1": {
+          "title": "Notiz hinzufügen",
+          "description": "Tippe auf + und wähle den Notiztyp"
+        },
+        "step2": {
+          "title": "KI analysiert",
+          "description": "Bekommt automatisch Tags und Zusammenfassung"
+        },
+        "step3": {
+          "title": "Einfach organisieren",
+          "description": "Suchen, filtern und wichtige anheften"
+        }
+      }
     }
   },
   "types": {
@@ -55,22 +91,41 @@
     "video": "Video"
   },
   "week": {
-    "days": ["M", "D", "M", "D", "F", "S", "S"]
+    "days": ["M", "D", "M", "D", "F", "S", "S"],
+    "monShort": "Mo",
+    "tueShort": "Di",
+    "wedShort": "Mi",
+    "thuShort": "Do",
+    "friShort": "Fr",
+    "satShort": "Sa",
+    "sunShort": "So"
   },
   "inbox": {
     "delete": "Löschen",
+    "search": {
+      "placeholder": "Notizen durchsuchen..."
+    },
+    "filters": {
+      "all": "Alle",
+      "byTags": "Nach Tags filtern:",
+      "clear": "Filter löschen"
+    },
+    "resultsCount_one": "{{count}} Notiz",
+    "resultsCount_other": "{{count}} Notizen",
     "empty": {
       "title": "Noch keine Notizen",
-      "subtitle": "Halte eine Idee, einen Gedanken oder eine Erinnerung fest – alles beginnt mit einer Notiz.",
+      "subtitle": "Erstellen Sie Ihre erste Notiz",
+      "noResults": "Keine Ergebnisse",
+      "tryDifferent": "Versuchen Sie einen anderen Suchbegriff",
       "cta": "Neue Notiz",
-      "hint": "Oder öffne das + Menü für Schnellaktionen"
+      "hint": "Oder öffnen Sie das + Menü für schnelle Aktionen"
     }
   },
   "note": {
     "untitled": "Ohne Titel",
     "placeholder": {
       "title": "Titel",
-      "body": "Schreib los…"
+      "body": "Beginne zu tippen…"
     },
     "pinned": "Angeheftet",
     "types": {
@@ -92,7 +147,80 @@
     "section": "Abschnitt {{index}}",
     "today": "Heute",
     "newNotesCount": "Du hast {{count}} neue Notizen",
-    "askAnything": "Frag mich alles",
-    "powered": "unterstützt von KI"
+    "askAnything": "Frage was immer du willst",
+    "powered": "angetrieben von KI"
+  },
+  "noteDetail": {
+    "actions": {
+      "edit": "Bearbeiten",
+      "save": "Speichern",
+      "back": "Zurück"
+    },
+    "errors": {
+      "invalidId": "Ungültige Notiz-ID",
+      "loading": "Notiz wird geladen...",
+      "paywall": "Abonnementoptionen konnten nicht angezeigt werden"
+    },
+    "date": {
+      "today": "Heute",
+      "tomorrow": "Morgen",
+      "dayAfterTomorrow": "Übermorgen",
+      "yesterday": "Gestern",
+      "inDays": "In {{count}} Tagen",
+      "daysAgo": "Vor {{count}} Tagen"
+    },
+    "sections": {
+      "description": "Beschreibung",
+      "aiSummary": "KI-Zusammenfassung",
+      "aiInsights": "KI-Einblicke",
+      "tags": "Tags",
+      "info": "Informationen"
+    },
+    "ai": {
+      "generateTitle": "KI-Titel",
+      "generatingTitle": "Titel wird generiert...",
+      "generateSummary": "Generieren",
+      "generatingSummary": "Wird generiert...",
+      "regenerate": "Neu generieren",
+      "clickToView": "Klicken um Zusammenfassung anzuzeigen"
+    },
+    "media": {
+      "tapToZoom": "Tippen zum Zoomen",
+      "tapToPlay": "Tippen zum Abspielen",
+      "voiceNote": "Sprachnotiz",
+      "extractText": "Text extrahieren",
+      "extractedText": "Extrahierter Text",
+      "transcribe": "Transkribieren",
+      "transcription": "Transkription",
+      "reExtract": "Erneut extrahieren",
+      "reTranscribe": "Erneut transkribieren",
+      "processing": "Verarbeitung..."
+    },
+    "text": {
+      "placeholder": "Text eingeben...",
+      "noContent": "Kein Textinhalt"
+    },
+    "tags": {
+      "noTags": "Keine Tags. Fügen Sie oben Ihren ersten Tag hinzu."
+    },
+    "metadata": {
+      "status": "Status",
+      "pinned": "Angeheftet",
+      "created": "Erstellt",
+      "updated": "Aktualisiert",
+      "type": "Typ",
+      "media": "Medien",
+      "yes": "Ja"
+    },
+    "delete": {
+      "title": "Notiz löschen?",
+      "message": "Diese Aktion kann nicht rückgängig gemacht werden.",
+      "cancel": "Abbrechen",
+      "confirm": "Löschen"
+    },
+    "premium": {
+      "badge": "KOSTENLOS",
+      "proBadge": "PRO"
+    }
   }
 }

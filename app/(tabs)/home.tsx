@@ -2,29 +2,45 @@
 import LargeHeader, { HeaderButton } from "@/components/LargeHeader";
 import ScreenScroll from "@/components/ScreenScroll";
 import { useNotes } from "@/context/NotesContext";
-import { usePlural } from "@/hooks/usePlural";
 import ScreenBackground from "@components/ScreenBackground";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Text, TouchableOpacity, View } from "react-native";
+import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 
 function MiniWeekChart({ counts }: { counts: number[] }) {
   const { t } = useTranslation("common");
   const max = Math.max(1, ...counts);
-  const days = ["M", "T", "W", "T", "F", "S", "S"];
+  const days = [
+    t("week.monShort"),
+    t("week.tueShort"),
+    t("week.wedShort"),
+    t("week.thuShort"),
+    t("week.friShort"),
+    t("week.satShort"),
+    t("week.sunShort"),
+  ];
 
   return (
-    <View className="rounded-2xl border border-black/10 dark:border-white/10 bg-white/70 dark:bg-white/10 p-4">
+    <Animated.View
+      entering={FadeInDown.delay(200).springify()}
+      className="rounded-2xl border border-ios-sepSoft dark:border-iosd-sepSoft bg-white/70 dark:bg-white/10 p-4"
+    >
       <Text className="text-ios-label dark:text-iosd-label font-semibold mb-3">
         {t("home.thisWeek")}
       </Text>
       <View className="flex-row justify-between items-end h-24">
         {counts.map((v, i) => {
-          const h = Math.round((v / max) * 100);
+          const h = Math.max(8, Math.round((v / max) * 100));
           return (
-            <View key={i} className="items-center" style={{ width: 24 }}>
+            <Animated.View
+              key={i}
+              entering={FadeInUp.delay(250 + i * 50).springify()}
+              className="items-center"
+              style={{ width: 24 }}
+            >
               <View
                 className="w-3 rounded-lg bg-ios-blue"
                 style={{ height: `${h}%` }}
@@ -32,17 +48,53 @@ function MiniWeekChart({ counts }: { counts: number[] }) {
               <Text className="mt-2 text-[11px] text-ios-secondary dark:text-iosd-secondary">
                 {days[i]}
               </Text>
-            </View>
+            </Animated.View>
           );
         })}
       </View>
-    </View>
+    </Animated.View>
+  );
+}
+
+// Reusable stat card component
+function StatCard({
+  icon,
+  iconColor,
+  iconBg,
+  count,
+  label,
+  delay = 0,
+}: {
+  icon: string;
+  iconColor: string;
+  iconBg: string;
+  count: number;
+  label: string;
+  delay?: number;
+}) {
+  return (
+    <Animated.View
+      entering={FadeInDown.delay(delay).springify()}
+      className="flex-row items-center w-[48%]"
+    >
+      <View
+        className="w-8 h-8 rounded-full items-center justify-center mr-2"
+        style={{ backgroundColor: iconBg }}
+      >
+        <Ionicons name={icon as any} size={16} color={iconColor} />
+      </View>
+      <Text className="text-base font-semibold text-ios-label dark:text-iosd-label mr-1">
+        {count}
+      </Text>
+      <Text className="text-sm text-ios-secondary dark:text-iosd-label2">
+        {label}
+      </Text>
+    </Animated.View>
   );
 }
 
 export default function HomeScreen() {
   const { t } = useTranslation("common");
-  const plural = usePlural();
   const router = useRouter();
   const { notes } = useNotes();
 
@@ -52,20 +104,22 @@ export default function HomeScreen() {
     const todayStr = now.toDateString();
 
     const total = notes.length;
-    const pinned = notes.filter((n) => n.pinned).length;
+    const pinned = notes.filter((n: any) => n.pinned).length;
     const todayCount = notes.filter(
-      (n) => new Date(n.createdAt).toDateString() === todayStr
+      (n: any) => new Date(n.createdAt).toDateString() === todayStr
     ).length;
 
-    const byType = {
-      text: notes.filter((n) => n.type === "text").length,
-      audio: notes.filter((n) => n.type === "audio").length,
-      photo: notes.filter((n) => n.type === "photo").length,
-      video: notes.filter((n) => n.type === "video").length,
+    const byType: Record<string, number> = {
+      text: notes.filter((n: any) => n.type === "text").length,
+      audio: notes.filter((n: any) => n.type === "audio").length,
+      photo: notes.filter((n: any) => n.type === "photo").length,
+      video: notes.filter((n: any) => n.type === "video").length,
     };
 
-    const withTags = notes.filter((n) => n.tags && n.tags.length > 0).length;
-    const withSummary = notes.filter((n) => n.ai?.summary).length;
+    const withTags = notes.filter(
+      (n: any) => n.tags && n.tags.length > 0
+    ).length;
+    const withSummary = notes.filter((n: any) => n.ai?.summary).length;
 
     // Weekly counts (Mon-Sun)
     const weekCounts = [0, 0, 0, 0, 0, 0, 0];
@@ -74,7 +128,7 @@ export default function HomeScreen() {
       return (js + 6) % 7; // 0=Mon
     };
 
-    notes.forEach((n) => {
+    notes.forEach((n: any) => {
       const created = new Date(n.createdAt);
       const idx = getWeekIndex(created);
       weekCounts[idx]++;
@@ -94,13 +148,15 @@ export default function HomeScreen() {
   // ⭐ Upcoming dates
   const upcomingNotes = useMemo(() => {
     return notes
-      .filter((n) => n.ai?.facts?.some((f) => f.predicate === "due_on"))
-      .sort((a, b) => {
+      .filter((n: any) =>
+        n.ai?.facts?.some((f: any) => f.predicate === "due_on")
+      )
+      .sort((a: any, b: any) => {
         const dateA = a.ai?.facts?.find(
-          (f) => f.predicate === "due_on"
+          (f: any) => f.predicate === "due_on"
         )?.object;
         const dateB = b.ai?.facts?.find(
-          (f) => f.predicate === "due_on"
+          (f: any) => f.predicate === "due_on"
         )?.object;
         return (dateA || "").localeCompare(dateB || "");
       });
@@ -109,7 +165,7 @@ export default function HomeScreen() {
   return (
     <ScreenBackground variant="grouped">
       <LargeHeader
-        title="Home"
+        title={t("home.title")}
         rightButtons={
           <HeaderButton
             icon="settings-outline"
@@ -126,217 +182,284 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Hero pozdrav */}
-        <View className="mb-6">
+        <Animated.View
+          entering={FadeInDown.delay(50).springify()}
+          className="mb-6"
+        >
           <Text className="text-ios-secondary dark:text-iosd-label2 text-[16px]">
             {t("home.welcome")}
           </Text>
 
           <Text className="text-2xl font-bold text-ios-label dark:text-iosd-label mt-1">
-            {stats.todayCount} {plural(stats.todayCount, "home.note")}{" "}
-            {t("home.today")}
+            {t("home.todayCount", {
+              count: stats.todayCount,
+            })}
           </Text>
-        </View>
+        </Animated.View>
 
         {/* ⭐ Kompaktna Stats kartica */}
-        <View className="mb-6 p-4 bg-white/70 dark:bg-white/10 rounded-2xl border border-black/10 dark:border-white/10">
-          <View className="flex-row items-center justify-between mb-3">
-            <Text className="text-lg font-bold text-ios-label dark:text-iosd-label">
-              {t("home.overview")}
-            </Text>
-            <View className="bg-ios-blue/15 rounded-full px-2 py-1">
-              <Text className="text-xs font-semibold text-ios-blue">
-                {stats.total} {t("home.total")}
-              </Text>
-            </View>
-          </View>
-
-          {/* Grid sa 4 key metrics - horizontal layout */}
-          <View className="flex-row flex-wrap gap-y-3">
-            {/* Text */}
-            <View className="flex-row items-center w-[48%]">
-              <View className="w-8 h-8 rounded-full bg-ios-blue/15 items-center justify-center mr-2">
-                <Ionicons name="document-text" size={16} color="#0A84FF" />
-              </View>
-              <Text className="text-base font-semibold text-ios-label dark:text-iosd-label mr-1">
-                {stats.byType.text}
-              </Text>
-              <Text className="text-sm text-ios-secondary dark:text-iosd-label2">
-                Text
-              </Text>
-            </View>
-
-            {/* Audio */}
-            <View className="flex-row items-center w-[48%]">
-              <View className="w-8 h-8 rounded-full bg-purple-500/15 items-center justify-center mr-2">
-                <Ionicons name="mic" size={16} color="#A855F7" />
-              </View>
-              <Text className="text-base font-semibold text-ios-label dark:text-iosd-label mr-1">
-                {stats.byType.audio}
-              </Text>
-              <Text className="text-sm text-ios-secondary dark:text-iosd-label2">
-                Audio
-              </Text>
-            </View>
-
-            {/* Photo */}
-            <View className="flex-row items-center w-[48%]">
-              <View className="w-8 h-8 rounded-full bg-green-500/15 items-center justify-center mr-2">
-                <Ionicons name="image" size={16} color="#10B981" />
-              </View>
-              <Text className="text-base font-semibold text-ios-label dark:text-iosd-label mr-1">
-                {stats.byType.photo}
-              </Text>
-              <Text className="text-sm text-ios-secondary dark:text-iosd-label2">
-                Photo
-              </Text>
-            </View>
-
-            {/* Video */}
-            <View className="flex-row items-center w-[48%]">
-              <View className="w-8 h-8 rounded-full bg-amber-500/15 items-center justify-center mr-2">
-                <Ionicons name="videocam" size={16} color="#F59E0B" />
-              </View>
-              <Text className="text-base font-semibold text-ios-label dark:text-iosd-label mr-1">
-                {stats.byType.video}
-              </Text>
-              <Text className="text-sm text-ios-secondary dark:text-iosd-label2">
-                Video
-              </Text>
-            </View>
-          </View>
-
-          {/* Dodatni metrics (samo ako postoje) */}
-          {(stats.pinned > 0 ||
-            stats.withTags > 0 ||
-            stats.withSummary > 0) && (
-            <View className="mt-3 pt-3 border-t border-ios-sep dark:border-iosd-sep flex-row flex-wrap gap-2">
-              {stats.pinned > 0 && (
-                <View className="flex-row items-center px-2 py-1 rounded-full bg-amber-500/10">
-                  <Ionicons name="pin" size={12} color="#F59E0B" />
-                  <Text>
-                    {stats.pinned} {t("note.singular", { count: stats.pinned })}
-                  </Text>
-                </View>
-              )}
-              {stats.withTags > 0 && (
-                <View className="flex-row items-center px-2 py-1 rounded-full bg-blue-500/10">
-                  <Ionicons name="pricetag" size={12} color="#3B82F6" />
-                  <Text className="text-xs ml-1 text-blue-600 dark:text-blue-400">
-                    {stats.withTags} tagged
-                  </Text>
-                </View>
-              )}
-              {stats.withSummary > 0 && (
-                <View className="flex-row items-center px-2 py-1 rounded-full bg-purple-500/10">
-                  <Ionicons name="sparkles" size={12} color="#A855F7" />
-                  <Text className="text-xs ml-1 text-purple-600 dark:text-purple-400">
-                    {stats.withSummary} AI
-                  </Text>
-                </View>
-              )}
-            </View>
-          )}
-        </View>
-
-        {/* ⭐ Weekly Chart */}
-        <View className="mb-6">
-          <MiniWeekChart counts={stats.weekCounts} />
-        </View>
-
-        {/* ⭐ Quick links ka kategorijama */}
-        <View className="mb-6">
-          <Text className="text-lg font-bold text-ios-label dark:text-iosd-label mb-3">
-            {t("home.browse")}
-          </Text>
-
-          {/* Pinned link */}
-          {stats.pinned > 0 && (
-            <TouchableOpacity
-              onPress={() => router.push("/inbox")} // Inbox će imati pinned na vrhu
-              className="flex-row items-center justify-between p-4 mb-2 bg-white/70 dark:bg-white/10 rounded-2xl border border-black/10 dark:border-white/10 active:opacity-70"
-              activeOpacity={1}
-            >
-              <View className="flex-row items-center">
-                <View className="w-10 h-10 rounded-full bg-amber-500/15 items-center justify-center mr-3">
-                  <Ionicons name="pin" size={20} color="#F59E0B" />
-                </View>
-                <View>
-                  <Text className="text-base font-semibold text-ios-label dark:text-iosd-label">
-                    Pinned Notes
-                  </Text>
-                  <Text className="text-xs text-ios-secondary dark:text-iosd-label2">
-                    {stats.pinned} {stats.pinned === 1 ? "note" : "notes"}
-                  </Text>
-                </View>
-              </View>
-              <Ionicons name="chevron-forward" size={20} color="#8E8E93" />
-            </TouchableOpacity>
-          )}
-
-          {/* Upcoming link */}
-          {upcomingNotes.length > 0 && (
-            <TouchableOpacity
-              onPress={() => router.push("/inbox")}
-              className="flex-row items-center justify-between p-4 mb-2 bg-white/70 dark:bg-white/10 rounded-2xl border border-black/10 dark:border-white/10 active:opacity-70"
-              activeOpacity={1}
-            >
-              <View className="flex-row items-center">
-                <View className="w-10 h-10 rounded-full bg-red-500/15 items-center justify-center mr-3">
-                  <Ionicons name="calendar-outline" size={20} color="#EF4444" />
-                </View>
-                <View>
-                  <Text className="text-base font-semibold text-ios-label dark:text-iosd-label">
-                    {t("home.upcoming")}
-                  </Text>
-                  <Text className="text-xs text-ios-secondary dark:text-iosd-label2">
-                    {upcomingNotes.length} with due dates
-                  </Text>
-                </View>
-              </View>
-              <Ionicons name="chevron-forward" size={20} color="#8E8E93" />
-            </TouchableOpacity>
-          )}
-
-          {/* All notes link */}
-          <TouchableOpacity
-            onPress={() => router.push("/inbox")}
-            className="flex-row items-center justify-between p-4 bg-ios-blue/15 rounded-2xl border border-ios-blue/30 active:opacity-70"
-            activeOpacity={1}
+        {stats.total > 0 && (
+          <Animated.View
+            entering={FadeInDown.delay(100).springify()}
+            className="mb-6 p-4 bg-white/70 dark:bg-white/10 rounded-2xl border border-ios-sepSoft dark:border-iosd-sepSoft"
           >
-            <View className="flex-row items-center">
-              <View className="w-10 h-10 rounded-full bg-ios-blue/20 items-center justify-center mr-3">
-                <Ionicons name="albums-outline" size={20} color="#0A84FF" />
-              </View>
-              <View>
-                <Text className="text-base font-semibold text-ios-blue">
-                  {t("home.allNotes")}
-                </Text>
-                <Text className="text-xs text-ios-blue">
-                  {t("home.viewAll")}
+            <View className="flex-row items-center justify-between mb-3">
+              <Text className="text-lg font-bold text-ios-label dark:text-iosd-label">
+                {t("home.overview")}
+              </Text>
+              <View className="bg-ios-blue/15 rounded-full px-2 py-1">
+                <Text className="text-xs font-semibold text-ios-blue">
+                  {t("home.totalCount", { count: stats.total })}
                 </Text>
               </View>
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#0A84FF" />
-          </TouchableOpacity>
-        </View>
+
+            {/* Grid sa 4 key metrics */}
+            <View className="flex-row flex-wrap gap-y-3">
+              <StatCard
+                icon="document-text"
+                iconColor="#0A84FF"
+                iconBg="rgba(10, 132, 255, 0.15)"
+                count={stats.byType.text}
+                label={t("home.types.text")}
+                delay={150}
+              />
+
+              <StatCard
+                icon="mic"
+                iconColor="#A855F7"
+                iconBg="rgba(168, 85, 247, 0.15)"
+                count={stats.byType.audio}
+                label={t("home.types.audio")}
+                delay={200}
+              />
+
+              <StatCard
+                icon="image"
+                iconColor="#10B981"
+                iconBg="rgba(16, 185, 129, 0.15)"
+                count={stats.byType.photo}
+                label={t("home.types.photo")}
+                delay={250}
+              />
+
+              <StatCard
+                icon="videocam"
+                iconColor="#F59E0B"
+                iconBg="rgba(245, 158, 11, 0.15)"
+                count={stats.byType.video || 0}
+                label={t("home.types.video")}
+                delay={300}
+              />
+            </View>
+
+            {(stats.pinned > 0 ||
+              stats.withTags > 0 ||
+              stats.withSummary > 0) && (
+              <Animated.View
+                entering={FadeInDown.delay(350).springify()}
+                className="mt-3 pt-3 border-t border-ios-sep dark:border-iosd-sep flex-row flex-wrap gap-2"
+              >
+                {stats.pinned > 0 && (
+                  <View className="flex-row items-center px-2 py-1 rounded-full bg-amber-500/10">
+                    <Ionicons name="pin" size={12} color="#F59E0B" />
+                    <Text className="text-xs ml-1 text-amber-600 dark:text-amber-400">
+                      {t("home.pinnedCount", { count: stats.pinned })}
+                    </Text>
+                  </View>
+                )}
+                {stats.withTags > 0 && (
+                  <View className="flex-row items-center px-2 py-1 rounded-full bg-blue-500/10">
+                    <Ionicons name="pricetag" size={12} color="#3B82F6" />
+                    <Text className="text-xs ml-1 text-blue-600 dark:text-blue-400">
+                      {t("home.taggedCount", { count: stats.withTags })}
+                    </Text>
+                  </View>
+                )}
+                {stats.withSummary > 0 && (
+                  <View className="flex-row items-center px-2 py-1 rounded-full bg-purple-500/10">
+                    <Ionicons name="sparkles" size={12} color="#A855F7" />
+                    <Text className="text-xs ml-1 text-purple-600 dark:text-purple-400">
+                      {t("home.aiCount", { count: stats.withSummary })}
+                    </Text>
+                  </View>
+                )}
+              </Animated.View>
+            )}
+          </Animated.View>
+        )}
+
+        {/* Weekly Chart - prikaži samo ako ima beleški */}
+        {stats.total > 0 && (
+          <View className="mb-6">
+            <MiniWeekChart counts={stats.weekCounts} />
+          </View>
+        )}
+
+        {/* ⭐ Quick links - prikaži SAMO ako ima beleški */}
+        {stats.total > 0 && (
+          <View className="mb-6">
+            <Animated.Text
+              entering={FadeInDown.delay(400).springify()}
+              className="text-lg font-bold text-ios-label dark:text-iosd-label mb-3"
+            >
+              {t("home.browse")}
+            </Animated.Text>
+
+            {stats.pinned > 0 && (
+              <Animated.View entering={FadeInDown.delay(450).springify()}>
+                <TouchableOpacity
+                  onPress={() => router.push("/inbox")}
+                  className="flex-row items-center justify-between p-4 mb-2 bg-white/70 dark:bg-white/10 rounded-2xl border border-ios-sepSoft dark:border-iosd-sepSoft active:opacity-70"
+                  activeOpacity={1}
+                >
+                  <View className="flex-row items-center">
+                    <View className="w-10 h-10 rounded-full bg-amber-500/15 items-center justify-center mr-3">
+                      <Ionicons name="pin" size={20} color="#F59E0B" />
+                    </View>
+                    <View>
+                      <Text className="text-base font-semibold text-ios-label dark:text-iosd-label">
+                        {t("home.links.pinned")}
+                      </Text>
+                      <Text className="text-xs text-ios-secondary dark:text-iosd-label2">
+                        {t("home.pinnedCount", { count: stats.pinned })}
+                      </Text>
+                    </View>
+                  </View>
+                  <Ionicons name="chevron-forward" size={20} color="#8E8E93" />
+                </TouchableOpacity>
+              </Animated.View>
+            )}
+
+            {upcomingNotes.length > 0 && (
+              <Animated.View entering={FadeInDown.delay(500).springify()}>
+                <TouchableOpacity
+                  onPress={() => router.push("/inbox")}
+                  className="flex-row items-center justify-between p-4 mb-2 bg-white/70 dark:bg-white/10 rounded-2xl border border-ios-sepSoft dark:border-iosd-sepSoft active:opacity-70"
+                  activeOpacity={1}
+                >
+                  <View className="flex-row items-center">
+                    <View className="w-10 h-10 rounded-full bg-red-500/15 items-center justify-center mr-3">
+                      <Ionicons
+                        name="calendar-outline"
+                        size={20}
+                        color="#EF4444"
+                      />
+                    </View>
+                    <View>
+                      <Text className="text-base font-semibold text-ios-label dark:text-iosd-label">
+                        {t("home.upcoming")}
+                      </Text>
+                      <Text className="text-xs text-ios-secondary dark:text-iosd-label2">
+                        {t("home.withDueDates", {
+                          count: upcomingNotes.length,
+                        })}
+                      </Text>
+                    </View>
+                  </View>
+                  <Ionicons name="chevron-forward" size={20} color="#8E8E93" />
+                </TouchableOpacity>
+              </Animated.View>
+            )}
+
+            <Animated.View entering={FadeInDown.delay(550).springify()}>
+              <TouchableOpacity
+                onPress={() => router.push("/inbox")}
+                className="flex-row items-center justify-between p-4 bg-ios-blue/15 rounded-2xl border border-ios-blue/30 active:opacity-70"
+                activeOpacity={1}
+              >
+                <View className="flex-row items-center">
+                  <View className="w-10 h-10 rounded-full bg-ios-blue/20 items-center justify-center mr-3">
+                    <Ionicons name="albums-outline" size={20} color="#0A84FF" />
+                  </View>
+                  <View>
+                    <Text className="text-base font-semibold text-ios-blue">
+                      {t("home.allNotes")}
+                    </Text>
+                    <Text className="text-xs text-ios-blue">
+                      {t("home.viewAll")}
+                    </Text>
+                  </View>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color="#0A84FF" />
+              </TouchableOpacity>
+            </Animated.View>
+          </View>
+        )}
 
         {/* Empty state */}
         {stats.total === 0 && (
-          <View className="items-center justify-center py-20 px-8">
-            <View className="w-20 h-20 rounded-full bg-ios-fill dark:bg-iosd-fill items-center justify-center mb-4">
-              <Ionicons
-                name="document-text-outline"
-                size={40}
-                color="#8E8E93"
-              />
+          <Animated.View
+            entering={FadeInDown.delay(200).springify()}
+            className="items-center py-12 px-6"
+          >
+            <View className="w-24 h-24 rounded-full bg-ios-blue/10 items-center justify-center mb-4">
+              <Ionicons name="sparkles" size={48} color="#0A84FF" />
             </View>
-            <Text className="text-lg font-semibold text-ios-label dark:text-iosd-label mb-1 text-center">
+            <Text className="text-2xl font-bold text-ios-label dark:text-iosd-label mb-2 text-center">
               {t("home.empty.title")}
             </Text>
-            <Text className="text-sm text-ios-secondary dark:text-iosd-label2 text-center">
+            <Text className="text-base text-ios-secondary dark:text-iosd-label2 text-center mb-8">
               {t("home.empty.subtitle")}
             </Text>
-          </View>
+
+            {/* Mini tutorial */}
+            <View className="w-full">
+              {/* Korak 1 */}
+              <Animated.View
+                entering={FadeInDown.delay(300).springify()}
+                className="flex-row items-start p-4 bg-white/70 dark:bg-white/10 rounded-xl mb-4"
+              >
+                <View className="w-8 h-8 rounded-full bg-ios-blue/15 items-center justify-center mr-3">
+                  <Text className="text-ios-blue font-bold">1</Text>
+                </View>
+                <View className="flex-1">
+                  <Text className="text-sm font-semibold text-ios-label dark:text-iosd-label">
+                    {t("home.empty.tutorial.step1.title")}
+                  </Text>
+                  <Text className="text-xs text-ios-secondary dark:text-iosd-label2 mt-1">
+                    {t("home.empty.tutorial.step1.description")}
+                  </Text>
+                </View>
+              </Animated.View>
+
+              {/* Korak 2 */}
+              <Animated.View
+                entering={FadeInDown.delay(400).springify()}
+                className="flex-row items-start p-4 bg-white/70 dark:bg-white/10 rounded-xl mb-4"
+              >
+                <View className="w-8 h-8 rounded-full bg-purple-500/15 items-center justify-center mr-3">
+                  <Text className="text-purple-500 font-bold">2</Text>
+                </View>
+                <View className="flex-1">
+                  <Text className="text-sm font-semibold text-ios-label dark:text-iosd-label">
+                    {t("home.empty.tutorial.step2.title")}
+                  </Text>
+                  <Text className="text-xs text-ios-secondary dark:text-iosd-label2 mt-1">
+                    {t("home.empty.tutorial.step2.description")}
+                  </Text>
+                </View>
+              </Animated.View>
+
+              {/* Korak 3 */}
+              <Animated.View
+                entering={FadeInDown.delay(500).springify()}
+                className="flex-row items-start p-4 bg-white/70 dark:bg-white/10 rounded-xl"
+              >
+                <View className="w-8 h-8 rounded-full bg-green-500/15 items-center justify-center mr-3">
+                  <Text className="text-green-500 font-bold">3</Text>
+                </View>
+                <View className="flex-1">
+                  <Text className="text-sm font-semibold text-ios-label dark:text-iosd-label">
+                    {t("home.empty.tutorial.step3.title")}
+                  </Text>
+                  <Text className="text-xs text-ios-secondary dark:text-iosd-label2 mt-1">
+                    {t("home.empty.tutorial.step3.description")}
+                  </Text>
+                </View>
+              </Animated.View>
+            </View>
+          </Animated.View>
         )}
       </ScreenScroll>
     </ScreenBackground>

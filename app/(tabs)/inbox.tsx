@@ -10,12 +10,14 @@ import { haptics } from "@/utils/haptics";
 import ScreenBackground from "@components/ScreenBackground";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Animated, Text, TouchableOpacity, View } from "react-native";
 
 type FilterType = "all" | "text" | "audio" | "photo" | "video";
 type SortOption = "newest" | "oldest" | "titleAsc" | "titleDesc" | "type";
 
 export default function InboxScreen() {
+  const { t } = useTranslation("common");
   const { notes, getAllTags } = useNotes();
 
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
@@ -90,13 +92,11 @@ export default function InboxScreen() {
   const toggleSearch = () => {
     if (isSearchExpanded) {
       setIsSearchExpanded(false);
-
-      // ⭐ Brži cleanup (80 + 300 + 50 buffer)
       setTimeout(() => {
         setSearchQuery("");
         setFilterType("all");
         setSelectedTags([]);
-      }, 450); // ⭐ Bilo 600
+      }, 450);
     } else {
       setIsSearchExpanded(true);
     }
@@ -105,7 +105,7 @@ export default function InboxScreen() {
   return (
     <ScreenBackground variant="grouped">
       <LargeHeader
-        title="Inbox"
+        title={t("screen.inbox.title")}
         isExpanded={isSearchExpanded}
         rightButtons={
           <>
@@ -125,38 +125,38 @@ export default function InboxScreen() {
             <SearchBar
               value={searchQuery}
               onChangeText={setSearchQuery}
-              placeholder="Search notes..."
+              placeholder={t("inbox.search.placeholder")}
               autoFocus={false}
             />
 
             {/* Filter Type Pills */}
             <View className="flex-row gap-2 mt-3 flex-wrap">
               <FilterPill
-                label="All"
+                label={t("inbox.filters.all")}
                 active={filterType === "all"}
                 onPress={() => setFilterType("all")}
                 icon="albums-outline"
               />
               <FilterPill
-                label="Text"
+                label={t("types.text")}
                 active={filterType === "text"}
                 onPress={() => setFilterType("text")}
                 icon="document-text"
               />
               <FilterPill
-                label="Audio"
+                label={t("types.audio")}
                 active={filterType === "audio"}
                 onPress={() => setFilterType("audio")}
                 icon="mic"
               />
               <FilterPill
-                label="Photo"
+                label={t("types.photo")}
                 active={filterType === "photo"}
                 onPress={() => setFilterType("photo")}
                 icon="image"
               />
               <FilterPill
-                label="Video"
+                label={t("types.video")}
                 active={filterType === "video"}
                 onPress={() => setFilterType("video")}
                 icon="videocam"
@@ -167,7 +167,7 @@ export default function InboxScreen() {
             {allTags.length > 0 && (
               <View className="mt-3">
                 <Text className="text-xs font-semibold text-ios-secondary dark:text-iosd-label2 mb-2">
-                  Filter by tags:
+                  {t("inbox.filters.byTags")}
                 </Text>
                 <View className="flex-row flex-wrap gap-2">
                   {allTags.map((tag) => (
@@ -192,15 +192,14 @@ export default function InboxScreen() {
                 activeOpacity={0.7}
               >
                 <Text className="text-xs font-semibold text-red-600 dark:text-red-400">
-                  Clear filters
+                  {t("inbox.filters.clear")}
                 </Text>
               </TouchableOpacity>
             )}
 
             {/* Results counter */}
             <Text className="text-xs text-ios-secondary dark:text-iosd-label2 mt-2">
-              {filteredNotes.length}{" "}
-              {filteredNotes.length === 1 ? "note" : "notes"}
+              {t("inbox.resultsCount", { count: filteredNotes.length })}
             </Text>
           </>
         }
@@ -223,12 +222,14 @@ export default function InboxScreen() {
               />
             </View>
             <Text className="text-lg font-semibold text-ios-label dark:text-iosd-label mb-1 text-center">
-              {searchQuery ? "No results" : "No notes yet"}
+              {searchQuery
+                ? t("inbox.empty.noResults")
+                : t("inbox.empty.title")}
             </Text>
             <Text className="text-sm text-ios-secondary dark:text-iosd-label2 text-center">
               {searchQuery
-                ? "Try a different search term"
-                : "Create your first note"}
+                ? t("inbox.empty.tryDifferent")
+                : t("inbox.empty.subtitle")}
             </Text>
           </View>
         )}

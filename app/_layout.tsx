@@ -17,6 +17,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-get-random-values";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import "../global.css";
+import "../utils/rc-init";
 
 const EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY =
   "pk_test_dmVyaWZpZWQtYW50ZWxvcGUtNS5jbGVyay5hY2NvdW50cy5kZXYk";

@@ -21,7 +21,7 @@ export default function SubscriptionScreen() {
   const router = useRouter();
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === "dark";
-  const { isPremium, checkPremiumStatus } = usePremium();
+  const { isPremium, checkPremiumStatus, rcReady } = usePremium();
 
   const [offerings, setOfferings] = useState<PurchasesOffering | null>(null);
   const [loading, setLoading] = useState(true);
@@ -30,42 +30,48 @@ export default function SubscriptionScreen() {
     useState<PurchasesPackage | null>(null);
 
   useEffect(() => {
-    fetchOfferings();
-  }, []);
+    if (rcReady) fetchOfferings(); // ⬅️ tek kad RC sigurno spreman
+  }, [rcReady]);
 
   const fetchOfferings = async () => {
     try {
       console.log("🔍 [Subscription] Fetching offerings...");
-      const offerings = await Purchases.getOfferings();
+      const res = await Purchases.getOfferings();
+      console.log("🧾 Offerings dump:", JSON.stringify(res, null, 2));
 
-      if (offerings.current) {
-        console.log(
-          "✅ [Subscription] Offerings found:",
-          offerings.current.identifier
-        );
-        console.log(
-          "📦 [Subscription] Available packages:",
-          offerings.current.availablePackages.length
-        );
-
-        setOfferings(offerings.current);
-
-        // Auto-select annual package (best value)
-        const annualPackage = offerings.current.availablePackages.find(
-          (pkg) => pkg.identifier === "$rc_annual"
-        );
-        if (annualPackage) {
-          setSelectedPackage(annualPackage);
-        } else if (offerings.current.availablePackages.length > 0) {
-          setSelectedPackage(offerings.current.availablePackages[0]);
-        }
-      } else {
+      if (!res.current) {
         console.log("⚠️ [Subscription] No current offering found");
         Alert.alert("Error", "No subscription plans available");
+        return;
+      }
+
+      const cur = res.current;
+      setOfferings(cur);
+
+      // Pronađi annual / monthly po packageType, pa fallback na $rc_* ili prvi paket
+      const annual =
+        cur.availablePackages.find((p) => p.packageType === "ANNUAL") ||
+        cur.availablePackages.find((p) => p.identifier === "$rc_annual");
+
+      const monthly =
+        cur.availablePackages.find((p) => p.packageType === "MONTHLY") ||
+        cur.availablePackages.find((p) => p.identifier === "$rc_monthly");
+
+      const initial = annual ?? monthly ?? cur.availablePackages[0] ?? null;
+      setSelectedPackage(initial);
+
+      if (!cur.availablePackages.length) {
+        Alert.alert(
+          "No plans",
+          "The current offering has no available packages. Check RevenueCat dashboard."
+        );
       }
     } catch (error) {
       console.error("❌ [Subscription] Error fetching offerings:", error);
-      Alert.alert("Error", "Failed to load subscription plans");
+      Alert.alert(
+        "Error",
+        "Failed to load subscription plans. Check your RevenueCat offerings."
+      );
     } finally {
       setLoading(false);
     }

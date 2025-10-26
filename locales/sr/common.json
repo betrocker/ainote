@@ -27,26 +27,74 @@
     "version": "AiNote v{{version}}"
   },
   "home": {
-    "welcome": "Dobrodošli nazad",
+    "title": "Početna",
+    "welcome": "Dobrodošao nazad!",
     "today": "danas",
+    "todayCount_one": "Danas {{count}} beleška",
+    "todayCount_few": "Danas {{count}} beleške",
+    "todayCount_many": "Danas {{count}} beleški",
+    "todayCount_other": "Danas {{count}} beleški",
     "stats": "Statistika",
     "total": "Ukupno",
-    "withTags": "Tagovi",
-    "thisWeek": "Ove nedelje",
-    "upcoming": "Uskoro",
-    "recent": "Nedavno",
-    "viewAll": "Vidi sve",
+    "totalCount_one": "{{count}} ukupno",
+    "totalCount_few": "{{count}} ukupno",
+    "totalCount_many": "{{count}} ukupno",
+    "totalCount_other": "{{count}} ukupno",
     "overview": "Pregled",
-    "browse": "Pretraži",
+    "thisWeek": "Ove nedelje",
+    "browse": "Pregledaj",
+    "upcoming": "Predstojeće",
+    "recent": "Nedavno",
     "allNotes": "Sve beleške",
+    "viewAll": "Prikaži sve",
+    "withTags": "Tagovi",
+    "withDueDates_one": "{{count}} sa rokom",
+    "withDueDates_few": "{{count}} sa rokom",
+    "withDueDates_many": "{{count}} sa rokom",
+    "withDueDates_other": "{{count}} sa rokom",
+    "pinnedCount_one": "{{count}} zakačena",
+    "pinnedCount_few": "{{count}} zakačene",
+    "pinnedCount_many": "{{count}} zakačenih",
+    "pinnedCount_other": "{{count}} zakačenih",
+    "taggedCount_one": "{{count}} sa tagom",
+    "taggedCount_few": "{{count}} sa tagom",
+    "taggedCount_many": "{{count}} sa tagom",
+    "taggedCount_other": "{{count}} sa tagom",
+    "aiCount_one": "{{count}} AI",
+    "aiCount_few": "{{count}} AI",
+    "aiCount_many": "{{count}} AI",
+    "aiCount_other": "{{count}} AI",
+    "types": {
+      "text": "Tekst",
+      "audio": "Audio",
+      "photo": "Foto",
+      "video": "Video"
+    },
+    "links": {
+      "pinned": "Zakačene beleške"
+    },
     "note": {
       "one": "beleška",
       "few": "beleške",
       "other": "beležaka"
     },
     "empty": {
-      "title": "Nema beleški",
-      "subtitle": "Započni kreiranjem prve beleške"
+      "title": "Dobrodošao u AiNote!",
+      "subtitle": "Tvoj pametni asistent za beleženje. Snimaj ideje glasom, slikama ili tekstom.",
+      "tutorial": {
+        "step1": {
+          "title": "Dodaj belešku",
+          "description": "Tapni + dugme i izaberi tip beleške"
+        },
+        "step2": {
+          "title": "AI analizira",
+          "description": "Automatski dobija tagove i sažetak"
+        },
+        "step3": {
+          "title": "Organizuj lako",
+          "description": "Pretraži, filtriraj i zakači važne"
+        }
+      }
     }
   },
   "types": {
@@ -56,13 +104,34 @@
     "video": "Video"
   },
   "week": {
-    "days": ["P", "U", "S", "Č", "P", "S", "N"]
+    "days": ["P", "U", "S", "Č", "P", "S", "N"],
+    "monShort": "Pon",
+    "tueShort": "Uto",
+    "wedShort": "Sre",
+    "thuShort": "Čet",
+    "friShort": "Pet",
+    "satShort": "Sub",
+    "sunShort": "Ned"
   },
   "inbox": {
     "delete": "Obriši",
+    "search": {
+      "placeholder": "Pretraži beleške..."
+    },
+    "filters": {
+      "all": "Sve",
+      "byTags": "Filtriraj po tagovima:",
+      "clear": "Obriši filtere"
+    },
+    "resultsCount_one": "{{count}} beleška",
+    "resultsCount_few": "{{count}} beleške",
+    "resultsCount_many": "{{count}} beleški",
+    "resultsCount_other": "{{count}} beleški",
     "empty": {
       "title": "Nema beleški još",
-      "subtitle": "Zabeleži ideju, misao ili podsetnik — sve počinje jednom beleškom.",
+      "subtitle": "Kreiraj svoju prvu belešku",
+      "noResults": "Nema rezultata",
+      "tryDifferent": "Pokušaj drugačiji termin za pretragu",
       "cta": "Nova beleška",
       "hint": "Ili otvori + meni za brze akcije"
     }
@@ -96,5 +165,78 @@
     "newNotesCount": "Imate {{count}} nove beleške",
     "askAnything": "Pitaj šta god",
     "powered": "pokreće AI"
+  },
+  "noteDetail": {
+    "actions": {
+      "edit": "Izmeni",
+      "save": "Sačuvaj",
+      "back": "Nazad"
+    },
+    "errors": {
+      "invalidId": "Nevažeći ID beleške",
+      "loading": "Učitavanje beleške...",
+      "paywall": "Failed to show subscription options"
+    },
+    "date": {
+      "today": "Danas",
+      "tomorrow": "Sutra",
+      "dayAfterTomorrow": "Prekosutra",
+      "yesterday": "Juče",
+      "inDays": "Za {{count}} dana",
+      "daysAgo": "Pre {{count}} dana"
+    },
+    "sections": {
+      "description": "Opis",
+      "aiSummary": "AI Sažetak",
+      "aiInsights": "AI Insights",
+      "tags": "Tagovi",
+      "info": "Informacije"
+    },
+    "ai": {
+      "generateTitle": "AI Naslov",
+      "generatingTitle": "Generiše naslov...",
+      "generateSummary": "Generiši",
+      "generatingSummary": "Generiše...",
+      "regenerate": "Regeneriši",
+      "clickToView": "Klikni da vidiš sažetak"
+    },
+    "media": {
+      "tapToZoom": "Tap to zoom",
+      "tapToPlay": "Tap to play",
+      "voiceNote": "Voice Note",
+      "extractText": "Izvuci tekst",
+      "extractedText": "Izvučeni tekst",
+      "transcribe": "Transkribuj",
+      "transcription": "Transkripcija",
+      "reExtract": "Re-extract",
+      "reTranscribe": "Re-transcribe",
+      "processing": "Obrada u toku..."
+    },
+    "text": {
+      "placeholder": "Upiši tekst...",
+      "noContent": "Nema tekstualnog sadržaja"
+    },
+    "tags": {
+      "noTags": "Nema tagova. Dodaj prvi tag iznad."
+    },
+    "metadata": {
+      "status": "Status",
+      "pinned": "Pinovano",
+      "created": "Kreirano",
+      "updated": "Izmenjeno",
+      "type": "Tip",
+      "media": "Medija",
+      "yes": "Da"
+    },
+    "delete": {
+      "title": "Obriši belešku?",
+      "message": "Ova akcija se ne može poništiti.",
+      "cancel": "Otkaži",
+      "confirm": "Obriši"
+    },
+    "premium": {
+      "badge": "FREE",
+      "proBadge": "PRO"
+    }
   }
 }

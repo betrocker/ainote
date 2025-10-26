@@ -4,13 +4,14 @@ import TagChip from "@/components/TagChip";
 import TagInput from "@/components/TagInput";
 import VideoFullscreenPlayer from "@/components/VideoFullscreenPlayer";
 import { useNotes } from "@/context/NotesContext";
-import { usePremium } from "@/context/PremiumContext"; // ⭐ Dodato
+import { usePremium } from "@/context/PremiumContext";
 import { Ionicons } from "@expo/vector-icons";
 import { Audio, AVPlaybackStatusSuccess } from "expo-av";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useColorScheme } from "nativewind";
 import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Alert,
@@ -22,9 +23,10 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import RevenueCatUI from "react-native-purchases-ui"; // ⭐ Dodato
+import RevenueCatUI from "react-native-purchases-ui";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-function formatDateFromISO(iso: string): string {
+function formatDateFromISO(iso: string, t: any): string {
   try {
     const date = new Date(iso + "T00:00:00");
     const now = new Date();
@@ -33,12 +35,14 @@ function formatDateFromISO(iso: string): string {
         86400000
     );
 
-    if (diffDays === 0) return "Danas";
-    if (diffDays === 1) return "Sutra";
-    if (diffDays === 2) return "Prekosutra";
-    if (diffDays === -1) return "Juče";
-    if (diffDays > 1 && diffDays <= 7) return `Za ${diffDays} dana`;
-    if (diffDays < -1 && diffDays >= -7) return `Pre ${-diffDays} dana`;
+    if (diffDays === 0) return t("noteDetail.date.today");
+    if (diffDays === 1) return t("noteDetail.date.tomorrow");
+    if (diffDays === 2) return t("noteDetail.date.dayAfterTomorrow");
+    if (diffDays === -1) return t("noteDetail.date.yesterday");
+    if (diffDays > 1 && diffDays <= 7)
+      return t("noteDetail.date.inDays", { count: diffDays });
+    if (diffDays < -1 && diffDays >= -7)
+      return t("noteDetail.date.daysAgo", { count: -diffDays });
 
     return date.toLocaleDateString("sr-RS", {
       day: "2-digit",
@@ -51,6 +55,8 @@ function formatDateFromISO(iso: string): string {
 }
 
 export default function NoteDetailScreen() {
+  const { t } = useTranslation("common");
+  const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const {
     notes,
@@ -68,7 +74,7 @@ export default function NoteDetailScreen() {
     generatingSummaries,
   } = useNotes();
 
-  const { isPremium } = usePremium(); // ⭐ Dodato
+  const { isPremium } = usePremium();
   const router = useRouter();
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === "dark";
@@ -107,7 +113,6 @@ export default function NoteDetailScreen() {
       console.log("❌ [Note] User is not premium, showing paywall");
 
       try {
-        // ⭐ presentPaywall() ne prima parametre u novijoj verziji
         const result = await RevenueCatUI.presentPaywall();
 
         console.log("💳 [Note] Paywall result:", result);
@@ -123,9 +128,8 @@ export default function NoteDetailScreen() {
         }
       } catch (error) {
         console.error("❌ [Note] Paywall error:", error);
-        Alert.alert("Error", "Failed to show subscription options");
+        Alert.alert(t("noteDetail.errors.paywall"));
       }
-
       return;
     }
 
@@ -166,7 +170,11 @@ export default function NoteDetailScreen() {
 
           const { sound } = await Audio.Sound.createAsync(
             { uri: note.fileUri! },
-            { shouldPlay: false, progressUpdateIntervalMillis: 250 },
+            {
+              shouldPlay: false,
+              progressUpdateIntervalMillis: 250,
+              isLooping: false,
+            },
             (status) => {
               if (!mounted || !status.isLoaded) return;
               const st = status as AVPlaybackStatusSuccess;
@@ -175,9 +183,9 @@ export default function NoteDetailScreen() {
               setAudioDuration(st.durationMillis || 0);
               setAudioPosition(st.positionMillis || 0);
 
-              if (st.didJustFinish) {
+              if (st.didJustFinish && mounted) {
                 setAudioPlaying(false);
-                sound.setPositionAsync(0);
+                setAudioPosition(0);
               }
             }
           );
@@ -237,13 +245,15 @@ export default function NoteDetailScreen() {
       <View className="flex-1 bg-ios-bg dark:bg-iosd-bg items-center justify-center p-4">
         <Ionicons name="alert-circle-outline" size={64} color="#EF4444" />
         <Text className="text-lg font-semibold text-ios-label dark:text-iosd-label mt-4 text-center">
-          Nevažeći ID beleške
+          {t("noteDetail.errors.invalidId")}
         </Text>
         <TouchableOpacity
           onPress={() => router.back()}
           className="mt-6 px-6 py-3 bg-ios-blue rounded-full"
         >
-          <Text className="text-white font-semibold">Nazad</Text>
+          <Text className="text-white font-semibold">
+            {t("noteDetail.actions.back")}
+          </Text>
         </TouchableOpacity>
       </View>
     );
@@ -254,7 +264,7 @@ export default function NoteDetailScreen() {
       <View className="flex-1 bg-ios-bg dark:bg-iosd-bg items-center justify-center p-4">
         <ActivityIndicator size="large" color="#0A84FF" />
         <Text className="text-sm text-ios-secondary dark:text-iosd-label2 mt-4">
-          Učitavanje beleške...
+          {t("noteDetail.errors.loading")}
         </Text>
       </View>
     );
@@ -278,15 +288,15 @@ export default function NoteDetailScreen() {
 
   const handleDelete = () => {
     Alert.alert(
-      "Obriši belešku?",
-      "Ova akcija se ne može poništiti.",
+      t("noteDetail.delete.title"),
+      t("noteDetail.delete.message"),
       [
         {
-          text: "Otkaži",
+          text: t("noteDetail.delete.cancel"),
           style: "cancel",
         },
         {
-          text: "Obriši",
+          text: t("noteDetail.delete.confirm"),
           style: "destructive",
           onPress: async () => {
             await deleteNote(note.id);
@@ -390,7 +400,9 @@ export default function NoteDetailScreen() {
             {/* ⭐ Premium Badge (ako nema premium) */}
             {!isPremium && (
               <View className="px-2 py-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mr-1">
-                <Text className="text-white text-[10px] font-bold">FREE</Text>
+                <Text className="text-white text-[10px] font-bold">
+                  {t("noteDetail.premium.badge")}
+                </Text>
               </View>
             )}
 
@@ -417,7 +429,9 @@ export default function NoteDetailScreen() {
                 activeOpacity={1}
               >
                 <Text className="text-white font-semibold text-sm">
-                  {isEditing ? "Sačuvaj" : "Izmeni"}
+                  {isEditing
+                    ? t("noteDetail.actions.save")
+                    : t("noteDetail.actions.edit")}
                 </Text>
               </TouchableOpacity>
             )}
@@ -471,18 +485,20 @@ export default function NoteDetailScreen() {
               <>
                 <ActivityIndicator size="small" color="#A855F7" />
                 <Text className="ml-2 text-sm font-medium text-purple-600 dark:text-purple-400">
-                  Generiše naslov...
+                  {t("noteDetail.ai.generatingTitle")}
                 </Text>
               </>
             ) : (
               <>
                 <Ionicons name="sparkles-outline" size={16} color="#A855F7" />
                 <Text className="ml-2 text-sm font-medium text-purple-600 dark:text-purple-400">
-                  AI Naslov
+                  {t("noteDetail.ai.generateTitle")}
                 </Text>
                 {!isPremium && (
                   <View className="ml-2 bg-yellow-500 rounded-full px-1.5 py-0.5">
-                    <Text className="text-[9px] font-bold text-white">PRO</Text>
+                    <Text className="text-[9px] font-bold text-white">
+                      {t("noteDetail.premium.proBadge")}
+                    </Text>
                   </View>
                 )}
               </>
@@ -502,7 +518,13 @@ export default function NoteDetailScreen() {
         </Text>
       </View>
 
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        className="flex-1"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingBottom: Math.max(insets.bottom, 16) + 30,
+        }}
+      >
         <View className="p-4">
           {/* Description kartica */}
           {note.description && (
@@ -514,7 +536,7 @@ export default function NoteDetailScreen() {
                   color="#6B7280"
                 />
                 <Text className="ml-2 text-xs font-semibold text-ios-secondary dark:text-iosd-label2 uppercase tracking-wide">
-                  Opis
+                  {t("noteDetail.sections.description")}
                 </Text>
               </View>
               <Text className="text-base text-ios-label dark:text-iosd-label leading-6">
@@ -533,12 +555,12 @@ export default function NoteDetailScreen() {
                     <Ionicons name="sparkles" size={16} color="#A855F7" />
                   </View>
                   <Text className="text-lg font-semibold text-ios-label dark:text-iosd-label">
-                    AI Sažetak
+                    {t("noteDetail.sections.aiSummary")}
                   </Text>
                   {!isPremium && (
                     <View className="ml-2 bg-yellow-500 rounded-full px-2 py-0.5">
                       <Text className="text-[9px] font-bold text-white">
-                        PRO
+                        {t("noteDetail.premium.proBadge")}
                       </Text>
                     </View>
                   )}
@@ -555,7 +577,7 @@ export default function NoteDetailScreen() {
                       <>
                         <ActivityIndicator size="small" color="#A855F7" />
                         <Text className="ml-1.5 text-xs text-purple-600 dark:text-purple-400 font-medium">
-                          Generiše...
+                          {t("noteDetail.ai.generatingSummary")}
                         </Text>
                       </>
                     ) : (
@@ -566,7 +588,7 @@ export default function NoteDetailScreen() {
                           color="#A855F7"
                         />
                         <Text className="ml-1.5 text-xs text-purple-600 dark:text-purple-400 font-medium">
-                          Generiši
+                          {t("noteDetail.ai.generateSummary")}
                         </Text>
                       </>
                     )}
@@ -605,7 +627,7 @@ export default function NoteDetailScreen() {
                       color="#A855F7"
                     />
                     <Text className="ml-1.5 text-xs text-purple-600 dark:text-purple-400 font-medium">
-                      Regeneriši
+                      {t("noteDetail.ai.regenerate")}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -615,7 +637,7 @@ export default function NoteDetailScreen() {
               {hasSummary && !isSummaryExpanded && (
                 <View className="p-3 bg-white/70 dark:bg-white/5 rounded-2xl border border-ios-sep dark:border-iosd-sep">
                   <Text className="text-sm text-ios-secondary dark:text-iosd-label2 italic text-center">
-                    Klikni da vidiš sažetak
+                    {t("noteDetail.ai.clickToView")}
                   </Text>
                 </View>
               )}
@@ -638,7 +660,7 @@ export default function NoteDetailScreen() {
                 <View className="absolute bottom-3 right-3 bg-black/60 rounded-full px-3 py-1.5 flex-row items-center">
                   <Ionicons name="expand-outline" size={14} color="#FFF" />
                   <Text className="text-white text-xs font-medium ml-1">
-                    Tap to zoom
+                    {t("noteDetail.media.tapToZoom")}
                   </Text>
                 </View>
               </TouchableOpacity>
@@ -647,12 +669,14 @@ export default function NoteDetailScreen() {
                 <View className="flex-row items-center justify-between mb-2">
                   <View className="flex-row items-center">
                     <Text className="text-sm text-ios-secondary dark:text-iosd-label2">
-                      {note.text ? "Izvučeni tekst" : "Izvuci tekst"}
+                      {note.text
+                        ? t("noteDetail.media.extractedText")
+                        : t("noteDetail.media.extractText")}
                     </Text>
                     {!isPremium && (
                       <View className="ml-2 bg-yellow-500 rounded-full px-1.5 py-0.5">
                         <Text className="text-[8px] font-bold text-white">
-                          PRO
+                          {t("noteDetail.premium.proBadge")}
                         </Text>
                       </View>
                     )}
@@ -674,10 +698,10 @@ export default function NoteDetailScreen() {
                     )}
                     <Text className="ml-1.5 text-xs text-green-600 dark:text-green-400 font-medium">
                       {isTranscribing
-                        ? "Processing..."
+                        ? t("noteDetail.media.processing")
                         : note.text
-                          ? "Re-extract"
-                          : "Extract Text"}
+                          ? t("noteDetail.media.reExtract")
+                          : t("noteDetail.media.extractText")}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -711,7 +735,7 @@ export default function NoteDetailScreen() {
                 <View className="absolute bottom-3 right-3 bg-black/60 rounded-full px-3 py-1.5 flex-row items-center">
                   <Ionicons name="play-circle-outline" size={14} color="#FFF" />
                   <Text className="text-white text-xs font-medium ml-1">
-                    Tap to play
+                    {t("noteDetail.media.tapToPlay")}
                   </Text>
                 </View>
               </TouchableOpacity>
@@ -720,12 +744,14 @@ export default function NoteDetailScreen() {
                 <View className="flex-row items-center justify-between mb-2">
                   <View className="flex-row items-center">
                     <Text className="text-sm text-ios-secondary dark:text-iosd-label2">
-                      {note.text ? "Transkripcija" : "Transkribuj"}
+                      {note.text
+                        ? t("noteDetail.media.transcription")
+                        : t("noteDetail.media.transcribe")}
                     </Text>
                     {!isPremium && (
                       <View className="ml-2 bg-yellow-500 rounded-full px-1.5 py-0.5">
                         <Text className="text-[8px] font-bold text-white">
-                          PRO
+                          {t("noteDetail.premium.proBadge")}
                         </Text>
                       </View>
                     )}
@@ -747,10 +773,10 @@ export default function NoteDetailScreen() {
                     )}
                     <Text className="ml-1.5 text-xs text-purple-600 dark:text-purple-400 font-medium">
                       {isTranscribing
-                        ? "Processing..."
+                        ? t("noteDetail.media.processing")
                         : note.text
-                          ? "Re-transcribe"
-                          : "Transcribe"}
+                          ? t("noteDetail.media.reTranscribe")
+                          : t("noteDetail.media.transcribe")}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -790,7 +816,7 @@ export default function NoteDetailScreen() {
 
                   <View className="flex-1">
                     <Text className="text-lg font-semibold text-ios-label dark:text-iosd-label">
-                      Voice Note
+                      {t("noteDetail.media.voiceNote")}
                     </Text>
                     <Text className="text-sm text-ios-secondary dark:text-iosd-label2 mt-0.5">
                       {formatDuration(audioPosition)} /{" "}
@@ -820,12 +846,14 @@ export default function NoteDetailScreen() {
                 <View className="flex-row items-center justify-between mb-2">
                   <View className="flex-row items-center">
                     <Text className="text-sm text-ios-secondary dark:text-iosd-label2">
-                      {note.text ? "Transkripcija" : "Transkribuj"}
+                      {note.text
+                        ? t("noteDetail.media.transcription")
+                        : t("noteDetail.media.transcribe")}
                     </Text>
                     {!isPremium && (
                       <View className="ml-2 bg-yellow-500 rounded-full px-1.5 py-0.5">
                         <Text className="text-[8px] font-bold text-white">
-                          PRO
+                          {t("noteDetail.premium.proBadge")}
                         </Text>
                       </View>
                     )}
@@ -847,10 +875,10 @@ export default function NoteDetailScreen() {
                     )}
                     <Text className="ml-1.5 text-xs text-purple-600 dark:text-purple-400 font-medium">
                       {isTranscribing
-                        ? "Processing..."
+                        ? t("noteDetail.media.processing")
                         : note.text
-                          ? "Re-transcribe"
-                          : "Transcribe"}
+                          ? t("noteDetail.media.reTranscribe")
+                          : t("noteDetail.media.transcribe")}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -874,12 +902,12 @@ export default function NoteDetailScreen() {
                   multiline
                   autoFocus
                   className="text-base leading-6 text-ios-label dark:text-iosd-label bg-ios-fill dark:bg-iosd-fill rounded-2xl p-4 min-h-[200px]"
-                  placeholder="Upiši tekst..."
+                  placeholder={t("noteDetail.text.placeholder")}
                   placeholderTextColor="#8E8E93"
                 />
               ) : (
                 <Text className="text-base leading-6 text-ios-label dark:text-iosd-label">
-                  {note.text || "Nema tekstualnog sadržaja"}
+                  {note.text || t("noteDetail.text.noContent")}
                 </Text>
               )}
             </View>
@@ -893,7 +921,7 @@ export default function NoteDetailScreen() {
                   <Ionicons name="sparkles" size={16} color="#0A84FF" />
                 </View>
                 <Text className="text-lg font-semibold text-ios-label dark:text-iosd-label">
-                  AI Insights
+                  {t("noteDetail.sections.aiInsights")}
                 </Text>
               </View>
 
@@ -944,7 +972,7 @@ export default function NoteDetailScreen() {
                     <View className="flex-1">
                       <Text className="text-sm font-medium text-ios-label dark:text-iosd-label">
                         {fact.predicate === "due_on"
-                          ? formatDateFromISO(fact.object)
+                          ? formatDateFromISO(fact.object, t)
                           : fact.predicate === "number"
                             ? fact.object
                             : fact.predicate === "topic"
@@ -971,7 +999,7 @@ export default function NoteDetailScreen() {
                 <Ionicons name="pricetags" size={16} color="#0A84FF" />
               </View>
               <Text className="text-lg font-semibold text-ios-label dark:text-iosd-label">
-                Tagovi
+                {t("noteDetail.sections.tags")}
               </Text>
             </View>
 
@@ -996,7 +1024,7 @@ export default function NoteDetailScreen() {
 
               {(!note.tags || note.tags.length === 0) && (
                 <Text className="text-sm text-ios-secondary dark:text-iosd-label2 text-center mt-3">
-                  Nema tagova. Dodaj prvi tag iznad.
+                  {t("noteDetail.tags.noTags")}
                 </Text>
               )}
             </View>
@@ -1013,35 +1041,39 @@ export default function NoteDetailScreen() {
                 />
               </View>
               <Text className="text-lg font-semibold text-ios-label dark:text-iosd-label">
-                Informacije
+                {t("noteDetail.sections.info")}
               </Text>
             </View>
 
             <View className="bg-white/70 dark:bg-white/5 rounded-2xl p-4 border border-ios-sep dark:border-iosd-sep">
               {note.pinned && (
-                <MetadataRow label="Status" value="Pinned" icon="pin" />
+                <MetadataRow
+                  label={t("noteDetail.metadata.status")}
+                  value={t("noteDetail.metadata.pinned")}
+                  icon="pin"
+                />
               )}
               <MetadataRow
-                label="Kreirano"
+                label={t("noteDetail.metadata.created")}
                 value={new Date(note.createdAt).toLocaleString("sr-RS")}
                 icon="time-outline"
               />
               {note.updatedAt && (
                 <MetadataRow
-                  label="Izmenjeno"
+                  label={t("noteDetail.metadata.updated")}
                   value={new Date(note.updatedAt).toLocaleString("sr-RS")}
                   icon="create-outline"
                 />
               )}
               <MetadataRow
-                label="Tip"
+                label={t("noteDetail.metadata.type")}
                 value={note.type}
                 icon="albums-outline"
               />
               {note.fileUri && (
                 <MetadataRow
-                  label="Medija"
-                  value="Da"
+                  label={t("noteDetail.metadata.media")}
+                  value={t("noteDetail.metadata.yes")}
                   icon="attach-outline"
                   isLast
                 />

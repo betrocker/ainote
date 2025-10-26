@@ -10,6 +10,7 @@ import React from "react";
 import {
   LayoutChangeEvent,
   Platform,
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
@@ -64,15 +65,7 @@ export default function FabMenu() {
       width: w,
       height: h,
       borderRadius: r,
-      position: "absolute",
-      bottom: 0,
-      right: 0,
-      backgroundColor:
-        open.value < 0.02
-          ? isDark
-            ? "rgba(0,0,0,0.28)"
-            : "rgba(255,255,255,0.28)"
-          : "transparent",
+      overflow: "hidden",
     };
   });
 
@@ -119,7 +112,7 @@ export default function FabMenu() {
         content: (
           <View className="px-2 pt-2">
             <Text className="text-ios-secondary dark:text-iosd-label2 mb-2 px-2">
-              Zabeleži misao (npr. “sledeća zamena ulja na 100000 km”)
+              Zabeleži misao
             </Text>
             <TextInput
               autoFocus
@@ -287,7 +280,7 @@ export default function FabMenu() {
         style={{ paddingVertical: ITEM_VPAD }}
       >
         <Ionicons name="create-outline" size={20} color={iconColor} />
-        <Text className={`ml-2 text-base ${textColor}`}>Zabelezi misao</Text>
+        <Text className={`ml-2 text-base ${textColor}`}>Napisi ideju</Text>
       </TouchableOpacity>
 
       <Divider />
@@ -299,7 +292,7 @@ export default function FabMenu() {
         style={{ paddingVertical: ITEM_VPAD }}
       >
         <Ionicons name="mic-outline" size={20} color={iconColor} />
-        <Text className={`ml-2 text-base ${textColor}`}>Audio</Text>
+        <Text className={`ml-2 text-base ${textColor}`}>Izgovori misao</Text>
       </TouchableOpacity>
 
       <Divider />
@@ -311,7 +304,7 @@ export default function FabMenu() {
         style={{ paddingVertical: ITEM_VPAD }}
       >
         <Ionicons name="camera-outline" size={20} color={iconColor} />
-        <Text className={`ml-2 text-base ${textColor}`}>Camera</Text>
+        <Text className={`ml-2 text-base ${textColor}`}>Uhvati momenat</Text>
       </TouchableOpacity>
     </View>
   );
@@ -326,10 +319,36 @@ export default function FabMenu() {
     }
   };
 
+  // Background wrapper - iOS blur, Android solid
+  const BackgroundWrapper = ({ children }: { children: React.ReactNode }) => {
+    if (Platform.OS === "ios") {
+      return (
+        <>
+          <BlurView
+            intensity={BLUR_INTENSITY}
+            tint={blurTint}
+            className="absolute inset-0"
+          />
+          {children}
+        </>
+      );
+    }
+
+    // Android fallback
+    return (
+      <View
+        className={isDark ? "bg-gray-900/95" : "bg-white/95"}
+        style={StyleSheet.absoluteFill}
+      >
+        {children}
+      </View>
+    );
+  };
+
   /** ========== Render ========== */
   return (
     <>
-      {/* Nevidljivi “ghost” za merenje */}
+      {/* Nevidljivi "ghost" za merenje */}
       <View
         style={{
           position: "absolute",
@@ -343,17 +362,24 @@ export default function FabMenu() {
         <MenuContent />
       </View>
 
-      <TouchableOpacity activeOpacity={0.9} onPress={toggle}>
-        <Animated.View
-          style={containerStyle}
-          className="overflow-hidden shadow-md shadow-black/40"
-        >
-          <BlurView
-            intensity={BLUR_INTENSITY}
-            tint={blurTint}
-            className="absolute inset-0"
-          />
-
+      {/* Glavni FAB kontejner */}
+      <Animated.View
+        style={[
+          containerStyle,
+          {
+            position: "absolute",
+            bottom: 0,
+            right: 0,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 8,
+          },
+        ]}
+      >
+        <BackgroundWrapper>
+          {/* Overlay tint kada je otvoren */}
           <Animated.View
             pointerEvents="none"
             style={[
@@ -362,20 +388,30 @@ export default function FabMenu() {
             ]}
           />
 
+          {/* Outline */}
           <Animated.View
             pointerEvents="none"
             style={[{ position: "absolute", inset: 0 }, outlineStyle]}
           />
 
-          {!menuOpen ? (
-            <View className="absolute inset-0 items-center justify-center">
-              <Ionicons name="add" size={26} color={iconColor} />
-            </View>
-          ) : (
-            <MenuContent />
-          )}
-        </Animated.View>
-      </TouchableOpacity>
+          {/* Touchable area - UNUTAR animated view-a */}
+          <Pressable
+            onPress={toggle}
+            style={{ flex: 1 }}
+            android_ripple={{
+              color: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
+            }}
+          >
+            {!menuOpen ? (
+              <View className="absolute inset-0 items-center justify-center">
+                <Ionicons name="add" size={26} color={iconColor} />
+              </View>
+            ) : (
+              <MenuContent />
+            )}
+          </Pressable>
+        </BackgroundWrapper>
+      </Animated.View>
     </>
   );
 }

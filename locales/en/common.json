@@ -4,7 +4,7 @@
     "inbox": { "title": "Inbox" },
     "assistant": { "title": "Assistant" },
     "settings": { "title": "Settings" },
-    "noteCompose": { "title": "New note" }
+    "noteCompose": { "title": "New Note" }
   },
   "user": {
     "fallbackName": "User"
@@ -12,7 +12,7 @@
   "appearance": {
     "darkMode": {
       "title": "Dark Mode",
-      "subtitle": "Use a darker appearance"
+      "subtitle": "Enable darker appearance"
     }
   },
   "settings": {
@@ -27,25 +27,61 @@
     "version": "AiNote v{{version}}"
   },
   "home": {
-    "welcome": "Welcome back",
+    "title": "Home",
+    "welcome": "Welcome back!",
     "today": "today",
+    "todayCount_one": "{{count}} note today",
+    "todayCount_other": "{{count}} notes today",
     "stats": "Statistics",
     "total": "Total",
-    "withTags": "Tagged",
-    "thisWeek": "This Week",
+    "totalCount_one": "{{count}} total",
+    "totalCount_other": "{{count}} total",
+    "overview": "Overview",
+    "thisWeek": "This week",
+    "browse": "Browse",
     "upcoming": "Upcoming",
     "recent": "Recent",
-    "viewAll": "View all",
-    "overview": "Overview",
-    "browse": "Browse",
     "allNotes": "All Notes",
+    "viewAll": "View all",
+    "withTags": "Tags",
+    "withDueDates_one": "{{count}} with due date",
+    "withDueDates_other": "{{count}} with due dates",
+    "pinnedCount_one": "{{count}} pinned",
+    "pinnedCount_other": "{{count}} pinned",
+    "taggedCount_one": "{{count}} tagged",
+    "taggedCount_other": "{{count}} tagged",
+    "aiCount_one": "{{count}} AI",
+    "aiCount_other": "{{count}} AI",
+    "types": {
+      "text": "Text",
+      "audio": "Audio",
+      "photo": "Photo",
+      "video": "Video"
+    },
+    "links": {
+      "pinned": "Pinned Notes"
+    },
     "note": {
       "one": "note",
       "other": "notes"
     },
     "empty": {
-      "title": "No notes yet",
-      "subtitle": "Start by creating your first note"
+      "title": "Welcome to AiNote!",
+      "subtitle": "Your smart note-taking assistant. Capture ideas with voice, images, or text.",
+      "tutorial": {
+        "step1": {
+          "title": "Add a note",
+          "description": "Tap the + button and choose note type"
+        },
+        "step2": {
+          "title": "AI analyzes",
+          "description": "Automatically gets tags and summary"
+        },
+        "step3": {
+          "title": "Organize easily",
+          "description": "Search, filter, and pin important ones"
+        }
+      }
     }
   },
   "types": {
@@ -55,13 +91,32 @@
     "video": "Video"
   },
   "week": {
-    "days": ["M", "T", "W", "T", "F", "S", "S"]
+    "days": ["M", "T", "W", "T", "F", "S", "S"],
+    "monShort": "Mon",
+    "tueShort": "Tue",
+    "wedShort": "Wed",
+    "thuShort": "Thu",
+    "friShort": "Fri",
+    "satShort": "Sat",
+    "sunShort": "Sun"
   },
   "inbox": {
     "delete": "Delete",
+    "search": {
+      "placeholder": "Search notes..."
+    },
+    "filters": {
+      "all": "All",
+      "byTags": "Filter by tags:",
+      "clear": "Clear filters"
+    },
+    "resultsCount_one": "{{count}} note",
+    "resultsCount_other": "{{count}} notes",
     "empty": {
       "title": "No notes yet",
-      "subtitle": "Capture an idea, a thought, or a reminder — it all starts with one note.",
+      "subtitle": "Create your first note",
+      "noResults": "No results",
+      "tryDifferent": "Try a different search term",
       "cta": "New note",
       "hint": "Or open the + menu for quick actions"
     }
@@ -71,6 +126,13 @@
     "placeholder": {
       "title": "Title",
       "body": "Start typing…"
+    },
+    "pinned": "Pinned",
+    "types": {
+      "text": "Text",
+      "audio": "Audio",
+      "photo": "Photo",
+      "video": "Video"
     },
     "singular": "note",
     "singular_plural": "notes"
@@ -85,7 +147,80 @@
     "section": "Section {{index}}",
     "today": "Today",
     "newNotesCount": "You have {{count}} new notes",
-    "askAnything": "Ask Anything",
+    "askAnything": "Ask anything",
     "powered": "powered by AI"
+  },
+  "noteDetail": {
+    "actions": {
+      "edit": "Edit",
+      "save": "Save",
+      "back": "Back"
+    },
+    "errors": {
+      "invalidId": "Invalid note ID",
+      "loading": "Loading note...",
+      "paywall": "Failed to show subscription options"
+    },
+    "date": {
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "dayAfterTomorrow": "Day after tomorrow",
+      "yesterday": "Yesterday",
+      "inDays": "In {{count}} days",
+      "daysAgo": "{{count}} days ago"
+    },
+    "sections": {
+      "description": "Description",
+      "aiSummary": "AI Summary",
+      "aiInsights": "AI Insights",
+      "tags": "Tags",
+      "info": "Information"
+    },
+    "ai": {
+      "generateTitle": "AI Title",
+      "generatingTitle": "Generating title...",
+      "generateSummary": "Generate",
+      "generatingSummary": "Generating...",
+      "regenerate": "Regenerate",
+      "clickToView": "Click to view summary"
+    },
+    "media": {
+      "tapToZoom": "Tap to zoom",
+      "tapToPlay": "Tap to play",
+      "voiceNote": "Voice Note",
+      "extractText": "Extract Text",
+      "extractedText": "Extracted Text",
+      "transcribe": "Transcribe",
+      "transcription": "Transcription",
+      "reExtract": "Re-extract",
+      "reTranscribe": "Re-transcribe",
+      "processing": "Processing..."
+    },
+    "text": {
+      "placeholder": "Type text...",
+      "noContent": "No text content"
+    },
+    "tags": {
+      "noTags": "No tags. Add your first tag above."
+    },
+    "metadata": {
+      "status": "Status",
+      "pinned": "Pinned",
+      "created": "Created",
+      "updated": "Updated",
+      "type": "Type",
+      "media": "Media",
+      "yes": "Yes"
+    },
+    "delete": {
+      "title": "Delete note?",
+      "message": "This action cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Delete"
+    },
+    "premium": {
+      "badge": "FREE",
+      "proBadge": "PRO"
+    }
   }
 }

@@ -50,8 +50,8 @@ const getIconByRouteName = (route: string) => {
   }
 };
 
-const BASE_TABBAR_HEIGHT = 64; // h-16
-const ANDROID_FALLBACK_BOTTOM = 16; // kad insets.bottom = 0 na 3-dugmeta navi
+const BASE_TABBAR_HEIGHT = 64;
+const ANDROID_FALLBACK_BOTTOM = 16;
 
 const CustomTabBar: React.FC<CustomTabBarProps> = ({
   currentIndex,
@@ -65,7 +65,6 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
   const isDark = colorScheme === "dark";
   const blurTint = isDark ? "dark" : "light";
 
-  // realan bottom spacing (Android fallback ako je 0)
   const bottomSpace =
     Platform.OS === "android"
       ? insets.bottom && insets.bottom > 0
@@ -79,12 +78,10 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
   const pillScale = useSharedValue(1);
   const currentIdxSV = useSharedValue(currentIndex);
 
-  // mirroring currentIndex → shared (da bude dostupan u workletima)
   useEffect(() => {
     currentIdxSV.value = currentIndex;
   }, [currentIndex, currentIdxSV]);
 
-  // “bounce” efekat na tap
   const triggerBounce = useCallback(() => {
     pillScale.value = withSequence(
       withTiming(0.9, { duration: 80 }),
@@ -93,7 +90,6 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
     );
   }, [pillScale]);
 
-  // Reaktivno postavljanje X pil-a (samo u worklet kontekstu)
   useDerivedValue(() => {
     if (segmentW.value <= 0) return;
     const newWidth = segmentW.value * 0.9;
@@ -106,7 +102,6 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
     });
   });
 
-  // Stil za pil (čita .value unutar useAnimatedStyle – ispravno)
   const pillStyle = useAnimatedStyle(() => {
     if (segmentW.value <= 0) return {};
     return {
@@ -123,7 +118,6 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
     };
   });
 
-  // onLayout računa širinu segmenata i postavlja početni X
   const prevWidth = useRef(0);
   const onLayout = useCallback(
     (event: any) => {
@@ -133,7 +127,6 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
         const segWidth = w / tabs.length;
         segmentW.value = segWidth;
 
-        // inicijalni X (da ne “iskoči” na prvi frame)
         const newWidth = segWidth * 0.9;
         const segmentCenter = currentIndex * segWidth + segWidth / 2;
         pillX.value = segmentCenter - newWidth / 2;
@@ -141,6 +134,41 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
     },
     [tabs.length, currentIndex, segmentW, pillX]
   );
+
+  // Wrapper komponenta za Tab Bar sa platform-specific stilom
+  const TabBarContent = ({ children }: { children: React.ReactNode }) => {
+    if (Platform.OS === "ios") {
+      return (
+        <BlurView
+          intensity={50}
+          tint={blurTint}
+          className="rounded-full overflow-hidden h-16 border border-black/10 dark:border-white/10"
+        >
+          {children}
+        </BlurView>
+      );
+    }
+
+    // Android fallback - solid background sa opacity
+    return (
+      <View
+        className={`rounded-full overflow-hidden h-16 border ${
+          isDark
+            ? "bg-gray-900/95 border-white/10"
+            : "bg-white/95 border-black/10"
+        }`}
+        style={{
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.25,
+          shadowRadius: 8,
+          elevation: 5,
+        }}
+      >
+        {children}
+      </View>
+    );
+  };
 
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
@@ -152,12 +180,18 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
           className="absolute inset-0 z-40"
           pointerEvents="auto"
         >
-          <BlurView
-            intensity={20}
-            tint={blurTint}
-            className="absolute inset-0"
-          />
-          <View className="absolute inset-0 bg-black/35" />
+          {Platform.OS === "ios" ? (
+            <>
+              <BlurView
+                intensity={20}
+                tint={blurTint}
+                className="absolute inset-0"
+              />
+              <View className="absolute inset-0 bg-black/35" />
+            </>
+          ) : (
+            <View className="absolute inset-0 bg-black/60" />
+          )}
           <Pressable
             onPress={() => setMenuOpen(false)}
             className="absolute inset-0"
@@ -165,7 +199,7 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
         </Animated.View>
       )}
 
-      {/* TAB BAR – levo 70%, podignut za bottomSpace */}
+      {/* TAB BAR */}
       {!menuOpen && (
         <Animated.View
           entering={FadeIn.duration(220)}
@@ -174,11 +208,7 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
           style={{ bottom: bottomSpace + 4 }}
           pointerEvents="box-none"
         >
-          <BlurView
-            intensity={50}
-            tint={blurTint}
-            className="rounded-full overflow-hidden h-16 border border-black/10 dark:border-white/10"
-          >
+          <TabBarContent>
             <View
               className="relative flex-row h-full items-center"
               onLayout={onLayout}
@@ -225,11 +255,11 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
                 );
               })}
             </View>
-          </BlurView>
+          </TabBarContent>
         </Animated.View>
       )}
 
-      {/* FAB – desno, pozicioniran iznad nav bara */}
+      {/* FAB */}
       <View
         className="absolute right-6 z-50"
         style={{ bottom: bottomSpace + 6 }}
