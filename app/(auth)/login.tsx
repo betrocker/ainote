@@ -7,6 +7,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Redirect, router } from "expo-router";
 import { useColorScheme } from "nativewind";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Keyboard,
@@ -22,6 +23,7 @@ export default function Login() {
   const { isSignedIn, isLoaded: authLoaded } = useAuth();
   const { isLoaded, signIn, setActive } = useSignIn();
   const { colorScheme } = useColorScheme();
+  const { t } = useTranslation("common");
   const isDark = colorScheme === "dark";
 
   const [email, setEmail] = useState("");
@@ -30,6 +32,7 @@ export default function Login() {
   const [pendingVerification, setPendingVerification] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   if (!authLoaded) {
     return (
@@ -65,7 +68,7 @@ export default function Login() {
       }
     } catch (err: any) {
       console.error("❌ [Login] Error:", err);
-      setError(err.errors?.[0]?.message || "Login failed. Please try again.");
+      setError(err.errors?.[0]?.message || t("auth.login.errors.loginFailed"));
     } finally {
       setLoading(false);
     }
@@ -91,7 +94,7 @@ export default function Login() {
       }
     } catch (err: any) {
       console.error("❌ [Login] Verification error:", err);
-      setError(err.errors?.[0]?.message || "Invalid code. Please try again.");
+      setError(err.errors?.[0]?.message || t("auth.login.errors.invalidCode"));
     } finally {
       setLoading(false);
     }
@@ -118,19 +121,19 @@ export default function Login() {
               {!pendingVerification ? (
                 <>
                   <Text className="text-3xl font-bold text-ios-label dark:text-iosd-label mb-2">
-                    Welcome Back
+                    {t("auth.login.title")}
                   </Text>
                   <Text className="text-base text-ios-secondary dark:text-iosd-label2 text-center">
-                    Sign in to continue to AInote
+                    {t("auth.login.subtitle")}
                   </Text>
                 </>
               ) : (
                 <>
                   <Text className="text-3xl font-bold text-ios-label dark:text-iosd-label mb-2">
-                    Verify Email
+                    {t("auth.login.verifyTitle")}
                   </Text>
                   <Text className="text-base text-ios-secondary dark:text-iosd-label2 text-center px-8">
-                    We sent a verification code to {email}
+                    {t("auth.login.verifySubtitle", { email })}
                   </Text>
                 </>
               )}
@@ -141,10 +144,10 @@ export default function Login() {
               {!pendingVerification ? (
                 <>
                   <Input
-                    placeholder="Email"
+                    placeholder={t("auth.login.emailPlaceholder")}
                     value={email}
                     onChangeText={(text) => {
-                      setEmail(text);
+                      setEmail(text.trim());
                       setError("");
                     }}
                     keyboardType="email-address"
@@ -154,19 +157,32 @@ export default function Login() {
                     editable={!loading}
                   />
 
-                  <Input
-                    placeholder="Password"
-                    value={password}
-                    onChangeText={(text) => {
-                      setPassword(text);
-                      setError("");
-                    }}
-                    secureTextEntry
-                    autoComplete="password"
-                    returnKeyType="done"
-                    onSubmitEditing={handleLogin}
-                    editable={!loading}
-                  />
+                  <View className="relative">
+                    <Input
+                      placeholder={t("auth.login.passwordPlaceholder")}
+                      value={password}
+                      onChangeText={(text) => {
+                        setPassword(text);
+                        setError("");
+                      }}
+                      secureTextEntry={!showPassword}
+                      autoComplete="password"
+                      returnKeyType="done"
+                      onSubmitEditing={handleLogin}
+                      editable={!loading}
+                    />
+                    <TouchableWithoutFeedback
+                      onPress={() => setShowPassword(!showPassword)}
+                    >
+                      <View className="absolute right-4 top-4">
+                        <Ionicons
+                          name={showPassword ? "eye-off" : "eye"}
+                          size={22}
+                          color={isDark ? "#8E8E93" : "#C7C7CC"}
+                        />
+                      </View>
+                    </TouchableWithoutFeedback>
+                  </View>
 
                   {error ? (
                     <View className="flex-row items-center bg-red-500/10 border border-red-500/30 rounded-xl p-3 mb-4">
@@ -178,9 +194,9 @@ export default function Login() {
                   ) : null}
 
                   <Button
-                    title="Sign In"
+                    title={t("auth.login.signInButton")}
                     variant="primary"
-                    size="lg"
+                    size="md"
                     fullWidth
                     onPress={handleLogin}
                     disabled={loading || !email || !password}
@@ -189,9 +205,9 @@ export default function Login() {
                   />
 
                   <Button
-                    title="Don't have an account? Register"
+                    title={t("auth.login.noAccount")}
                     variant="secondary"
-                    size="lg"
+                    size="md"
                     fullWidth
                     onPress={() => router.push("/(auth)/register")}
                     disabled={loading}
@@ -201,7 +217,7 @@ export default function Login() {
                   <View className="flex-row items-center my-6">
                     <View className="flex-1 h-px bg-ios-sep dark:bg-iosd-sep" />
                     <Text className="mx-4 text-sm text-ios-secondary dark:text-iosd-label2">
-                      or continue with
+                      {t("auth.login.orContinueWith")}
                     </Text>
                     <View className="flex-1 h-px bg-ios-sep dark:bg-iosd-sep" />
                   </View>
@@ -211,7 +227,7 @@ export default function Login() {
               ) : (
                 <>
                   <Input
-                    placeholder="Verification Code"
+                    placeholder={t("auth.login.verificationCodePlaceholder")}
                     value={code}
                     onChangeText={(text) => {
                       setCode(text);
@@ -222,6 +238,7 @@ export default function Login() {
                     onSubmitEditing={handleVerify}
                     maxLength={6}
                     editable={!loading}
+                    autoFocus
                   />
 
                   {error ? (
@@ -234,18 +251,18 @@ export default function Login() {
                   ) : null}
 
                   <Button
-                    title="Verify Email"
+                    title={t("auth.login.verifyButton")}
                     variant="primary"
                     size="lg"
                     fullWidth
                     onPress={handleVerify}
-                    disabled={loading || !code}
+                    disabled={loading || !code || code.length !== 6}
                     loading={loading}
                     className="mb-3"
                   />
 
                   <Button
-                    title="Back to Login"
+                    title={t("auth.login.backToLogin")}
                     variant="secondary"
                     size="lg"
                     fullWidth

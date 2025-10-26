@@ -1,4 +1,5 @@
 // app/settings.tsx
+import CustomPaywall from "@/components/CustomPaywall";
 import LanguagePicker from "@/components/LanguagePicker";
 import LargeHeader from "@/components/LargeHeader";
 import ScreenBackground from "@/components/ScreenBackground";
@@ -6,18 +7,14 @@ import ScreenScroll from "@/components/ScreenScroll";
 import { usePremium } from "@/context/PremiumContext";
 import { useTheme } from "@/context/ThemeContext";
 import { haptics } from "@/utils/haptics";
-import {
-  getAllScheduledNotifications,
-  registerForPushNotifications,
-  scheduleDailyDigest,
-} from "@/utils/notifications";
+import { registerForPushNotifications } from "@/utils/notifications";
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
-import * as Notifications from "expo-notifications";
 import { router } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { useColorScheme } from "nativewind";
+import React, { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
@@ -27,12 +24,18 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import RevenueCatUI from "react-native-purchases-ui";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 function ThemeToggleRow() {
   const { theme, setTheme } = useTheme();
-  const isDark = theme === "dark";
+  const { colorScheme } = useColorScheme();
   const { t } = useTranslation("common");
+  const isDark = theme === "dark";
+
+  const handleToggle = (value: boolean) => {
+    setTheme(value ? "dark" : "light");
+    haptics.light();
+  };
 
   return (
     <View className="flex-row items-center justify-between py-3 px-6">
@@ -52,95 +55,54 @@ function ThemeToggleRow() {
 
       <Switch
         value={isDark}
-        onValueChange={(v) => setTheme(v ? "dark" : "light")}
+        onValueChange={handleToggle}
         trackColor={{
-          false: "rgba(60,60,67,0.28)",
-          true: "rgba(10,132,255,0.45)",
+          false:
+            colorScheme === "dark"
+              ? "rgba(120, 120, 128, 0.32)"
+              : "rgba(120, 120, 128, 0.16)",
+          true: "#34C759",
         }}
-        thumbColor={isDark ? "#0A84FF" : "#FFFFFF"}
+        thumbColor="#FFFFFF"
+        ios_backgroundColor={
+          colorScheme === "dark"
+            ? "rgba(120, 120, 128, 0.32)"
+            : "rgba(120, 120, 128, 0.16)"
+        }
       />
     </View>
   );
 }
 
-// ⭐ Premium Settings Component
 function PremiumSettings() {
   const { isPremium, loading, checkPremiumStatus } = usePremium();
-  const [presentingPaywall, setPresentingPaywall] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
+  const { t } = useTranslation("common");
 
-  const handleRefreshStatus = async () => {
-    setRefreshing(true);
-    try {
-      await checkPremiumStatus();
-      haptics.light();
-      console.log("🔄 [Settings] Premium status refreshed:", isPremium);
-    } catch (error) {
-      console.error("❌ [Settings] Refresh error:", error);
-    } finally {
-      setRefreshing(false);
-    }
-  };
+  const handleManageSubscription = useCallback(() => {
+    const isExpoGo = Constants.appOwnership === "expo";
 
-  const handleManageSubscription = async () => {
-    if (presentingPaywall) return;
-
-    setPresentingPaywall(true);
-    try {
-      console.log(
-        "🎯 [Settings] Opening subscription info, current premium status:",
-        isPremium
-      );
-
-      // ⭐ Detektuj Expo Go
-      const isExpoGo = Constants.appOwnership === "expo";
-
-      if (isExpoGo) {
-        // ⭐ Test Store mode - pokaži instrukcije
-        Alert.alert(
-          "💎 Test Store Mode",
-          "You're running in Expo Go with Test Store.\n\n" +
-            "To test premium:\n" +
-            "1. Check console for your Customer ID\n" +
-            "2. Go to RevenueCat Dashboard → Customers\n" +
-            "3. Search for your Customer ID\n" +
-            '4. Click "Grant Promotional Entitlement"\n' +
-            '5. Select "premium" entitlement\n' +
-            '6. Tap "Refresh Status" below\n\n' +
-            "Premium features will work normally in production build.",
-          [
-            {
-              text: "Refresh Status",
-              onPress: handleRefreshStatus,
-            },
-            { text: "OK", style: "cancel" },
-          ]
-        );
-      } else {
-        // ⭐ Production build - prikaži pravi paywall
-        const result = await RevenueCatUI.presentPaywall();
-
-        console.log("💳 [Settings] Paywall result:", result);
-
-        if (result === "PURCHASED" || result === "RESTORED") {
-          await checkPremiumStatus();
-          haptics.success();
-          Alert.alert(
-            "🎉 Success!",
-            "Welcome to AInote Premium! Enjoy unlimited AI features."
-          );
-        }
-      }
-    } catch (error) {
-      console.error("❌ [Settings] Error:", error);
+    if (isExpoGo) {
+      // Development mode
       Alert.alert(
-        "Info",
-        "Premium features will be available in the production build"
+        "💎 Premium Features",
+        "Premium subscription will be available in the production build.\n\nFor testing, you can grant premium access via RevenueCat Dashboard.",
+        [
+          {
+            text: "Refresh Status",
+            onPress: async () => {
+              await checkPremiumStatus();
+              haptics.light();
+            },
+          },
+          { text: "OK", style: "cancel" },
+        ]
       );
-    } finally {
-      setPresentingPaywall(false);
+    } else {
+      // Production - open custom paywall
+      setShowPaywall(true);
     }
-  };
+  }, [checkPremiumStatus]);
 
   if (loading) {
     return (
@@ -152,7 +114,6 @@ function PremiumSettings() {
 
   return (
     <>
-      {/* Premium Status */}
       <View className="py-3 px-6">
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center flex-1">
@@ -169,7 +130,7 @@ function PremiumSettings() {
             </View>
             <View className="flex-1">
               <Text className="text-base text-ios-label dark:text-iosd-label font-medium">
-                Premium Status
+                {t("settings.premium.status")}
               </Text>
               <Text
                 className={`text-[12px] mt-0.5 ${
@@ -178,33 +139,20 @@ function PremiumSettings() {
                     : "text-ios-secondary dark:text-iosd-label2"
                 }`}
               >
-                {isPremium ? "✅ Active" : "❌ Not Active"}
+                {isPremium
+                  ? t("settings.premium.active")
+                  : t("settings.premium.inactive")}
               </Text>
             </View>
           </View>
-
-          {/* ⭐ Refresh button */}
-          <TouchableOpacity
-            onPress={handleRefreshStatus}
-            disabled={refreshing}
-            className="ml-2 p-2 rounded-full bg-ios-blue/10 dark:bg-ios-blue/20"
-          >
-            {refreshing ? (
-              <ActivityIndicator size="small" color="#0A84FF" />
-            ) : (
-              <Ionicons name="refresh" size={16} color="#0A84FF" />
-            )}
-          </TouchableOpacity>
         </View>
       </View>
 
       <View className="h-px bg-ios-sep dark:bg-iosd-sep ml-14" />
 
-      {/* Manage/Upgrade Button */}
       <TouchableOpacity
-        className="flex-row items-center py-3 px-6 active:opacity-90"
+        className="flex-row items-center py-3 px-6 active:opacity-70"
         onPress={handleManageSubscription}
-        disabled={presentingPaywall}
       >
         <View className="w-8 h-8 rounded-full bg-purple-500 items-center justify-center mr-3">
           <Ionicons name="diamond" size={18} color="white" />
@@ -212,75 +160,75 @@ function PremiumSettings() {
         <View className="flex-1 flex-row justify-between items-center">
           <View>
             <Text className="text-base text-ios-label dark:text-iosd-label font-medium">
-              {isPremium ? "Manage Subscription" : "Upgrade to Premium"}
+              {isPremium
+                ? t("settings.premium.manage")
+                : t("settings.premium.upgrade")}
             </Text>
             <Text className="text-[12px] mt-0.5 text-ios-secondary dark:text-iosd-label2">
               {isPremium
-                ? "View plans and billing"
-                : "Unlock unlimited AI features"}
+                ? t("settings.premium.manageSubtitle")
+                : t("settings.premium.upgradeSubtitle")}
             </Text>
           </View>
-          {presentingPaywall ? (
-            <ActivityIndicator size="small" />
-          ) : (
-            <Ionicons name="chevron-forward" size={20} color="#999" />
-          )}
+          <Ionicons name="chevron-forward" size={20} color="#999" />
         </View>
       </TouchableOpacity>
 
       {!isPremium && (
         <>
           <View className="h-px bg-ios-sep dark:bg-iosd-sep ml-14" />
-
-          {/* Premium Benefits */}
           <View className="py-3 px-6">
             <Text className="text-[11px] uppercase font-semibold text-ios-secondary dark:text-iosd-label2 mb-2">
-              Premium Benefits
+              {t("settings.premium.benefits.title")}
             </Text>
-
             <View className="space-y-2">
               <View className="flex-row items-center mb-2">
                 <Ionicons name="checkmark-circle" size={16} color="#34C759" />
                 <Text className="text-[13px] text-ios-label dark:text-iosd-label ml-2">
-                  Unlimited AI transcriptions
+                  {t("settings.premium.benefits.transcriptions")}
                 </Text>
               </View>
-
               <View className="flex-row items-center mb-2">
                 <Ionicons name="checkmark-circle" size={16} color="#34C759" />
                 <Text className="text-[13px] text-ios-label dark:text-iosd-label ml-2">
-                  Audio & video note analysis
+                  {t("settings.premium.benefits.analysis")}
                 </Text>
               </View>
-
               <View className="flex-row items-center mb-2">
                 <Ionicons name="checkmark-circle" size={16} color="#34C759" />
                 <Text className="text-[13px] text-ios-label dark:text-iosd-label ml-2">
-                  Cloud sync across devices
+                  {t("settings.premium.benefits.sync")}
                 </Text>
               </View>
-
               <View className="flex-row items-center">
                 <Ionicons name="checkmark-circle" size={16} color="#34C759" />
                 <Text className="text-[13px] text-ios-label dark:text-iosd-label ml-2">
-                  Advanced search & organization
+                  {t("settings.premium.benefits.search")}
                 </Text>
               </View>
             </View>
           </View>
         </>
       )}
+
+      {/* Custom Paywall */}
+      <CustomPaywall
+        visible={showPaywall}
+        onClose={() => setShowPaywall(false)}
+        onSuccess={async () => {
+          await checkPremiumStatus();
+          haptics.success();
+        }}
+      />
     </>
   );
 }
 
-// ⭐ Notification Settings Component
 function NotificationSettings() {
   const { t } = useTranslation("common");
+  const { colorScheme } = useColorScheme();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
-  const [dailyDigestEnabled, setDailyDigestEnabled] = useState(false);
-  const [scheduledCount, setScheduledCount] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const isDark = colorScheme === "dark";
 
   useEffect(() => {
     loadNotificationSettings();
@@ -290,305 +238,94 @@ function NotificationSettings() {
     try {
       const enabled = await AsyncStorage.getItem("notifications_enabled");
       setNotificationsEnabled(enabled === "true");
-
-      const scheduled = await getAllScheduledNotifications();
-      setScheduledCount(scheduled.length);
-
-      const hasDigest = scheduled.some(
-        (n) => n.content.data?.type === "daily_digest"
-      );
-      setDailyDigestEnabled(hasDigest);
-
-      console.log("🔔 [Settings] Loaded notification settings:", {
-        enabled,
-        scheduled: scheduled.length,
-        hasDigest,
-      });
     } catch (error) {
-      console.error("🔔 [Settings] Error loading settings:", error);
+      console.error("❌ [Notifications] Error loading settings:", error);
     }
   };
 
-  const handleEnableNotifications = async (value: boolean) => {
-    if (loading) return;
+  const handleToggle = async (value: boolean) => {
+    setNotificationsEnabled(value);
+    haptics.light();
 
-    setLoading(true);
     try {
       if (value) {
         const granted = await registerForPushNotifications();
+
         if (granted) {
           await AsyncStorage.setItem("notifications_enabled", "true");
-          setNotificationsEnabled(true);
-          Alert.alert(
-            "✅ Notifications Enabled",
-            "You'll receive reminders for your notes with due dates"
-          );
         } else {
-          Alert.alert(
-            "❌ Permission Denied",
-            "Please enable notifications in your device Settings"
-          );
+          setNotificationsEnabled(false);
+          await AsyncStorage.setItem("notifications_enabled", "false");
         }
       } else {
         await AsyncStorage.setItem("notifications_enabled", "false");
-        setNotificationsEnabled(false);
-        setDailyDigestEnabled(false);
-        Alert.alert(
-          "🔕 Notifications Disabled",
-          "You won't receive any notifications"
-        );
       }
     } catch (error) {
-      console.error("🔔 [Settings] Error toggling notifications:", error);
-      Alert.alert("❌ Error", "Failed to update notification settings");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDailyDigest = async (value: boolean) => {
-    if (loading || !notificationsEnabled) return;
-
-    setLoading(true);
-    try {
-      if (value) {
-        await scheduleDailyDigest();
-        setDailyDigestEnabled(true);
-        Alert.alert(
-          "✅ Daily Digest Enabled",
-          "You'll receive a summary at 9 AM every day"
-        );
-      } else {
-        const scheduled = await getAllScheduledNotifications();
-        const digest = scheduled.find(
-          (n) => n.content.data?.type === "daily_digest"
-        );
-        if (digest) {
-          await Notifications.cancelScheduledNotificationAsync(
-            digest.identifier
-          );
-        }
-        setDailyDigestEnabled(false);
-        Alert.alert("🔕 Daily Digest Disabled", "Daily summaries turned off");
-      }
-
-      await loadNotificationSettings();
-    } catch (error) {
-      console.error("🔔 [Settings] Error toggling daily digest:", error);
-      Alert.alert("❌ Error", "Failed to update daily digest setting");
-    } finally {
-      setLoading(false);
+      console.error("❌ [Notifications] Error:", error);
+      setNotificationsEnabled(!value);
     }
   };
 
   return (
-    <>
-      {/* Enable Notifications */}
-      <View className="flex-row items-center justify-between py-3 px-6">
-        <View className="flex-row items-center flex-1">
-          <View className="w-8 h-8 rounded-full bg-red-500 items-center justify-center mr-3">
-            <Ionicons name="notifications" size={18} color="white" />
-          </View>
-          <View className="flex-1">
-            <Text className="text-base text-ios-label dark:text-iosd-label font-medium">
-              Push Notifications
-            </Text>
-            <Text className="text-[12px] mt-0.5 text-ios-secondary dark:text-iosd-label2">
-              Reminders for due dates
-            </Text>
-          </View>
-        </View>
-        <Switch
-          value={notificationsEnabled}
-          onValueChange={handleEnableNotifications}
-          disabled={loading}
-          trackColor={{
-            false: "rgba(60,60,67,0.28)",
-            true: "rgba(10,132,255,0.45)",
-          }}
-          thumbColor={notificationsEnabled ? "#0A84FF" : "#FFFFFF"}
-        />
-      </View>
-
-      <View className="h-px bg-ios-sep dark:bg-iosd-sep ml-14" />
-
-      {/* Daily Digest */}
-      <View className="flex-row items-center justify-between py-3 px-6">
-        <View className="flex-row items-center flex-1">
-          <View className="w-8 h-8 rounded-full bg-orange-500 items-center justify-center mr-3">
-            <Ionicons name="sunny" size={18} color="white" />
-          </View>
-          <View className="flex-1">
-            <Text
-              className={`text-base font-medium ${
-                notificationsEnabled
-                  ? "text-ios-label dark:text-iosd-label"
-                  : "text-ios-secondary dark:text-iosd-label2"
-              }`}
-            >
-              Daily Digest
-            </Text>
-            <Text className="text-[12px] mt-0.5 text-ios-secondary dark:text-iosd-label2">
-              9 AM summary of today's notes
-            </Text>
-          </View>
-        </View>
-        <Switch
-          value={dailyDigestEnabled}
-          onValueChange={handleDailyDigest}
-          disabled={!notificationsEnabled || loading}
-          trackColor={{
-            false: "rgba(60,60,67,0.28)",
-            true: "rgba(10,132,255,0.45)",
-          }}
-          thumbColor={dailyDigestEnabled ? "#0A84FF" : "#FFFFFF"}
-        />
-      </View>
-
-      <View className="h-px bg-ios-sep dark:bg-iosd-sep ml-14" />
-
-      {/* Scheduled Count */}
-      <TouchableOpacity
-        className="flex-row items-center py-3 px-6 active:opacity-90"
-        onPress={async () => {
-          await loadNotificationSettings();
-          haptics.light();
-
-          const scheduled = await getAllScheduledNotifications();
-          Alert.alert(
-            "🔔 Scheduled Notifications",
-            `You have ${scheduled.length} scheduled notification${
-              scheduled.length === 1 ? "" : "s"
-            }`,
-            [
-              {
-                text: "OK",
-                style: "default",
-              },
-              {
-                text: "View Details",
-                onPress: () => {
-                  console.log("📋 Scheduled notifications:", scheduled);
-                  scheduled.forEach((n, i) => {
-                    console.log(`${i + 1}. ${n.content.title}`, n.content.data);
-                  });
-                },
-              },
-            ]
-          );
-        }}
-      >
-        <View className="w-8 h-8 rounded-full bg-purple-500 items-center justify-center mr-3">
-          <Ionicons name="time" size={18} color="white" />
-        </View>
-        <View className="flex-1 flex-row justify-between items-center">
-          <View>
-            <Text className="text-base text-ios-label dark:text-iosd-label font-medium">
-              Scheduled Notifications
-            </Text>
-            <Text className="text-[12px] mt-0.5 text-ios-secondary dark:text-iosd-label2">
-              Tap to refresh
-            </Text>
-          </View>
-          <View className="flex-row items-center">
-            <Text className="text-base text-ios-secondary dark:text-iosd-label2 mr-2">
-              {scheduledCount}
-            </Text>
-            <Ionicons name="chevron-forward" size={20} color="#999" />
-          </View>
-        </View>
-      </TouchableOpacity>
-
-      <View className="h-px bg-ios-sep dark:bg-iosd-sep ml-14" />
-
-      {/* Test Notification */}
-      <TouchableOpacity
-        className="flex-row items-center py-3 px-6 active:opacity-90"
-        onPress={async () => {
-          try {
-            const { scheduleTestNotification } = await import(
-              "@/utils/notifications"
-            );
-            await scheduleTestNotification(5);
-            haptics.success();
-            Alert.alert(
-              "✅ Test Scheduled",
-              "You'll receive a notification in 5 seconds"
-            );
-          } catch (error) {
-            Alert.alert("❌ Error", String(error));
-          }
-        }}
-      >
-        <View className="w-8 h-8 rounded-full bg-green-500 items-center justify-center mr-3">
-          <Ionicons name="flask" size={18} color="white" />
-        </View>
-        <View className="flex-1 flex-row justify-between items-center">
-          <View>
-            <Text className="text-base text-ios-label dark:text-iosd-label font-medium">
-              Test Notification
-            </Text>
-            <Text className="text-[12px] mt-0.5 text-ios-secondary dark:text-iosd-label2">
-              Trigger in 5 seconds
-            </Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color="#999" />
-        </View>
-      </TouchableOpacity>
-
-      <View className="h-px bg-ios-sep dark:bg-iosd-sep ml-14" />
-
-      {/* Cancel All Notifications */}
-      <TouchableOpacity
-        className="flex-row items-center py-3 px-6 active:opacity-90"
-        onPress={async () => {
-          const scheduled = await getAllScheduledNotifications();
-          Alert.alert(
-            "Cancel All?",
-            `This will cancel all ${scheduled.length} scheduled notifications`,
-            [
-              { text: "Cancel", style: "cancel" },
-              {
-                text: "Delete All",
-                style: "destructive",
-                onPress: async () => {
-                  await Notifications.cancelAllScheduledNotificationsAsync();
-                  await loadNotificationSettings();
-                  haptics.heavy();
-                  Alert.alert("✅ Cleared", "All notifications cancelled");
-                },
-              },
-            ]
-          );
-        }}
-      >
+    <View className="flex-row items-center justify-between py-3 px-6">
+      <View className="flex-row items-center flex-1">
         <View className="w-8 h-8 rounded-full bg-red-500 items-center justify-center mr-3">
-          <Ionicons name="trash" size={18} color="white" />
+          <Ionicons name="notifications" size={18} color="white" />
         </View>
         <View className="flex-1">
-          <Text className="text-base text-red-500 font-medium">
-            Cancel All Notifications
+          <Text className="text-base text-ios-label dark:text-iosd-label font-medium">
+            {t("settings.notifications.title")}
           </Text>
           <Text className="text-[12px] mt-0.5 text-ios-secondary dark:text-iosd-label2">
-            Clear all scheduled notifications
+            {t("settings.notifications.subtitle")}
           </Text>
         </View>
-      </TouchableOpacity>
-    </>
+      </View>
+      <Switch
+        value={notificationsEnabled}
+        onValueChange={handleToggle}
+        trackColor={{
+          false: isDark
+            ? "rgba(120, 120, 128, 0.32)"
+            : "rgba(120, 120, 128, 0.16)",
+          true: "#34C759",
+        }}
+        thumbColor="#FFFFFF"
+        ios_backgroundColor={
+          isDark ? "rgba(120, 120, 128, 0.32)" : "rgba(120, 120, 128, 0.16)"
+        }
+      />
+    </View>
   );
 }
 
-/* ---------------- MAIN SETTINGS SCREEN ---------------- */
 export default function Settings() {
   const { user } = useUser();
   const { signOut } = useAuth();
   const { ready } = useTheme();
   const { t } = useTranslation("common");
+  const insets = useSafeAreaInsets();
 
-  const handleLogout = async () => {
-    await signOut();
-    router.replace("/");
-  };
+  const handleLogout = useCallback(() => {
+    Alert.alert(
+      t("settings.logout.confirm.title"),
+      t("settings.logout.confirm.message"),
+      [
+        {
+          text: t("settings.logout.confirm.cancel"),
+          style: "cancel",
+        },
+        {
+          text: t("settings.logout.confirm.confirm"),
+          style: "destructive",
+          onPress: async () => {
+            await signOut();
+            router.replace("/");
+          },
+        },
+      ]
+    );
+  }, [signOut, t]);
 
   if (!ready) return null;
 
@@ -598,7 +335,9 @@ export default function Settings() {
         title={t("screen.settings.title")}
         rightButtons={
           <TouchableOpacity onPress={() => router.back()}>
-            <Text className="text-ios-blue text-base font-medium">Done</Text>
+            <Text className="text-ios-blue text-base font-medium">
+              {t("settings.done")}
+            </Text>
           </TouchableOpacity>
         }
       />
@@ -606,11 +345,10 @@ export default function Settings() {
       <ScreenScroll
         style={{ flex: 1 }}
         contentContainerStyle={{
-          paddingBottom: 40,
+          paddingBottom: Math.max(insets.bottom + 20, 40),
         }}
         showsVerticalScrollIndicator={false}
       >
-        {/* User info */}
         <View className="px-6 mb-8">
           <Text className="text-xl font-semibold text-ios-label dark:text-iosd-label">
             {user?.fullName || t("user.fallbackName")}
@@ -620,12 +358,12 @@ export default function Settings() {
           </Text>
         </View>
 
-        {/* ⭐ Premium Section - First! */}
+        {/* Premium */}
         <View className="mx-4 rounded-2xl overflow-hidden border border-black/10 dark:border-white/10 bg-white/80 dark:bg-white/10">
           <PremiumSettings />
         </View>
 
-        {/* Appearance */}
+        {/* Theme */}
         <View className="mt-6 mx-4 rounded-2xl overflow-hidden border border-black/10 dark:border-white/10 bg-white/80 dark:bg-white/10">
           <ThemeToggleRow />
         </View>
@@ -635,32 +373,15 @@ export default function Settings() {
           <LanguagePicker />
         </View>
 
-        {/* ⭐ Notifications Section */}
+        {/* Notifications */}
         <View className="mt-6 mx-4 rounded-2xl overflow-hidden border border-black/10 dark:border-white/10 bg-white/80 dark:bg-white/10">
           <NotificationSettings />
         </View>
 
-        {/* App settings */}
+        {/* About */}
         <View className="mt-6 mx-4 rounded-2xl overflow-hidden border border-black/10 dark:border-white/10 bg-white/80 dark:bg-white/10">
           <TouchableOpacity
-            className="flex-row items-center py-3 px-6 active:opacity-90"
-            onPress={() => router.push("/privacy")}
-          >
-            <View className="w-8 h-8 rounded-full bg-purple-500 items-center justify-center mr-3">
-              <Ionicons name="lock-closed-outline" size={18} color="white" />
-            </View>
-            <View className="flex-1 flex-row justify-between items-center">
-              <Text className="text-base text-ios-label dark:text-iosd-label">
-                {t("settings.sections.privacy")}
-              </Text>
-              <Ionicons name="chevron-forward" size={20} color="#999" />
-            </View>
-          </TouchableOpacity>
-
-          <View className="h-px bg-ios-sep dark:bg-iosd-sep ml-14" />
-
-          <TouchableOpacity
-            className="flex-row items-center py-3 px-6 active:opacity-90"
+            className="flex-row items-center py-3 px-6 active:opacity-70"
             onPress={() => router.push("/about")}
           >
             <View className="w-8 h-8 rounded-full bg-ios-blue items-center justify-center mr-3">
@@ -671,7 +392,7 @@ export default function Settings() {
               />
             </View>
             <View className="flex-1 flex-row justify-between items-center">
-              <Text className="text-base text-ios-label dark:text-iosd-label">
+              <Text className="text-base text-ios-label dark:text-iosd-label font-medium">
                 {t("settings.sections.about")}
               </Text>
               <Ionicons name="chevron-forward" size={20} color="#999" />
@@ -682,19 +403,19 @@ export default function Settings() {
         {/* Logout */}
         <View className="mt-6 mx-4 rounded-2xl overflow-hidden border border-black/10 dark:border-white/10 bg-white/80 dark:bg-white/10">
           <TouchableOpacity
-            className="flex-row items-center py-3 px-6 active:opacity-90"
+            className="flex-row items-center py-3 px-6 active:opacity-70"
             onPress={handleLogout}
           >
             <View className="w-8 h-8 rounded-full bg-red-500 items-center justify-center mr-3">
               <Ionicons name="exit-outline" size={18} color="white" />
             </View>
             <Text className="text-base font-semibold text-red-500">
-              {t("settings.logout")}
+              {t("settings.logout.button")}
             </Text>
           </TouchableOpacity>
         </View>
 
-        {/* App info */}
+        {/* Version */}
         <View className="mt-8 items-center">
           <Text className="text-sm text-ios-secondary dark:text-iosd-label2">
             {t("app.version", {

@@ -7,6 +7,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Redirect, router } from "expo-router";
 import { useColorScheme } from "nativewind";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Keyboard,
@@ -23,6 +24,7 @@ export default function Register() {
   const { isSignedIn, isLoaded: authLoaded } = useAuth();
   const { isLoaded, signUp, setActive } = useSignUp();
   const { colorScheme } = useColorScheme();
+  const { t } = useTranslation("common");
   const isDark = colorScheme === "dark";
 
   const [email, setEmail] = useState("");
@@ -31,6 +33,8 @@ export default function Register() {
   const [pendingVerification, setPendingVerification] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   if (!authLoaded) {
     return (
@@ -41,6 +45,12 @@ export default function Register() {
   }
 
   if (isSignedIn) return <Redirect href="/(tabs)/home" />;
+
+  const getPasswordStrength = () => {
+    if (password.length < 8) return 0;
+    if (password.length < 12) return 1;
+    return 2;
+  };
 
   const handleRegister = async () => {
     if (!isLoaded || !signUp) return;
@@ -60,7 +70,8 @@ export default function Register() {
       console.error("❌ [Register] Error:", err);
 
       const errorMsg =
-        err.errors?.[0]?.message || "Registration failed. Please try again.";
+        err.errors?.[0]?.message ||
+        t("auth.register.errors.registrationFailed");
       setError(errorMsg);
     } finally {
       setLoading(false);
@@ -85,11 +96,44 @@ export default function Register() {
       }
     } catch (err: any) {
       console.error("❌ [Register] Verification error:", err);
-      setError(err.errors?.[0]?.message || "Invalid code. Please try again.");
+      setError(
+        err.errors?.[0]?.message || t("auth.register.errors.invalidCode")
+      );
     } finally {
       setLoading(false);
     }
   };
+
+  const handleResendCode = async () => {
+    if (!loading && signUp && resendCooldown === 0) {
+      try {
+        setResendCooldown(60);
+        const interval = setInterval(() => {
+          setResendCooldown((prev) => {
+            if (prev <= 1) {
+              clearInterval(interval);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+
+        await signUp.prepareEmailAddressVerification({
+          strategy: "email_code",
+        });
+        setError("");
+      } catch (err: any) {
+        setError(t("auth.register.errors.resendFailed"));
+      }
+    }
+  };
+
+  const passwordStrength = getPasswordStrength();
+  const strengthLabels = [
+    t("auth.register.passwordStrength.weak"),
+    t("auth.register.passwordStrength.good"),
+    t("auth.register.passwordStrength.strong"),
+  ];
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
@@ -112,19 +156,19 @@ export default function Register() {
               {!pendingVerification ? (
                 <>
                   <Text className="text-3xl font-bold text-ios-label dark:text-iosd-label mb-2">
-                    Create Account
+                    {t("auth.register.title")}
                   </Text>
                   <Text className="text-base text-ios-secondary dark:text-iosd-label2 text-center">
-                    Start capturing ideas with AI
+                    {t("auth.register.subtitle")}
                   </Text>
                 </>
               ) : (
                 <>
                   <Text className="text-3xl font-bold text-ios-label dark:text-iosd-label mb-2">
-                    Verify Email
+                    {t("auth.register.verifyTitle")}
                   </Text>
                   <Text className="text-base text-ios-secondary dark:text-iosd-label2 text-center px-8">
-                    Enter the code we sent to {email}
+                    {t("auth.register.verifySubtitle", { email })}
                   </Text>
                 </>
               )}
@@ -135,10 +179,10 @@ export default function Register() {
               {!pendingVerification ? (
                 <>
                   <Input
-                    placeholder="Email"
+                    placeholder={t("auth.register.emailPlaceholder")}
                     value={email}
                     onChangeText={(text) => {
-                      setEmail(text);
+                      setEmail(text.trim());
                       setError("");
                     }}
                     keyboardType="email-address"
@@ -148,52 +192,54 @@ export default function Register() {
                     editable={!loading}
                   />
 
-                  <Input
-                    placeholder="Password (min. 8 characters)"
-                    value={password}
-                    onChangeText={(text) => {
-                      setPassword(text);
-                      setError("");
-                    }}
-                    secureTextEntry
-                    autoComplete="password-new"
-                    returnKeyType="done"
-                    onSubmitEditing={handleRegister}
-                    editable={!loading}
-                  />
+                  <View className="relative">
+                    <Input
+                      placeholder={t("auth.register.passwordPlaceholder")}
+                      value={password}
+                      onChangeText={(text) => {
+                        setPassword(text);
+                        setError("");
+                      }}
+                      secureTextEntry={!showPassword}
+                      autoComplete="password-new"
+                      returnKeyType="done"
+                      onSubmitEditing={handleRegister}
+                      editable={!loading}
+                    />
+                    <TouchableWithoutFeedback
+                      onPress={() => setShowPassword(!showPassword)}
+                    >
+                      <View className="absolute right-4 top-4">
+                        <Ionicons
+                          name={showPassword ? "eye-off" : "eye"}
+                          size={22}
+                          color={isDark ? "#8E8E93" : "#C7C7CC"}
+                        />
+                      </View>
+                    </TouchableWithoutFeedback>
+                  </View>
 
                   {/* Password strength indicator */}
                   {password.length > 0 && (
                     <View className="mb-4">
-                      <View className="flex-row items-center">
-                        <View
-                          className={`flex-1 h-1 rounded-full mr-1 ${
-                            password.length >= 8
-                              ? "bg-green-500"
-                              : "bg-gray-300 dark:bg-gray-600"
-                          }`}
-                        />
-                        <View
-                          className={`flex-1 h-1 rounded-full mr-1 ${
-                            password.length >= 12
-                              ? "bg-green-500"
-                              : "bg-gray-300 dark:bg-gray-600"
-                          }`}
-                        />
-                        <View
-                          className={`flex-1 h-1 rounded-full ${
-                            password.length >= 16
-                              ? "bg-green-500"
-                              : "bg-gray-300 dark:bg-gray-600"
-                          }`}
-                        />
+                      <View className="flex-row items-center gap-1">
+                        {[0, 1, 2].map((index) => (
+                          <View
+                            key={index}
+                            className={`flex-1 h-1 rounded-full ${
+                              index <= passwordStrength
+                                ? index === 0
+                                  ? "bg-red-500"
+                                  : index === 1
+                                    ? "bg-yellow-500"
+                                    : "bg-green-500"
+                                : "bg-gray-300 dark:bg-gray-600"
+                            }`}
+                          />
+                        ))}
                       </View>
                       <Text className="text-xs text-ios-secondary dark:text-iosd-label2 mt-1">
-                        {password.length < 8
-                          ? "Weak"
-                          : password.length < 12
-                            ? "Good"
-                            : "Strong"}
+                        {strengthLabels[passwordStrength]}
                       </Text>
                     </View>
                   )}
@@ -208,9 +254,9 @@ export default function Register() {
                   ) : null}
 
                   <Button
-                    title="Create Account"
+                    title={t("auth.register.createAccountButton")}
                     variant="primary"
-                    size="lg"
+                    size="md"
                     fullWidth
                     onPress={handleRegister}
                     disabled={loading || !email || password.length < 8}
@@ -219,9 +265,9 @@ export default function Register() {
                   />
 
                   <Button
-                    title="Already have an account? Login"
+                    title={t("auth.register.haveAccount")}
                     variant="secondary"
-                    size="lg"
+                    size="md"
                     fullWidth
                     onPress={() => router.push("/(auth)/login")}
                     disabled={loading}
@@ -231,7 +277,7 @@ export default function Register() {
                   <View className="flex-row items-center my-6">
                     <View className="flex-1 h-px bg-ios-sep dark:bg-iosd-sep" />
                     <Text className="mx-4 text-sm text-ios-secondary dark:text-iosd-label2">
-                      or continue with
+                      {t("auth.register.orContinueWith")}
                     </Text>
                     <View className="flex-1 h-px bg-ios-sep dark:bg-iosd-sep" />
                   </View>
@@ -240,14 +286,13 @@ export default function Register() {
 
                   {/* Terms */}
                   <Text className="text-xs text-ios-secondary dark:text-iosd-label2 text-center mt-6 leading-5">
-                    By creating an account, you agree to our Terms of Service
-                    and Privacy Policy
+                    {t("auth.register.terms")}
                   </Text>
                 </>
               ) : (
                 <>
                   <Input
-                    placeholder="Verification Code"
+                    placeholder={t("auth.register.verificationCodePlaceholder")}
                     value={code}
                     onChangeText={(text) => {
                       setCode(text);
@@ -271,20 +316,20 @@ export default function Register() {
                   ) : null}
 
                   <Button
-                    title="Verify & Continue"
+                    title={t("auth.register.verifyButton")}
                     variant="primary"
-                    size="lg"
+                    size="md"
                     fullWidth
                     onPress={handleVerify}
-                    disabled={loading || !code}
+                    disabled={loading || !code || code.length !== 6}
                     loading={loading}
                     className="mb-3"
                   />
 
                   <Button
-                    title="Back to Registration"
+                    title={t("auth.register.backToRegister")}
                     variant="secondary"
-                    size="lg"
+                    size="md"
                     fullWidth
                     onPress={() => {
                       setPendingVerification(false);
@@ -297,23 +342,20 @@ export default function Register() {
 
                   {/* Resend code */}
                   <TouchableOpacity
-                    onPress={async () => {
-                      if (!loading && signUp) {
-                        try {
-                          await signUp.prepareEmailAddressVerification({
-                            strategy: "email_code",
-                          });
-                          setError("");
-                        } catch (err: any) {
-                          setError("Failed to resend code");
-                        }
-                      }
-                    }}
-                    disabled={loading}
+                    onPress={handleResendCode}
+                    disabled={loading || resendCooldown > 0}
                     className="py-3 items-center"
                   >
-                    <Text className="text-ios-blue text-sm font-medium">
-                      Didn't receive code? Resend
+                    <Text
+                      className={`text-sm font-medium ${
+                        resendCooldown > 0
+                          ? "text-ios-secondary dark:text-iosd-label2"
+                          : "text-ios-blue"
+                      }`}
+                    >
+                      {resendCooldown > 0
+                        ? `${t("auth.register.resendCode")} (${resendCooldown}s)`
+                        : t("auth.register.resendCode")}
                     </Text>
                   </TouchableOpacity>
                 </>

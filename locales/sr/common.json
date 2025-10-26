@@ -9,6 +9,52 @@
   "user": {
     "fallbackName": "Korisnik"
   },
+  "auth": {
+    "login": {
+      "title": "Dobrodošli nazad",
+      "subtitle": "Prijavite se da nastavite u AInote",
+      "emailPlaceholder": "Email",
+      "passwordPlaceholder": "Lozinka",
+      "signInButton": "Prijavi se",
+      "noAccount": "Nemate nalog? Registrujte se",
+      "orContinueWith": "ili nastavite sa",
+      "verifyTitle": "Verifikujte email",
+      "verifySubtitle": "Poslali smo verifikacioni kod na {{email}}",
+      "verificationCodePlaceholder": "Verifikacioni kod",
+      "verifyButton": "Verifikuj email",
+      "backToLogin": "Nazad na prijavu",
+      "errors": {
+        "loginFailed": "Prijava neuspešna. Pokušajte ponovo.",
+        "invalidCode": "Neispravan kod. Pokušajte ponovo."
+      }
+    },
+    "register": {
+      "title": "Kreiraj nalog",
+      "subtitle": "Počni da snimаš ideje sa AI",
+      "emailPlaceholder": "Email",
+      "passwordPlaceholder": "Lozinka (min. 8 karaktera)",
+      "createAccountButton": "Kreiraj nalog",
+      "haveAccount": "Već imate nalog? Prijavite se",
+      "orContinueWith": "ili nastavite sa",
+      "terms": "Kreiranjem naloga prihvatate naše Uslove korišćenja i Politiku privatnosti",
+      "verifyTitle": "Verifikujte email",
+      "verifySubtitle": "Unesite kod koji smo poslali na {{email}}",
+      "verificationCodePlaceholder": "Verifikacioni kod",
+      "verifyButton": "Verifikuj i nastavi",
+      "backToRegister": "Nazad na registraciju",
+      "resendCode": "Niste dobili kod? Pošalji ponovo",
+      "passwordStrength": {
+        "weak": "Slaba",
+        "good": "Dobra",
+        "strong": "Jaka"
+      },
+      "errors": {
+        "registrationFailed": "Registracija neuspešna. Pokušajte ponovo.",
+        "invalidCode": "Neispravan kod. Pokušajte ponovo.",
+        "resendFailed": "Slanje koda neuspešno"
+      }
+    }
+  },
   "appearance": {
     "darkMode": {
       "title": "Tamni režim",
@@ -16,15 +62,215 @@
     }
   },
   "settings": {
+    "done": "Gotovo",
+    "premium": {
+      "status": "Premium Status",
+      "active": "Aktivan",
+      "inactive": "Nije aktivan",
+      "manage": "Upravljaj pretplatom",
+      "upgrade": "Nadogradi na Premium",
+      "manageSubtitle": "Pregledaj planove i naplatu",
+      "upgradeSubtitle": "Otključaj neograničene AI funkcije",
+      "success": {
+        "title": "Uspeh!",
+        "message": "Dobrodošli u AInote Premium! Uživajte u neograničenim AI funkcijama."
+      },
+      "benefits": {
+        "title": "Premium Prednosti",
+        "transcriptions": "Neograničene AI transkripcije",
+        "analysis": "Analiza audio i video beleški",
+        "sync": "Cloud sinhronizacija na svim uređajima",
+        "search": "Napredna pretraga i organizacija"
+      }
+    },
+    "notifications": {
+      "title": "Push Obaveštenja",
+      "subtitle": "Podsetnici za rokove",
+      "enabled": {
+        "title": "Obaveštenja Uključena",
+        "message": "Primićete podsetnike za beleške sa rokovima"
+      },
+      "denied": {
+        "title": "Dozvola Odbijena",
+        "message": "Molimo omogućite obaveštenja u podešavanjima uređaja"
+      },
+      "disabled": {
+        "title": "Obaveštenja Isključena",
+        "message": "Nećete primati obaveštenja"
+      },
+      "error": {
+        "title": "Greška",
+        "message": "Neuspešno ažuriranje podešavanja obaveštenja"
+      }
+    },
+    "logout": {
+      "button": "Odjavi se",
+      "confirm": {
+        "title": "Odjavi se?",
+        "message": "Da li ste sigurni da želite da se odjavite?",
+        "cancel": "Otkaži",
+        "confirm": "Odjavi se"
+      }
+    },
+    "language": {
+      "button": "Izaberi jezik",
+      "title": "Jezik aplikacije",
+      "selected": "Izabrano",
+      "modal": {
+        "title": "Jezik aplikacije",
+        "subtitle": "Izaberite željeni jezik",
+        "close": "Zatvori"
+      }
+    },
     "sections": {
-      "notifications": "Obaveštenja",
       "privacy": "Privatnost",
       "about": "O aplikaciji"
-    },
-    "logout": "Odjavi se"
+    }
   },
   "app": {
     "version": "AiNote v{{version}}"
+  },
+  "about": {
+    "title": "O aplikaciji",
+    "tagline": "Pametno beleženje sa AI",
+    "version": "Verzija {{version}} ({{buildNumber}})",
+    "description": "AInote je moderna aplikacija za beleženje koja koristi veštačku inteligenciju da organizuje vaše ideje. Snimajte audio, tekst, fotografije i video, a AI će automatski kreirati naslove, sažetke i tagove.",
+    "feedback": "Povratne informacije",
+    "links": {
+      "privacy": "Politika privatnosti",
+      "terms": "Uslovi korišćenja",
+      "website": "Web sajt"
+    },
+    "contact": {
+      "email": "Kontaktiraj nas",
+      "emailSubtitle": "Pošalji email podršci",
+      "rate": "Oceni aplikaciju",
+      "rateSubtitle": "Ostavi ocenu u prodavnici"
+    },
+    "madeWith": "Napravljeno sa ❤️ za ljude koji žele da organizuju svoje ideje",
+    "rights": "Sva prava zadržana.",
+    "error": {
+      "title": "Greška",
+      "message": "Ne mogu da otvorim link"
+    }
+  },
+  "privacy": {
+    "title": "Privatnost",
+    "intro": "Vaša privatnost je veoma važna za nas. Ova politika privatnosti objašnjava koje podatke prikupljamo, kako ih koristimo i vaša prava u vezi sa vašim ličnim podacima.",
+    "lastUpdated": "Poslednje ažurirano: 26. oktobar 2025.",
+    "sections": {
+      "dataCollection": {
+        "title": "Koje podatke prikupljamo",
+        "content": "Prikupljamo podatke koje vi direktno unosite u aplikaciju: beleške (tekst, audio, slike, video), nalog informacije (email, ime), i postavke aplikacije. Takođe prikupljamo osnovne podatke o upotrebi za poboljšanje aplikacije."
+      },
+      "dataUsage": {
+        "title": "Kako koristimo vaše podatke",
+        "content": "Vaši podaci se koriste isključivo za pružanje usluga aplikacije: čuvanje i organizovanje vaših beleški, AI analizu sadržaja, sinhronizaciju između uređaja, i personalizaciju vašeg iskustva. Nikada ne prodajemo vaše podatke trećim licima."
+      },
+      "aiProcessing": {
+        "title": "AI obrada",
+        "content": "Kada koristite AI funkcije (transkripcija, sažetak, tagovi), vaš sadržaj se šalje OpenAI servisu za obradu. Ovi servisi ne čuvaju vaše podatke nakon obrade. Svi AI zahtevi su šifrovani i sigurni."
+      },
+      "dataStorage": {
+        "title": "Čuvanje podataka",
+        "content": "Vaše beleške se čuvaju sigurno na vašem uređaju i u našem cloud sistemu (ako ste premium korisnik). Svi podaci su šifrovani u tranzitu i u mirovanju. Koristimo industijske standarde za sigurnost podataka."
+      },
+      "yourRights": {
+        "title": "Vaša prava",
+        "content": "Imate pravo da pristupite, ispravite ili obrišete svoje podatke u bilo kom trenutku. Možete eksportovati sve vaše podatke iz aplikacije. Da biste obrisali nalog i sve podatke, kontaktirajte našu podršku."
+      },
+      "thirdParty": {
+        "title": "Servisi trećih strana",
+        "content": "Koristimo: Clerk (autentifikacija), OpenAI (AI funkcije), RevenueCat (pretplate), i Expo (push notifikacije). Ovi servisi imaju svoje politike privatnosti i obrađuju podatke u skladu sa njima."
+      }
+    },
+    "contact": {
+      "title": "Kontaktirajte nas",
+      "content": "Ako imate pitanja o ovoj politici privatnosti, kontaktirajte nas na denis.djordjevic@gmail.com"
+    }
+  },
+  "terms": {
+    "title": "Uslovi korišćenja",
+    "intro": "Korišćenjem AInote aplikacije prihvatate sledeće uslove korišćenja. Molimo vas da ih pažljivo pročitate.",
+    "lastUpdated": "Poslednje ažurirano: 26. oktobar 2025.",
+    "sections": {
+      "acceptance": {
+        "title": "Prihvatanje uslova",
+        "content": "Pristupajući i korišćenjem AInote aplikacije, prihvatate da budete vezani ovim uslovima. Ako se ne slažete sa bilo kojim delom uslova, ne smete koristiti aplikaciju."
+      },
+      "account": {
+        "title": "Korisnički nalog",
+        "content": "Da biste koristili AInote, morate kreirati nalog. Odgovorni ste za održavanje sigurnosti svog naloga i lozinke. Prihvatate odgovornost za sve aktivnosti koje se dešavaju pod vašim nalogom."
+      },
+      "license": {
+        "title": "Licenca za korišćenje",
+        "content": "Dajemo vam ograničenu, neekskluzivnu, neprenosivu licencu za korišćenje AInote aplikacije za lične, nekomercijalne svrhe. Ova licenca ne uključuje pravo na preprodaju ili komercijalnu upotrebu."
+      },
+      "userContent": {
+        "title": "Korisnički sadržaj",
+        "content": "Vi zadržavate sva prava vlasništva nad sadržajem koji kreirate u aplikaciji. Dajete nam ograničenu licencu za obradu vašeg sadržaja kako bismo pružili usluge aplikacije, uključujući AI funkcije."
+      },
+      "prohibited": {
+        "title": "Zabranjena upotreba",
+        "content": "Ne smete koristiti aplikaciju za nezakonite svrhe, upload malware-a, kršenje prava drugih korisnika, spam, ili bilo koju aktivnost koja može oštetiti funkcionalnost aplikacije."
+      },
+      "subscriptions": {
+        "title": "Pretplate",
+        "content": "Premium pretplata se automatski obnavlja ako je ne otkažete. Možete otkazati pretplatu u bilo kom trenutku kroz podešavanja vašeg App Store ili Google Play naloga. Povraćaj novca se vrši u skladu sa politikom prodavnice."
+      },
+      "termination": {
+        "title": "Prekid usluge",
+        "content": "Možemo suspendovati ili prekinuti vaš pristup aplikaciji u bilo kom trenutku, bez prethodnog upozorenja, zbog kršenja ovih uslova ili bilo kog razloga po našem nahođenju."
+      },
+      "disclaimer": {
+        "title": "Odricanje odgovornosti",
+        "content": "Aplikacija se pruža 'kakva jeste' bez garancija bilo koje vrste. Ne garantujemo da će aplikacija biti bez grešaka ili da će stalno biti dostupna. Nismo odgovorni za gubitak podataka."
+      },
+      "changes": {
+        "title": "Izmene uslova",
+        "content": "Zadržavamo pravo da izmenimo ove uslove u bilo kom trenutku. Nastavkom korišćenja aplikacije nakon izmena prihvatate nove uslove. Obaveštavamo vas o značajnim promenama."
+      }
+    },
+    "contact": {
+      "title": "Kontakt",
+      "content": "Za pravna pitanja kontaktirajte nas na denis.djordjevic@gmail.com"
+    }
+  },
+  "paywall": {
+    "title": "Nadogradi na Premium",
+    "choosePlan": "Izaberi plan",
+    "subscribe": "Pretplati se",
+    "bestValue": "NAJBOLJA VREDNOST",
+    "features": {
+      "title": "Premium Funkcije",
+      "unlimited": "Neograničene AI transkripcije",
+      "video": "Analiza audio i video snimaka",
+      "sync": "Cloud sinhronizacija",
+      "search": "Napredna pretraga"
+    },
+    "plans": {
+      "monthly": "Mesečno",
+      "annual": "Godišnje",
+      "lifetime": "Doživotno"
+    },
+    "terms": "Pretplata se automatski obnavlja. Možete otkazati u bilo kom trenutku.",
+    "success": {
+      "title": "Uspešno!",
+      "message": "Sada imate pristup svim premium funkcijama."
+    },
+    "restore": {
+      "button": "Vrati kupovine",
+      "success": "Uspešno vraćeno",
+      "message": "Vaše kupovine su vraćene.",
+      "noPurchases": "Nema kupovina",
+      "noPurchasesMessage": "Nije pronađena nijedna prethodna kupovina."
+    },
+    "error": {
+      "title": "Greška",
+      "loadFailed": "Nije moguće učitati pakete",
+      "purchaseFailed": "Kupovina nije uspela",
+      "restoreFailed": "Vraćanje kupovina nije uspelo"
+    }
   },
   "home": {
     "title": "Početna",

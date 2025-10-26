@@ -9,6 +9,52 @@
   "user": {
     "fallbackName": "User"
   },
+  "auth": {
+    "login": {
+      "title": "Welcome Back",
+      "subtitle": "Sign in to continue to AInote",
+      "emailPlaceholder": "Email",
+      "passwordPlaceholder": "Password",
+      "signInButton": "Sign In",
+      "noAccount": "Don't have an account? Register",
+      "orContinueWith": "or continue with",
+      "verifyTitle": "Verify Email",
+      "verifySubtitle": "We sent a verification code to {{email}}",
+      "verificationCodePlaceholder": "Verification Code",
+      "verifyButton": "Verify Email",
+      "backToLogin": "Back to Login",
+      "errors": {
+        "loginFailed": "Login failed. Please try again.",
+        "invalidCode": "Invalid code. Please try again."
+      }
+    },
+    "register": {
+      "title": "Create Account",
+      "subtitle": "Start capturing ideas with AI",
+      "emailPlaceholder": "Email",
+      "passwordPlaceholder": "Password (min. 8 characters)",
+      "createAccountButton": "Create Account",
+      "haveAccount": "Already have an account? Login",
+      "orContinueWith": "or continue with",
+      "terms": "By creating an account, you agree to our Terms of Service and Privacy Policy",
+      "verifyTitle": "Verify Email",
+      "verifySubtitle": "Enter the code we sent to {{email}}",
+      "verificationCodePlaceholder": "Verification Code",
+      "verifyButton": "Verify & Continue",
+      "backToRegister": "Back to Registration",
+      "resendCode": "Didn't receive code? Resend",
+      "passwordStrength": {
+        "weak": "Weak",
+        "good": "Good",
+        "strong": "Strong"
+      },
+      "errors": {
+        "registrationFailed": "Registration failed. Please try again.",
+        "invalidCode": "Invalid code. Please try again.",
+        "resendFailed": "Failed to resend code"
+      }
+    }
+  },
   "appearance": {
     "darkMode": {
       "title": "Dark Mode",
@@ -16,15 +62,215 @@
     }
   },
   "settings": {
-    "sections": {
-      "notifications": "Notifications",
-      "privacy": "Privacy",
-      "about": "About"
+    "done": "Done",
+    "premium": {
+      "status": "Premium Status",
+      "active": "✅ Active",
+      "inactive": "Not Active",
+      "manage": "Manage Subscription",
+      "upgrade": "Upgrade to Premium",
+      "manageSubtitle": "View plans and billing",
+      "upgradeSubtitle": "Unlock unlimited AI features",
+      "success": {
+        "title": "Success!",
+        "message": "Welcome to AInote Premium! Enjoy unlimited AI features."
+      },
+      "benefits": {
+        "title": "Premium Benefits",
+        "transcriptions": "Unlimited AI transcriptions",
+        "analysis": "Audio & video note analysis",
+        "sync": "Cloud sync across devices",
+        "search": "Advanced search & organization"
+      }
     },
-    "logout": "Log out"
+    "notifications": {
+      "title": "Push Notifications",
+      "subtitle": "Reminders for due dates",
+      "enabled": {
+        "title": "Notifications Enabled",
+        "message": "You'll receive reminders for your notes with due dates"
+      },
+      "denied": {
+        "title": "Permission Denied",
+        "message": "Please enable notifications in your device Settings"
+      },
+      "disabled": {
+        "title": "Notifications Disabled",
+        "message": "You won't receive any notifications"
+      },
+      "error": {
+        "title": "Error",
+        "message": "Failed to update notification settings"
+      }
+    },
+    "logout": {
+      "button": "Sign Out",
+      "confirm": {
+        "title": "Sign Out?",
+        "message": "Are you sure you want to sign out?",
+        "cancel": "Cancel",
+        "confirm": "Sign Out"
+      }
+    },
+    "language": {
+      "button": "Select language",
+      "title": "App Language",
+      "selected": "Selected",
+      "modal": {
+        "title": "App Language",
+        "subtitle": "Choose your preferred language",
+        "close": "Close"
+      }
+    },
+    "sections": {
+      "privacy": "Privacy",
+      "about": "About Application"
+    }
   },
   "app": {
     "version": "AiNote v{{version}}"
+  },
+  "about": {
+    "title": "About",
+    "tagline": "Smart Note-Taking with AI",
+    "version": "Version {{version}} ({{buildNumber}})",
+    "description": "AInote is a modern note-taking app that uses artificial intelligence to organize your ideas. Record audio, text, photos and videos, and AI will automatically create titles, summaries and tags.",
+    "feedback": "Feedback",
+    "links": {
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "website": "Website"
+    },
+    "contact": {
+      "email": "Contact Us",
+      "emailSubtitle": "Send email to support",
+      "rate": "Rate App",
+      "rateSubtitle": "Leave a review in the store"
+    },
+    "madeWith": "Made with ❤️ for people who want to organize their ideas",
+    "rights": "All rights reserved.",
+    "error": {
+      "title": "Error",
+      "message": "Cannot open link"
+    }
+  },
+  "privacy": {
+    "title": "Privacy",
+    "intro": "Your privacy is very important to us. This privacy policy explains what data we collect, how we use it, and your rights regarding your personal data.",
+    "lastUpdated": "Last updated: October 26, 2025",
+    "sections": {
+      "dataCollection": {
+        "title": "What data we collect",
+        "content": "We collect data that you directly enter into the app: notes (text, audio, images, video), account information (email, name), and app settings. We also collect basic usage data to improve the app."
+      },
+      "dataUsage": {
+        "title": "How we use your data",
+        "content": "Your data is used exclusively to provide app services: storing and organizing your notes, AI content analysis, syncing between devices, and personalizing your experience. We never sell your data to third parties."
+      },
+      "aiProcessing": {
+        "title": "AI processing",
+        "content": "When you use AI features (transcription, summary, tags), your content is sent to OpenAI services for processing. These services do not store your data after processing. All AI requests are encrypted and secure."
+      },
+      "dataStorage": {
+        "title": "Data storage",
+        "content": "Your notes are stored securely on your device and in our cloud system (if you're a premium user). All data is encrypted in transit and at rest. We use industry standards for data security."
+      },
+      "yourRights": {
+        "title": "Your rights",
+        "content": "You have the right to access, correct, or delete your data at any time. You can export all your data from the app. To delete your account and all data, contact our support."
+      },
+      "thirdParty": {
+        "title": "Third-party services",
+        "content": "We use: Clerk (authentication), OpenAI (AI features), RevenueCat (subscriptions), and Expo (push notifications). These services have their own privacy policies and process data accordingly."
+      }
+    },
+    "contact": {
+      "title": "Contact us",
+      "content": "If you have questions about this privacy policy, contact us at denis.djordjevic@gmail.com"
+    }
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "intro": "By using the AInote app, you agree to the following terms of service. Please read them carefully.",
+    "lastUpdated": "Last updated: October 26, 2025",
+    "sections": {
+      "acceptance": {
+        "title": "Acceptance of Terms",
+        "content": "By accessing and using the AInote app, you agree to be bound by these terms. If you disagree with any part of the terms, you may not use the app."
+      },
+      "account": {
+        "title": "User Account",
+        "content": "To use AInote, you must create an account. You are responsible for maintaining the security of your account and password. You accept responsibility for all activities that occur under your account."
+      },
+      "license": {
+        "title": "License to Use",
+        "content": "We grant you a limited, non-exclusive, non-transferable license to use the AInote app for personal, non-commercial purposes. This license does not include the right to resell or commercial use."
+      },
+      "userContent": {
+        "title": "User Content",
+        "content": "You retain all ownership rights to content you create in the app. You grant us a limited license to process your content to provide app services, including AI features."
+      },
+      "prohibited": {
+        "title": "Prohibited Use",
+        "content": "You may not use the app for illegal purposes, upload malware, violate other users' rights, spam, or any activity that may harm the app's functionality."
+      },
+      "subscriptions": {
+        "title": "Subscriptions",
+        "content": "Premium subscriptions automatically renew unless canceled. You can cancel your subscription at any time through your App Store or Google Play account settings. Refunds are subject to store policy."
+      },
+      "termination": {
+        "title": "Termination",
+        "content": "We may suspend or terminate your access to the app at any time, without prior notice, for violation of these terms or any reason at our discretion."
+      },
+      "disclaimer": {
+        "title": "Disclaimer",
+        "content": "The app is provided 'as is' without warranties of any kind. We do not guarantee that the app will be error-free or constantly available. We are not responsible for data loss."
+      },
+      "changes": {
+        "title": "Changes to Terms",
+        "content": "We reserve the right to modify these terms at any time. By continuing to use the app after changes, you accept the new terms. We will notify you of significant changes."
+      }
+    },
+    "contact": {
+      "title": "Contact",
+      "content": "For legal matters, contact us at denis.djordjevic@gmail.com"
+    }
+  },
+  "paywall": {
+    "title": "Upgrade to Premium",
+    "choosePlan": "Choose your plan",
+    "subscribe": "Subscribe Now",
+    "bestValue": "BEST VALUE",
+    "features": {
+      "title": "Premium Features",
+      "unlimited": "Unlimited AI transcriptions",
+      "video": "Audio & video note analysis",
+      "sync": "Cloud sync across devices",
+      "search": "Advanced search & organization"
+    },
+    "plans": {
+      "monthly": "Monthly",
+      "annual": "Annual",
+      "lifetime": "Lifetime"
+    },
+    "terms": "Subscription automatically renews. You can cancel at any time.",
+    "success": {
+      "title": "Success!",
+      "message": "You now have access to all premium features."
+    },
+    "restore": {
+      "button": "Restore Purchases",
+      "success": "Successfully Restored",
+      "message": "Your purchases have been restored.",
+      "noPurchases": "No Purchases Found",
+      "noPurchasesMessage": "No previous purchases were found."
+    },
+    "error": {
+      "title": "Error",
+      "loadFailed": "Unable to load packages",
+      "purchaseFailed": "Purchase failed",
+      "restoreFailed": "Failed to restore purchases"
+    }
   },
   "home": {
     "title": "Home",

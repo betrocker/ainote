@@ -1,12 +1,13 @@
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
+import { useColorScheme } from "nativewind";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
   Modal,
   Pressable,
+  StyleSheet,
   Text,
-  useColorScheme,
   View,
 } from "react-native";
 
@@ -28,7 +29,8 @@ export default function AppModal({
   const [showModal, setShowModal] = useState(visible);
   const scaleAnim = useRef(new Animated.Value(0.9)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
-  const colorScheme = useColorScheme();
+  const { colorScheme } = useColorScheme(); // NativeWind hook
+  const isDark = colorScheme === "dark";
 
   useEffect(() => {
     if (visible) {
@@ -60,23 +62,40 @@ export default function AppModal({
         }),
       ]).start(() => setShowModal(false));
     }
-  }, [visible]);
+  }, [visible, scaleAnim, opacityAnim]);
 
   if (!showModal) return null;
 
   return (
-    <Modal visible transparent animationType="none" onRequestClose={onClose}>
-      {/* Blur overlay */}
-      <Pressable className="flex-1" onPress={onClose}>
+    <Modal
+      visible
+      transparent
+      animationType="none"
+      onRequestClose={onClose}
+      statusBarTranslucent
+    >
+      {/* Backdrop */}
+      <Pressable
+        style={StyleSheet.absoluteFill}
+        onPress={onClose}
+        accessible={false}
+      >
+        {/* Solid pozadina */}
+        <View
+          style={StyleSheet.absoluteFill}
+          className="bg-black/70 dark:bg-black/85"
+        />
+
+        {/* Blur overlay */}
         <BlurView
-          intensity={40}
-          tint="default"
-          style={{ position: "absolute", inset: 0 }}
+          intensity={isDark ? 80 : 50}
+          tint={isDark ? "dark" : "light"}
+          style={StyleSheet.absoluteFill}
         />
       </Pressable>
 
       {/* Modal content */}
-      <View className="absolute inset-0 justify-center items-center px-4">
+      <View style={styles.contentContainer} pointerEvents="box-none">
         <Animated.View
           style={{
             transform: [{ scale: scaleAnim }],
@@ -85,38 +104,47 @@ export default function AppModal({
             maxWidth: 420,
           }}
         >
-          <View className="rounded-[28px] overflow-hidden border border-black/10 dark:border-white/10">
-            <LinearGradient
-              colors={
-                colorScheme === "dark"
-                  ? ["rgba(0,0,0,0.4)", "rgba(18,18,18,1)"]
-                  : ["rgba(255,255,255,0.8)", "rgba(230,230,230,1)"]
-              }
-              start={{ x: 0, y: 0 }}
-              end={{ x: 0, y: 1 }}
-              style={{ borderRadius: 28 }}
-            >
-              {/* JEDNAK padding za sve – naslov, tekst, content i dugmad */}
-              <View className="px-6 pt-6 pb-6">
-                {title ? (
-                  <Text className="text-xl font-monaBold text-ios-label dark:text-white mb-2">
-                    {title}
-                  </Text>
-                ) : null}
+          <Pressable onPress={(e) => e.stopPropagation()} accessible={false}>
+            <View className="rounded-[28px] overflow-hidden border-2 border-black/15 dark:border-white/20 shadow-2xl">
+              <LinearGradient
+                colors={
+                  isDark
+                    ? ["rgba(28, 28, 30, 0.98)", "rgba(18, 18, 18, 0.98)"]
+                    : ["rgba(255, 255, 255, 0.95)", "rgba(242, 242, 247, 0.95)"]
+                }
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0, y: 1 }}
+                style={{ borderRadius: 28 }}
+              >
+                <View className="px-6 pt-6 pb-6">
+                  {title ? (
+                    <Text className="text-xl font-bold text-ios-label dark:text-white mb-2">
+                      {title}
+                    </Text>
+                  ) : null}
 
-                {message ? (
-                  <Text className="text-base font-mona text-ios-secondary dark:text-white/70 mb-4">
-                    {message}
-                  </Text>
-                ) : null}
+                  {message ? (
+                    <Text className="text-base text-ios-secondary dark:text-white/90 mb-4">
+                      {message}
+                    </Text>
+                  ) : null}
 
-                {/* children = Input + Actions iz providera */}
-                {children}
-              </View>
-            </LinearGradient>
-          </View>
+                  {children}
+                </View>
+              </LinearGradient>
+            </View>
+          </Pressable>
         </Animated.View>
       </View>
     </Modal>
   );
 }
+
+const styles = StyleSheet.create({
+  contentContainer: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 16,
+  },
+});

@@ -9,6 +9,52 @@
   "user": {
     "fallbackName": "Benutzer"
   },
+  "auth": {
+    "login": {
+      "title": "Willkommen zurück",
+      "subtitle": "Melden Sie sich an, um fortzufahren",
+      "emailPlaceholder": "E-Mail",
+      "passwordPlaceholder": "Passwort",
+      "signInButton": "Anmelden",
+      "noAccount": "Noch kein Konto? Registrieren",
+      "orContinueWith": "oder weiter mit",
+      "verifyTitle": "E-Mail verifizieren",
+      "verifySubtitle": "Wir haben einen Verifizierungscode an {{email}} gesendet",
+      "verificationCodePlaceholder": "Verifizierungscode",
+      "verifyButton": "E-Mail verifizieren",
+      "backToLogin": "Zurück zur Anmeldung",
+      "errors": {
+        "loginFailed": "Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+        "invalidCode": "Ungültiger Code. Bitte versuchen Sie es erneut."
+      }
+    },
+    "register": {
+      "title": "Konto erstellen",
+      "subtitle": "Beginnen Sie, Ideen mit KI festzuhalten",
+      "emailPlaceholder": "E-Mail",
+      "passwordPlaceholder": "Passwort (min. 8 Zeichen)",
+      "createAccountButton": "Konto erstellen",
+      "haveAccount": "Haben Sie bereits ein Konto? Anmelden",
+      "orContinueWith": "oder weiter mit",
+      "terms": "Mit der Erstellung eines Kontos stimmen Sie unseren Nutzungsbedingungen und Datenschutzrichtlinien zu",
+      "verifyTitle": "E-Mail verifizieren",
+      "verifySubtitle": "Geben Sie den Code ein, den wir an {{email}} gesendet haben",
+      "verificationCodePlaceholder": "Verifizierungscode",
+      "verifyButton": "Verifizieren & Fortfahren",
+      "backToRegister": "Zurück zur Registrierung",
+      "resendCode": "Kein Code erhalten? Erneut senden",
+      "passwordStrength": {
+        "weak": "Schwach",
+        "good": "Gut",
+        "strong": "Stark"
+      },
+      "errors": {
+        "registrationFailed": "Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+        "invalidCode": "Ungültiger Code. Bitte versuchen Sie es erneut.",
+        "resendFailed": "Fehler beim erneuten Senden des Codes"
+      }
+    }
+  },
   "appearance": {
     "darkMode": {
       "title": "Dunkelmodus",
@@ -16,15 +62,215 @@
     }
   },
   "settings": {
-    "sections": {
-      "notifications": "Benachrichtigungen",
-      "privacy": "Datenschutz",
-      "about": "Über"
+    "done": "Fertig",
+    "premium": {
+      "status": "Premium-Status",
+      "active": "Aktiv",
+      "inactive": "Nicht aktiv",
+      "manage": "Abonnement verwalten",
+      "upgrade": "Auf Premium upgraden",
+      "manageSubtitle": "Pläne und Abrechnung anzeigen",
+      "upgradeSubtitle": "Unbegrenzte KI-Funktionen freischalten",
+      "success": {
+        "title": "Erfolg!",
+        "message": "Willkommen bei AInote Premium! Genießen Sie unbegrenzte KI-Funktionen."
+      },
+      "benefits": {
+        "title": "Premium-Vorteile",
+        "transcriptions": "Unbegrenzte KI-Transkriptionen",
+        "analysis": "Audio- und Videonotizen-Analyse",
+        "sync": "Cloud-Synchronisierung auf allen Geräten",
+        "search": "Erweiterte Suche & Organisation"
+      }
     },
-    "logout": "Abmelden"
+    "notifications": {
+      "title": "Push-Benachrichtigungen",
+      "subtitle": "Erinnerungen für Fälligkeitstermine",
+      "enabled": {
+        "title": "Benachrichtigungen aktiviert",
+        "message": "Sie erhalten Erinnerungen für Ihre Notizen mit Fälligkeitsdaten"
+      },
+      "denied": {
+        "title": "Berechtigung verweigert",
+        "message": "Bitte aktivieren Sie Benachrichtigungen in Ihren Geräteeinstellungen"
+      },
+      "disabled": {
+        "title": "Benachrichtigungen deaktiviert",
+        "message": "Sie erhalten keine Benachrichtigungen"
+      },
+      "error": {
+        "title": "Fehler",
+        "message": "Benachrichtigungseinstellungen konnten nicht aktualisiert werden"
+      }
+    },
+    "logout": {
+      "button": "Abmelden",
+      "confirm": {
+        "title": "Abmelden?",
+        "message": "Möchten Sie sich wirklich abmelden?",
+        "cancel": "Abbrechen",
+        "confirm": "Abmelden"
+      }
+    },
+    "language": {
+      "button": "Sprache auswählen",
+      "title": "App-Sprache",
+      "selected": "Ausgewählt",
+      "modal": {
+        "title": "App-Sprache",
+        "subtitle": "Wählen Sie Ihre bevorzugte Sprache",
+        "close": "Schließen"
+      }
+    },
+    "sections": {
+      "privacy": "Datenschutz",
+      "about": "Über die App"
+    }
   },
   "app": {
     "version": "AiNote v{{version}}"
+  },
+  "about": {
+    "title": "Über",
+    "tagline": "Intelligente Notizen mit KI",
+    "version": "Version {{version}} ({{buildNumber}})",
+    "description": "AInote ist eine moderne Notiz-App, die künstliche Intelligenz verwendet, um Ihre Ideen zu organisieren. Nehmen Sie Audio, Text, Fotos und Videos auf, und die KI erstellt automatisch Titel, Zusammenfassungen und Tags.",
+    "feedback": "Feedback",
+    "links": {
+      "privacy": "Datenschutzerklärung",
+      "terms": "Nutzungsbedingungen",
+      "website": "Webseite"
+    },
+    "contact": {
+      "email": "Kontaktieren Sie uns",
+      "emailSubtitle": "E-Mail an Support senden",
+      "rate": "App bewerten",
+      "rateSubtitle": "Bewertung im Store hinterlassen"
+    },
+    "madeWith": "Gemacht mit ❤️ für Menschen, die ihre Ideen organisieren möchten",
+    "rights": "Alle Rechte vorbehalten.",
+    "error": {
+      "title": "Fehler",
+      "message": "Link kann nicht geöffnet werden"
+    }
+  },
+  "privacy": {
+    "title": "Datenschutz",
+    "intro": "Ihre Privatsphäre ist uns sehr wichtig. Diese Datenschutzerklärung erklärt, welche Daten wir sammeln, wie wir sie verwenden und Ihre Rechte bezüglich Ihrer persönlichen Daten.",
+    "lastUpdated": "Zuletzt aktualisiert: 26. Oktober 2025",
+    "sections": {
+      "dataCollection": {
+        "title": "Welche Daten wir sammeln",
+        "content": "Wir sammeln Daten, die Sie direkt in die App eingeben: Notizen (Text, Audio, Bilder, Video), Kontoinformationen (E-Mail, Name) und App-Einstellungen. Wir sammeln auch grundlegende Nutzungsdaten zur Verbesserung der App."
+      },
+      "dataUsage": {
+        "title": "Wie wir Ihre Daten verwenden",
+        "content": "Ihre Daten werden ausschließlich zur Bereitstellung von App-Diensten verwendet: Speicherung und Organisation Ihrer Notizen, KI-Inhaltsanalyse, Synchronisierung zwischen Geräten und Personalisierung Ihrer Erfahrung. Wir verkaufen Ihre Daten niemals an Dritte."
+      },
+      "aiProcessing": {
+        "title": "KI-Verarbeitung",
+        "content": "Wenn Sie KI-Funktionen verwenden (Transkription, Zusammenfassung, Tags), wird Ihr Inhalt zur Verarbeitung an OpenAI-Dienste gesendet. Diese Dienste speichern Ihre Daten nach der Verarbeitung nicht. Alle KI-Anfragen sind verschlüsselt und sicher."
+      },
+      "dataStorage": {
+        "title": "Datenspeicherung",
+        "content": "Ihre Notizen werden sicher auf Ihrem Gerät und in unserem Cloud-System gespeichert (wenn Sie Premium-Benutzer sind). Alle Daten sind während der Übertragung und im Ruhezustand verschlüsselt. Wir verwenden Industriestandards für Datensicherheit."
+      },
+      "yourRights": {
+        "title": "Ihre Rechte",
+        "content": "Sie haben das Recht, jederzeit auf Ihre Daten zuzugreifen, sie zu korrigieren oder zu löschen. Sie können alle Ihre Daten aus der App exportieren. Um Ihr Konto und alle Daten zu löschen, kontaktieren Sie unseren Support."
+      },
+      "thirdParty": {
+        "title": "Drittanbieter-Dienste",
+        "content": "Wir verwenden: Clerk (Authentifizierung), OpenAI (KI-Funktionen), RevenueCat (Abonnements) und Expo (Push-Benachrichtigungen). Diese Dienste haben ihre eigenen Datenschutzrichtlinien und verarbeiten Daten entsprechend."
+      }
+    },
+    "contact": {
+      "title": "Kontaktieren Sie uns",
+      "content": "Wenn Sie Fragen zu dieser Datenschutzerklärung haben, kontaktieren Sie uns unter denis.djordjevic@gmail.com"
+    }
+  },
+  "terms": {
+    "title": "Nutzungsbedingungen",
+    "intro": "Durch die Nutzung der AInote-App stimmen Sie den folgenden Nutzungsbedingungen zu. Bitte lesen Sie sie sorgfältig.",
+    "lastUpdated": "Zuletzt aktualisiert: 26. Oktober 2025",
+    "sections": {
+      "acceptance": {
+        "title": "Annahme der Bedingungen",
+        "content": "Durch den Zugriff auf und die Nutzung der AInote-App erklären Sie sich mit diesen Bedingungen einverstanden. Wenn Sie mit einem Teil der Bedingungen nicht einverstanden sind, dürfen Sie die App nicht verwenden."
+      },
+      "account": {
+        "title": "Benutzerkonto",
+        "content": "Um AInote zu nutzen, müssen Sie ein Konto erstellen. Sie sind für die Sicherheit Ihres Kontos und Passworts verantwortlich. Sie übernehmen die Verantwortung für alle Aktivitäten, die unter Ihrem Konto stattfinden."
+      },
+      "license": {
+        "title": "Nutzungslizenz",
+        "content": "Wir gewähren Ihnen eine begrenzte, nicht-exklusive, nicht übertragbare Lizenz zur Nutzung der AInote-App für persönliche, nicht-kommerzielle Zwecke. Diese Lizenz beinhaltet nicht das Recht zum Weiterverkauf oder zur kommerziellen Nutzung."
+      },
+      "userContent": {
+        "title": "Benutzerinhalte",
+        "content": "Sie behalten alle Eigentumsrechte an Inhalten, die Sie in der App erstellen. Sie gewähren uns eine begrenzte Lizenz zur Verarbeitung Ihrer Inhalte, um App-Dienste bereitzustellen, einschließlich KI-Funktionen."
+      },
+      "prohibited": {
+        "title": "Verbotene Nutzung",
+        "content": "Sie dürfen die App nicht für illegale Zwecke verwenden, Malware hochladen, Rechte anderer Benutzer verletzen, Spam versenden oder Aktivitäten durchführen, die die Funktionalität der App beeinträchtigen könnten."
+      },
+      "subscriptions": {
+        "title": "Abonnements",
+        "content": "Premium-Abonnements werden automatisch verlängert, sofern sie nicht gekündigt werden. Sie können Ihr Abonnement jederzeit über Ihre App Store- oder Google Play-Kontoeinstellungen kündigen. Rückerstattungen unterliegen den Store-Richtlinien."
+      },
+      "termination": {
+        "title": "Beendigung",
+        "content": "Wir können Ihren Zugang zur App jederzeit ohne vorherige Ankündigung sperren oder beenden, bei Verstoß gegen diese Bedingungen oder aus beliebigem Grund nach unserem Ermessen."
+      },
+      "disclaimer": {
+        "title": "Haftungsausschluss",
+        "content": "Die App wird 'wie sie ist' ohne Garantien jeglicher Art bereitgestellt. Wir garantieren nicht, dass die App fehlerfrei oder ständig verfügbar ist. Wir sind nicht verantwortlich für Datenverlust."
+      },
+      "changes": {
+        "title": "Änderungen der Bedingungen",
+        "content": "Wir behalten uns das Recht vor, diese Bedingungen jederzeit zu ändern. Durch die weitere Nutzung der App nach Änderungen akzeptieren Sie die neuen Bedingungen. Wir informieren Sie über wesentliche Änderungen."
+      }
+    },
+    "contact": {
+      "title": "Kontakt",
+      "content": "Für rechtliche Angelegenheiten kontaktieren Sie uns unter denis.djordjevic@gmail.com"
+    }
+  },
+  "paywall": {
+    "title": "Auf Premium upgraden",
+    "choosePlan": "Wählen Sie Ihren Plan",
+    "subscribe": "Jetzt abonnieren",
+    "bestValue": "BESTES ANGEBOT",
+    "features": {
+      "title": "Premium-Funktionen",
+      "unlimited": "Unbegrenzte KI-Transkriptionen",
+      "video": "Audio- und Videonotizen-Analyse",
+      "sync": "Cloud-Synchronisierung auf allen Geräten",
+      "search": "Erweiterte Suche & Organisation"
+    },
+    "plans": {
+      "monthly": "Monatlich",
+      "annual": "Jährlich",
+      "lifetime": "Lebenslang"
+    },
+    "terms": "Abonnement verlängert sich automatisch. Sie können jederzeit kündigen.",
+    "success": {
+      "title": "Erfolg!",
+      "message": "Sie haben jetzt Zugriff auf alle Premium-Funktionen."
+    },
+    "restore": {
+      "button": "Käufe wiederherstellen",
+      "success": "Erfolgreich wiederhergestellt",
+      "message": "Ihre Käufe wurden wiederhergestellt.",
+      "noPurchases": "Keine Käufe gefunden",
+      "noPurchasesMessage": "Es wurden keine früheren Käufe gefunden."
+    },
+    "error": {
+      "title": "Fehler",
+      "loadFailed": "Pakete konnten nicht geladen werden",
+      "purchaseFailed": "Kauf fehlgeschlagen",
+      "restoreFailed": "Wiederherstellung der Käufe fehlgeschlagen"
+    }
   },
   "home": {
     "title": "Startseite",

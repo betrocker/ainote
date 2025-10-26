@@ -41,7 +41,7 @@ export default function SocialLogins() {
         onPress={handleApple}
         disabled={!apple || !apple.startOAuthFlow}
         variant="secondary"
-        size="lg"
+        size="md"
         fullWidth
         className="mb-3"
       />
@@ -51,7 +51,7 @@ export default function SocialLogins() {
         onPress={handleGoogle}
         disabled={!google || !google.startOAuthFlow}
         variant="secondary"
-        size="lg"
+        size="md"
         fullWidth
       />
     </View>

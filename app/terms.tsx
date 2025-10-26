@@ -1,4 +1,4 @@
-// app/privacy.tsx
+// app/terms.tsx
 import LargeHeader from "@/components/LargeHeader";
 import ScreenBackground from "@/components/ScreenBackground";
 import ScreenScroll from "@/components/ScreenScroll";
@@ -10,7 +10,7 @@ import { useTranslation } from "react-i18next";
 import { Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-export default function Privacy() {
+export default function Terms() {
   const { t } = useTranslation("common");
   const insets = useSafeAreaInsets();
 
@@ -47,7 +47,7 @@ export default function Privacy() {
   return (
     <ScreenBackground variant="grouped">
       <LargeHeader
-        title={t("privacy.title")}
+        title={t("terms.title")}
         rightButtons={
           <TouchableOpacity onPress={() => router.back()}>
             <Text className="text-ios-blue text-base font-medium">
@@ -67,59 +67,83 @@ export default function Privacy() {
         {/* Header */}
         <View className="px-6 py-6">
           <Text className="text-base text-ios-secondary dark:text-iosd-label2 leading-6">
-            {t("privacy.intro")}
+            {t("terms.intro")}
           </Text>
           <Text className="text-sm text-ios-secondary dark:text-iosd-label2 mt-4">
-            {t("privacy.lastUpdated")}
+            {t("terms.lastUpdated")}
           </Text>
         </View>
 
-        {/* Data Collection */}
+        {/* Acceptance */}
         <Section
-          icon="document-text"
-          iconColor="bg-ios-blue"
-          title={t("privacy.sections.dataCollection.title")}
-          content={t("privacy.sections.dataCollection.content")}
-        />
-
-        {/* How We Use Data */}
-        <Section
-          icon="shield-checkmark"
+          icon="checkmark-circle"
           iconColor="bg-green-500"
-          title={t("privacy.sections.dataUsage.title")}
-          content={t("privacy.sections.dataUsage.content")}
+          title={t("terms.sections.acceptance.title")}
+          content={t("terms.sections.acceptance.content")}
         />
 
-        {/* AI Processing */}
+        {/* User Account */}
         <Section
-          icon="sparkles"
+          icon="person"
+          iconColor="bg-ios-blue"
+          title={t("terms.sections.account.title")}
+          content={t("terms.sections.account.content")}
+        />
+
+        {/* License */}
+        <Section
+          icon="key"
           iconColor="bg-purple-500"
-          title={t("privacy.sections.aiProcessing.title")}
-          content={t("privacy.sections.aiProcessing.content")}
+          title={t("terms.sections.license.title")}
+          content={t("terms.sections.license.content")}
         />
 
-        {/* Data Storage */}
+        {/* User Content */}
         <Section
-          icon="server"
+          icon="document"
           iconColor="bg-orange-500"
-          title={t("privacy.sections.dataStorage.title")}
-          content={t("privacy.sections.dataStorage.content")}
+          title={t("terms.sections.userContent.title")}
+          content={t("terms.sections.userContent.content")}
         />
 
-        {/* Your Rights */}
+        {/* Prohibited Use */}
         <Section
-          icon="hand-right"
+          icon="ban"
           iconColor="bg-red-500"
-          title={t("privacy.sections.yourRights.title")}
-          content={t("privacy.sections.yourRights.content")}
+          title={t("terms.sections.prohibited.title")}
+          content={t("terms.sections.prohibited.content")}
         />
 
-        {/* Third Party Services */}
+        {/* Subscriptions */}
         <Section
-          icon="link"
+          icon="diamond"
+          iconColor="bg-yellow-500"
+          title={t("terms.sections.subscriptions.title")}
+          content={t("terms.sections.subscriptions.content")}
+        />
+
+        {/* Termination */}
+        <Section
+          icon="close-circle"
+          iconColor="bg-pink-500"
+          title={t("terms.sections.termination.title")}
+          content={t("terms.sections.termination.content")}
+        />
+
+        {/* Disclaimer */}
+        <Section
+          icon="information-circle"
           iconColor="bg-indigo-500"
-          title={t("privacy.sections.thirdParty.title")}
-          content={t("privacy.sections.thirdParty.content")}
+          title={t("terms.sections.disclaimer.title")}
+          content={t("terms.sections.disclaimer.content")}
+        />
+
+        {/* Changes */}
+        <Section
+          icon="refresh"
+          iconColor="bg-teal-500"
+          title={t("terms.sections.changes.title")}
+          content={t("terms.sections.changes.content")}
         />
 
         {/* Contact */}
@@ -127,20 +151,20 @@ export default function Privacy() {
           <TouchableOpacity
             className="p-6 active:opacity-70"
             onPress={() => {
-              Linking.openURL("mailto:privacy@ainote.app");
+              Linking.openURL("mailto:legal@ainote.app");
             }}
           >
             <View className="flex-row items-center mb-2">
-              <View className="w-10 h-10 rounded-full bg-yellow-500 items-center justify-center mr-3">
+              <View className="w-10 h-10 rounded-full bg-cyan-500 items-center justify-center mr-3">
                 <Ionicons name="mail" size={20} color="white" />
               </View>
               <Text className="text-lg font-bold text-ios-label dark:text-iosd-label flex-1">
-                {t("privacy.contact.title")}
+                {t("terms.contact.title")}
               </Text>
               <Ionicons name="chevron-forward" size={20} color="#999" />
             </View>
             <Text className="text-base text-ios-secondary dark:text-iosd-label2 leading-6 ml-13">
-              {t("privacy.contact.content")}
+              {t("terms.contact.content")}
             </Text>
           </TouchableOpacity>
         </View>
