@@ -7,6 +7,7 @@ import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { useColorScheme } from "nativewind";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import {
   LayoutChangeEvent,
   Platform,
@@ -37,6 +38,7 @@ const OPEN_RADIUS = 30;
 const EASE = Easing.bezier(0.22, 0.95, 0.21, 1);
 
 export default function FabMenu() {
+  const { t } = useTranslation("common");
   const { menuOpen, setMenuOpen } = useTab();
   const { addNote, addNoteFromText, addNoteFromPhoto, addNoteFromVideo } =
     useNotes();
@@ -108,15 +110,15 @@ export default function FabMenu() {
     rAF(() => {
       let draft = "";
       openModal({
-        title: "Quick Text",
+        title: t("fabMenu.quickText.title"),
         content: (
           <View className="px-2 pt-2">
             <Text className="text-ios-secondary dark:text-iosd-label2 mb-2 px-2">
-              Zabeleži misao
+              {t("fabMenu.quickText.subtitle")}
             </Text>
             <TextInput
               autoFocus
-              placeholder="Upiši ovde…"
+              placeholder={t("fabMenu.quickText.placeholder")}
               placeholderTextColor="#8E8E93"
               onChangeText={(t) => (draft = t)}
               className="rounded-xl px-4 py-3 bg-ios-fill dark:bg-iosd-fill text-ios-label dark:text-iosd-label border border-ios-sepSoft dark:border-iosd-sepSoft"
@@ -127,7 +129,9 @@ export default function FabMenu() {
                 className="min-w-[120px] px-6 py-3 rounded-full items-center justify-center bg-[#2C2C2E]"
                 activeOpacity={0.9}
               >
-                <Text className="text-white font-semibold">Otkaži</Text>
+                <Text className="text-white font-semibold">
+                  {t("fabMenu.quickText.cancel")}
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={async () => {
@@ -150,7 +154,9 @@ export default function FabMenu() {
                 className="min-w-[120px] px-6 py-3 rounded-full items-center justify-center bg-[#007AFF]"
                 activeOpacity={0.9}
               >
-                <Text className="text-white font-semibold">Sačuvaj</Text>
+                <Text className="text-white font-semibold">
+                  {t("fabMenu.quickText.save")}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -169,8 +175,8 @@ export default function FabMenu() {
   const onCamera = () => {
     rAF(() => {
       openModal({
-        title: "Camera",
-        message: "Šta želiš da zabeležiš?",
+        title: t("fabMenu.camera.title"),
+        message: t("fabMenu.camera.message"),
         content: (
           <View className="px-2 pt-2">
             <TouchableOpacity
@@ -180,7 +186,7 @@ export default function FabMenu() {
                   const { status } =
                     await ImagePicker.requestCameraPermissionsAsync();
                   if (status !== "granted") {
-                    alert("Kamera nije dozvoljena.");
+                    alert(t("fabMenu.camera.permissionDenied"));
                     return;
                   }
                   const res = await ImagePicker.launchCameraAsync({
@@ -209,7 +215,7 @@ export default function FabMenu() {
               <View className="flex-row items-center">
                 <Ionicons name="camera-outline" size={18} color={iconColor} />
                 <Text className={`ml-2 text-base ${textColor}`}>
-                  Take Photo
+                  {t("fabMenu.camera.takePhoto")}
                 </Text>
               </View>
               <Ionicons name="chevron-forward" size={18} color="#999" />
@@ -224,7 +230,7 @@ export default function FabMenu() {
                   const { status } =
                     await ImagePicker.requestCameraPermissionsAsync();
                   if (status !== "granted") {
-                    alert("Kamera nije dozvoljena.");
+                    alert(t("fabMenu.camera.permissionDenied"));
                     return;
                   }
                   const res = await ImagePicker.launchCameraAsync({
@@ -253,7 +259,7 @@ export default function FabMenu() {
               <View className="flex-row items-center">
                 <Ionicons name="videocam-outline" size={18} color={iconColor} />
                 <Text className={`ml-2 text-base ${textColor}`}>
-                  Record Video
+                  {t("fabMenu.camera.recordVideo")}
                 </Text>
               </View>
               <Ionicons name="chevron-forward" size={18} color="#999" />
@@ -280,7 +286,9 @@ export default function FabMenu() {
         style={{ paddingVertical: ITEM_VPAD }}
       >
         <Ionicons name="create-outline" size={20} color={iconColor} />
-        <Text className={`ml-2 text-base ${textColor}`}>Napisi ideju</Text>
+        <Text className={`ml-2 text-base ${textColor}`}>
+          {t("fabMenu.actions.writeIdea")}
+        </Text>
       </TouchableOpacity>
 
       <Divider />
@@ -292,7 +300,9 @@ export default function FabMenu() {
         style={{ paddingVertical: ITEM_VPAD }}
       >
         <Ionicons name="mic-outline" size={20} color={iconColor} />
-        <Text className={`ml-2 text-base ${textColor}`}>Izgovori misao</Text>
+        <Text className={`ml-2 text-base ${textColor}`}>
+          {t("fabMenu.actions.voiceNote")}
+        </Text>
       </TouchableOpacity>
 
       <Divider />
@@ -304,7 +314,9 @@ export default function FabMenu() {
         style={{ paddingVertical: ITEM_VPAD }}
       >
         <Ionicons name="camera-outline" size={20} color={iconColor} />
-        <Text className={`ml-2 text-base ${textColor}`}>Uhvati momenat</Text>
+        <Text className={`ml-2 text-base ${textColor}`}>
+          {t("fabMenu.actions.captureМoment")}
+        </Text>
       </TouchableOpacity>
     </View>
   );

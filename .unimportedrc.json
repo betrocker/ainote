@@ -1,0 +1,17 @@
+{
+  "entry": [
+    "app/**/*.{js,jsx,ts,tsx}",
+    "app/_layout.tsx",
+    "components/**/*.{js,jsx,ts,tsx}",
+    "context/**/*.{js,jsx,ts,tsx}",
+    "utils/**/*.{js,jsx,ts,tsx}",
+    "types/**/*.{ts,tsx}"
+  ],
+  "extensions": [".ts", ".tsx", ".js", ".jsx"],
+  "ignorePatterns": [
+    "**/node_modules/**",
+    "**/.expo/**",
+    "**/dist/**",
+    "**/.next/**"
+  ]
+}

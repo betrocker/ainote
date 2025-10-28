@@ -7,11 +7,12 @@ import { ThemeProvider } from "@/context/ThemeContext";
 import "@/i18n";
 import { registerForPushNotifications } from "@/utils/notifications";
 import { ClerkProvider } from "@clerk/clerk-expo";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFonts } from "expo-font";
 import * as Notifications from "expo-notifications";
 import { Stack, useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-get-random-values";
@@ -30,6 +31,33 @@ const tokenCache = {
 
 export default function RootLayout() {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    checkOnboarding();
+  }, []);
+
+  const checkOnboarding = async () => {
+    try {
+      const hasSeenOnboarding = await AsyncStorage.getItem("hasSeenOnboarding");
+
+      if (!hasSeenOnboarding) {
+        router.replace("/onboarding");
+      }
+    } catch (error) {
+      console.error("Error checking onboarding:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <View className="flex-1 bg-black items-center justify-center">
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+    );
+  }
 
   // ⭐ Hook za handling notification tap
   const lastNotificationResponse = Notifications.useLastNotificationResponse();

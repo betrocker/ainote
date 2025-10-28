@@ -16,13 +16,13 @@
       "emailPlaceholder": "Email",
       "passwordPlaceholder": "Password",
       "signInButton": "Sign In",
-      "noAccount": "Don't have an account? Register",
+      "noAccount": "Don't have an account? Sign up",
       "orContinueWith": "or continue with",
       "verifyTitle": "Verify Email",
-      "verifySubtitle": "We sent a verification code to {{email}}",
-      "verificationCodePlaceholder": "Verification Code",
+      "verifySubtitle": "We've sent a verification code to {{email}}",
+      "verificationCodePlaceholder": "Verification code",
       "verifyButton": "Verify Email",
-      "backToLogin": "Back to Login",
+      "backToLogin": "Back to login",
       "errors": {
         "loginFailed": "Login failed. Please try again.",
         "invalidCode": "Invalid code. Please try again."
@@ -34,14 +34,14 @@
       "emailPlaceholder": "Email",
       "passwordPlaceholder": "Password (min. 8 characters)",
       "createAccountButton": "Create Account",
-      "haveAccount": "Already have an account? Login",
+      "haveAccount": "Already have an account? Sign in",
       "orContinueWith": "or continue with",
-      "terms": "By creating an account, you agree to our Terms of Service and Privacy Policy",
+      "terms": "By creating an account you accept our Terms of Use and Privacy Policy",
       "verifyTitle": "Verify Email",
       "verifySubtitle": "Enter the code we sent to {{email}}",
-      "verificationCodePlaceholder": "Verification Code",
-      "verifyButton": "Verify & Continue",
-      "backToRegister": "Back to Registration",
+      "verificationCodePlaceholder": "Verification code",
+      "verifyButton": "Verify and Continue",
+      "backToRegister": "Back to registration",
       "resendCode": "Didn't receive code? Resend",
       "passwordStrength": {
         "weak": "Weak",
@@ -65,11 +65,11 @@
     "done": "Done",
     "premium": {
       "status": "Premium Status",
-      "active": "✅ Active",
-      "inactive": "Not Active",
+      "active": "Active",
+      "inactive": "Inactive",
       "manage": "Manage Subscription",
       "upgrade": "Upgrade to Premium",
-      "manageSubtitle": "View plans and billing",
+      "manageSubtitle": "Review plans and billing",
       "upgradeSubtitle": "Unlock unlimited AI features",
       "success": {
         "title": "Success!",
@@ -78,9 +78,9 @@
       "benefits": {
         "title": "Premium Benefits",
         "transcriptions": "Unlimited AI transcriptions",
-        "analysis": "Audio & video note analysis",
-        "sync": "Cloud sync across devices",
-        "search": "Advanced search & organization"
+        "analysis": "Audio and video note analysis",
+        "sync": "Cloud sync across all devices",
+        "search": "Advanced search and organization"
       }
     },
     "notifications": {
@@ -88,15 +88,15 @@
       "subtitle": "Reminders for due dates",
       "enabled": {
         "title": "Notifications Enabled",
-        "message": "You'll receive reminders for your notes with due dates"
+        "message": "You will receive reminders for notes with due dates"
       },
       "denied": {
         "title": "Permission Denied",
-        "message": "Please enable notifications in your device Settings"
+        "message": "Please enable notifications in device settings"
       },
       "disabled": {
         "title": "Notifications Disabled",
-        "message": "You won't receive any notifications"
+        "message": "You won't receive notifications"
       },
       "error": {
         "title": "Error",
@@ -113,7 +113,7 @@
       }
     },
     "language": {
-      "button": "Select language",
+      "button": "Choose Language",
       "title": "App Language",
       "selected": "Selected",
       "modal": {
@@ -124,7 +124,7 @@
     },
     "sections": {
       "privacy": "Privacy",
-      "about": "About Application"
+      "about": "About"
     }
   },
   "app": {
@@ -132,13 +132,13 @@
   },
   "about": {
     "title": "About",
-    "tagline": "Smart Note-Taking with AI",
+    "tagline": "Smart note-taking with AI",
     "version": "Version {{version}} ({{buildNumber}})",
-    "description": "AInote is a modern note-taking app that uses artificial intelligence to organize your ideas. Record audio, text, photos and videos, and AI will automatically create titles, summaries and tags.",
+    "description": "AInote is a modern note-taking app that uses artificial intelligence to organize your ideas. Record audio, text, photos and video, and AI will automatically create titles, summaries and tags.",
     "feedback": "Feedback",
     "links": {
       "privacy": "Privacy Policy",
-      "terms": "Terms of Service",
+      "terms": "Terms of Use",
       "website": "Website"
     },
     "contact": {
@@ -156,12 +156,12 @@
   },
   "privacy": {
     "title": "Privacy",
-    "intro": "Your privacy is very important to us. This privacy policy explains what data we collect, how we use it, and your rights regarding your personal data.",
-    "lastUpdated": "Last updated: October 26, 2025",
+    "intro": "Your privacy is very important to us. This privacy policy explains what data we collect, how we use it and your rights regarding your personal data.",
+    "lastUpdated": "Last updated: October 26, 2025.",
     "sections": {
       "dataCollection": {
         "title": "What data we collect",
-        "content": "We collect data that you directly enter into the app: notes (text, audio, images, video), account information (email, name), and app settings. We also collect basic usage data to improve the app."
+        "content": "We collect data you directly enter into the app: notes (text, audio, images, video), account information (email, name), and app settings. We also collect basic usage data to improve the app."
       },
       "dataUsage": {
         "title": "How we use your data",
@@ -169,7 +169,7 @@
       },
       "aiProcessing": {
         "title": "AI processing",
-        "content": "When you use AI features (transcription, summary, tags), your content is sent to OpenAI services for processing. These services do not store your data after processing. All AI requests are encrypted and secure."
+        "content": "When you use AI features (transcription, summary, tags), your content is sent to OpenAI service for processing. These services do not store your data after processing. All AI requests are encrypted and secure."
       },
       "dataStorage": {
         "title": "Data storage",
@@ -177,49 +177,49 @@
       },
       "yourRights": {
         "title": "Your rights",
-        "content": "You have the right to access, correct, or delete your data at any time. You can export all your data from the app. To delete your account and all data, contact our support."
+        "content": "You have the right to access, correct or delete your data at any time. You can export all your data from the app. To delete your account and all data, contact our support."
       },
       "thirdParty": {
         "title": "Third-party services",
-        "content": "We use: Clerk (authentication), OpenAI (AI features), RevenueCat (subscriptions), and Expo (push notifications). These services have their own privacy policies and process data accordingly."
+        "content": "We use: Clerk (authentication), OpenAI (AI features), RevenueCat (subscriptions), and Expo (push notifications). These services have their own privacy policies and process data in accordance with them."
       }
     },
     "contact": {
-      "title": "Contact us",
+      "title": "Contact Us",
       "content": "If you have questions about this privacy policy, contact us at denis.djordjevic@gmail.com"
     }
   },
   "terms": {
-    "title": "Terms of Service",
-    "intro": "By using the AInote app, you agree to the following terms of service. Please read them carefully.",
-    "lastUpdated": "Last updated: October 26, 2025",
+    "title": "Terms of Use",
+    "intro": "By using the AInote app you accept the following terms of use. Please read them carefully.",
+    "lastUpdated": "Last updated: October 26, 2025.",
     "sections": {
       "acceptance": {
-        "title": "Acceptance of Terms",
+        "title": "Acceptance of terms",
         "content": "By accessing and using the AInote app, you agree to be bound by these terms. If you disagree with any part of the terms, you may not use the app."
       },
       "account": {
-        "title": "User Account",
+        "title": "User account",
         "content": "To use AInote, you must create an account. You are responsible for maintaining the security of your account and password. You accept responsibility for all activities that occur under your account."
       },
       "license": {
-        "title": "License to Use",
+        "title": "License to use",
         "content": "We grant you a limited, non-exclusive, non-transferable license to use the AInote app for personal, non-commercial purposes. This license does not include the right to resell or commercial use."
       },
       "userContent": {
-        "title": "User Content",
+        "title": "User content",
         "content": "You retain all ownership rights to content you create in the app. You grant us a limited license to process your content to provide app services, including AI features."
       },
       "prohibited": {
-        "title": "Prohibited Use",
-        "content": "You may not use the app for illegal purposes, upload malware, violate other users' rights, spam, or any activity that may harm the app's functionality."
+        "title": "Prohibited use",
+        "content": "You may not use the app for illegal purposes, uploading malware, violating the rights of other users, spam, or any activity that may damage the app's functionality."
       },
       "subscriptions": {
         "title": "Subscriptions",
-        "content": "Premium subscriptions automatically renew unless canceled. You can cancel your subscription at any time through your App Store or Google Play account settings. Refunds are subject to store policy."
+        "content": "Premium subscription automatically renews unless you cancel it. You can cancel the subscription at any time through your App Store or Google Play account settings. Refunds are made in accordance with store policy."
       },
       "termination": {
-        "title": "Termination",
+        "title": "Termination of service",
         "content": "We may suspend or terminate your access to the app at any time, without prior notice, for violation of these terms or any reason at our discretion."
       },
       "disclaimer": {
@@ -227,26 +227,26 @@
         "content": "The app is provided 'as is' without warranties of any kind. We do not guarantee that the app will be error-free or constantly available. We are not responsible for data loss."
       },
       "changes": {
-        "title": "Changes to Terms",
-        "content": "We reserve the right to modify these terms at any time. By continuing to use the app after changes, you accept the new terms. We will notify you of significant changes."
+        "title": "Changes to terms",
+        "content": "We reserve the right to modify these terms at any time. By continuing to use the app after changes, you accept the new terms. We notify you of significant changes."
       }
     },
     "contact": {
       "title": "Contact",
-      "content": "For legal matters, contact us at denis.djordjevic@gmail.com"
+      "content": "For legal matters contact us at denis.djordjevic@gmail.com"
     }
   },
   "paywall": {
     "title": "Upgrade to Premium",
-    "choosePlan": "Choose your plan",
-    "subscribe": "Subscribe Now",
+    "choosePlan": "Choose Plan",
+    "subscribe": "Subscribe",
     "bestValue": "BEST VALUE",
     "features": {
       "title": "Premium Features",
       "unlimited": "Unlimited AI transcriptions",
-      "video": "Audio & video note analysis",
-      "sync": "Cloud sync across devices",
-      "search": "Advanced search & organization"
+      "video": "Audio and video analysis",
+      "sync": "Cloud sync",
+      "search": "Advanced search"
     },
     "plans": {
       "monthly": "Monthly",
@@ -262,14 +262,164 @@
       "button": "Restore Purchases",
       "success": "Successfully Restored",
       "message": "Your purchases have been restored.",
-      "noPurchases": "No Purchases Found",
-      "noPurchasesMessage": "No previous purchases were found."
+      "noPurchases": "No Purchases",
+      "noPurchasesMessage": "No previous purchases found."
     },
     "error": {
       "title": "Error",
-      "loadFailed": "Unable to load packages",
+      "loadFailed": "Failed to load packages",
       "purchaseFailed": "Purchase failed",
       "restoreFailed": "Failed to restore purchases"
+    },
+    "trial": {
+      "days_one": "{{count}} day free",
+      "days_other": "{{count}} days free",
+      "weeks_one": "{{count}} week free",
+      "weeks_other": "{{count}} weeks free",
+      "months_one": "{{count}} month free",
+      "months_other": "{{count}} months free"
+    }
+  },
+  "tabs": {
+    "home": "Home",
+    "inbox": "Inbox",
+    "assistant": "Assistant",
+    "private": "Private"
+  },
+  "noteDetail": {
+    "actions": {
+      "edit": "Edit",
+      "save": "Save",
+      "back": "Back",
+      "togglePrivate": "Mark as private",
+      "removePrivate": "Remove privacy"
+    },
+    "private": {
+      "badge": "Private note",
+      "authRequired": "Authentication required",
+      "authFailed": "Authentication failed",
+      "authFailedMessage": "You must authenticate to mark note as private"
+    },
+    "errors": {
+      "invalidId": "Invalid note ID",
+      "loading": "Loading note...",
+      "paywall": "Failed to show subscription options"
+    },
+    "date": {
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "dayAfterTomorrow": "Day after tomorrow",
+      "yesterday": "Yesterday",
+      "inDays": "In {{count}} days",
+      "daysAgo": "{{count}} days ago"
+    },
+    "sections": {
+      "description": "Description",
+      "aiSummary": "AI Summary",
+      "aiInsights": "AI Insights",
+      "tags": "Tags",
+      "info": "Information"
+    },
+    "ai": {
+      "generateTitle": "AI Title",
+      "generatingTitle": "Generating title...",
+      "generateSummary": "Generate",
+      "generatingSummary": "Generating...",
+      "regenerate": "Regenerate",
+      "clickToView": "Click to view summary"
+    },
+    "media": {
+      "tapToZoom": "Tap to zoom",
+      "tapToPlay": "Tap to play",
+      "voiceNote": "Voice Note",
+      "extractText": "Extract text",
+      "extractedText": "Extracted text",
+      "transcribe": "Transcribe",
+      "transcription": "Transcription",
+      "reExtract": "Re-extract",
+      "reTranscribe": "Re-transcribe",
+      "processing": "Processing..."
+    },
+    "text": {
+      "placeholder": "Type text...",
+      "noContent": "No text content"
+    },
+    "tags": {
+      "noTags": "No tags. Add first tag above."
+    },
+    "metadata": {
+      "status": "Status",
+      "pinned": "Pinned",
+      "created": "Created",
+      "updated": "Updated",
+      "type": "Type",
+      "media": "Media",
+      "yes": "Yes"
+    },
+    "delete": {
+      "title": "Delete note?",
+      "message": "This action cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Delete"
+    },
+    "premium": {
+      "badge": "FREE",
+      "proBadge": "PRO"
+    }
+  },
+  "privateFolder": {
+    "title": "Private Folder",
+    "locked": {
+      "title": "Private Folder",
+      "description": "Your private notes are protected with {biometricType}",
+      "unlockButton": "Unlock"
+    },
+    "unlocked": {
+      "title": "Private Notes",
+      "lockButton": "Lock",
+      "empty": {
+        "title": "You have no private notes",
+        "subtitle": "Mark any note as private"
+      },
+      "noteContent": {
+        "noContent": "No content"
+      }
+    },
+    "errors": {
+      "noHardware": "Your device doesn't support biometric authentication",
+      "notEnrolled": "Biometrics not set up",
+      "notEnrolledMessage": "You must first set up Face ID or Touch ID in device settings",
+      "authFailed": "Error",
+      "authFailedMessage": "Authentication failed"
+    },
+    "biometricTypes": {
+      "faceId": "Face ID",
+      "touchId": "Touch ID",
+      "iris": "Iris",
+      "biometrics": "Biometrics"
+    }
+  },
+  "onboarding": {
+    "skip": "Skip",
+    "next": "Next",
+    "done": "Get Started",
+    "pages": {
+      "transcription": {
+        "title": "AI Transcription",
+        "description": "Record audio or video - AI will automatically convert to text"
+      },
+      "search": {
+        "title": "Smart Search",
+        "description": "Ask a question - AI searches all your notes and provides an answer"
+      },
+      "ocr": {
+        "title": "OCR Technology",
+        "description": "Photograph text and automatically convert it to digital notes"
+      },
+      "private": {
+        "title": "Private Notes",
+        "description": "Protect sensitive information with Face ID or Touch ID"
+      }
     }
   },
   "home": {
@@ -280,14 +430,13 @@
     "todayCount_other": "{{count}} notes today",
     "stats": "Statistics",
     "total": "Total",
-    "totalCount_one": "{{count}} total",
-    "totalCount_other": "{{count}} total",
+    "totalCount": "{{count}} total",
     "overview": "Overview",
     "thisWeek": "This week",
     "browse": "Browse",
     "upcoming": "Upcoming",
     "recent": "Recent",
-    "allNotes": "All Notes",
+    "allNotes": "All notes",
     "viewAll": "View all",
     "withTags": "Tags",
     "withDueDates_one": "{{count}} with due date",
@@ -296,8 +445,7 @@
     "pinnedCount_other": "{{count}} pinned",
     "taggedCount_one": "{{count}} tagged",
     "taggedCount_other": "{{count}} tagged",
-    "aiCount_one": "{{count}} AI",
-    "aiCount_other": "{{count}} AI",
+    "aiCount": "{{count}} AI",
     "types": {
       "text": "Text",
       "audio": "Audio",
@@ -305,7 +453,7 @@
       "video": "Video"
     },
     "links": {
-      "pinned": "Pinned Notes"
+      "pinned": "Pinned notes"
     },
     "note": {
       "one": "note",
@@ -313,11 +461,11 @@
     },
     "empty": {
       "title": "Welcome to AiNote!",
-      "subtitle": "Your smart note-taking assistant. Capture ideas with voice, images, or text.",
+      "subtitle": "Your smart note-taking assistant. Capture ideas with voice, images or text.",
       "tutorial": {
         "step1": {
           "title": "Add a note",
-          "description": "Tap the + button and choose note type"
+          "description": "Tap + button and choose note type"
         },
         "step2": {
           "title": "AI analyzes",
@@ -325,7 +473,7 @@
         },
         "step3": {
           "title": "Organize easily",
-          "description": "Search, filter, and pin important ones"
+          "description": "Search, filter and pin important ones"
         }
       }
     }
@@ -364,7 +512,7 @@
       "noResults": "No results",
       "tryDifferent": "Try a different search term",
       "cta": "New note",
-      "hint": "Or open the + menu for quick actions"
+      "hint": "Or open + menu for quick actions"
     }
   },
   "note": {
@@ -383,11 +531,26 @@
     "singular": "note",
     "singular_plural": "notes"
   },
-  "fab": {
-    "newText": "New text note",
-    "newAudio": "New audio note",
-    "newPhoto": "New photo note",
-    "newVideo": "New video note"
+  "fabMenu": {
+    "quickText": {
+      "title": "Quick Note",
+      "subtitle": "Capture your thought",
+      "placeholder": "Type here…",
+      "cancel": "Cancel",
+      "save": "Save"
+    },
+    "camera": {
+      "title": "Camera",
+      "message": "What do you want to capture?",
+      "takePhoto": "Take Photo",
+      "recordVideo": "Record Video",
+      "permissionDenied": "Camera permission denied"
+    },
+    "actions": {
+      "writeIdea": "Write idea",
+      "voiceNote": "Voice note",
+      "captureМoment": "Capture moment"
+    }
   },
   "assistant": {
     "section": "Section {{index}}",
@@ -395,78 +558,5 @@
     "newNotesCount": "You have {{count}} new notes",
     "askAnything": "Ask anything",
     "powered": "powered by AI"
-  },
-  "noteDetail": {
-    "actions": {
-      "edit": "Edit",
-      "save": "Save",
-      "back": "Back"
-    },
-    "errors": {
-      "invalidId": "Invalid note ID",
-      "loading": "Loading note...",
-      "paywall": "Failed to show subscription options"
-    },
-    "date": {
-      "today": "Today",
-      "tomorrow": "Tomorrow",
-      "dayAfterTomorrow": "Day after tomorrow",
-      "yesterday": "Yesterday",
-      "inDays": "In {{count}} days",
-      "daysAgo": "{{count}} days ago"
-    },
-    "sections": {
-      "description": "Description",
-      "aiSummary": "AI Summary",
-      "aiInsights": "AI Insights",
-      "tags": "Tags",
-      "info": "Information"
-    },
-    "ai": {
-      "generateTitle": "AI Title",
-      "generatingTitle": "Generating title...",
-      "generateSummary": "Generate",
-      "generatingSummary": "Generating...",
-      "regenerate": "Regenerate",
-      "clickToView": "Click to view summary"
-    },
-    "media": {
-      "tapToZoom": "Tap to zoom",
-      "tapToPlay": "Tap to play",
-      "voiceNote": "Voice Note",
-      "extractText": "Extract Text",
-      "extractedText": "Extracted Text",
-      "transcribe": "Transcribe",
-      "transcription": "Transcription",
-      "reExtract": "Re-extract",
-      "reTranscribe": "Re-transcribe",
-      "processing": "Processing..."
-    },
-    "text": {
-      "placeholder": "Type text...",
-      "noContent": "No text content"
-    },
-    "tags": {
-      "noTags": "No tags. Add your first tag above."
-    },
-    "metadata": {
-      "status": "Status",
-      "pinned": "Pinned",
-      "created": "Created",
-      "updated": "Updated",
-      "type": "Type",
-      "media": "Media",
-      "yes": "Yes"
-    },
-    "delete": {
-      "title": "Delete note?",
-      "message": "This action cannot be undone.",
-      "cancel": "Cancel",
-      "confirm": "Delete"
-    },
-    "premium": {
-      "badge": "FREE",
-      "proBadge": "PRO"
-    }
   }
 }

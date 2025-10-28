@@ -1,25 +1,29 @@
-// types/note.ts
+import { Fact } from "@/utils/ai";
 
 export type Note = {
   id: string;
   type: "text" | "audio" | "photo" | "video";
-  title?: string;
+  title: string;
+  content?: string;
   text?: string;
+  fileUri?: string;
   audioUri?: string;
   photoUri?: string;
   videoUri?: string;
   description?: string;
   createdAt: number;
-  updatedAt: number;
+  updatedAt?: number;
   tags?: string[];
   pinned?: boolean;
   ai?: {
-    facts?: Fact[];
+    title?: string;
     summary?: string;
+    tags?: string[];
+    facts?: Fact[]; // ✅ Koristi importovani Fact tip
   };
-  // ⭐ Dodaj notification IDs
   notificationIds?: {
-    dueDate?: string; // Notification ID za due date
-    reminder?: string; // Notification ID za reminder (1 dan pre)
+    dueDate?: string;
+    reminder?: string;
   };
+  isPrivate?: boolean; // ✅ Dodato za private folder
 };

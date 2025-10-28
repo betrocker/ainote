@@ -1,7 +1,7 @@
 // context/NotesContext.tsx
+import { Note } from "@/types/note";
 import {
   extractTextFromImage,
-  Fact,
   generateSmartTitle,
   generateSummary,
   genFactsFromText,
@@ -21,32 +21,6 @@ import React, {
   useState,
 } from "react";
 import { v4 as uuidv4 } from "uuid";
-
-/** ===================== Tipovi ===================== */
-export type Note = {
-  id: string;
-  type: "text" | "audio" | "photo" | "video";
-  title: string;
-  content?: string;
-  fileUri?: string;
-  createdAt: number;
-  updatedAt?: number;
-  text?: string;
-  ai?: {
-    title?: string;
-    summary?: string;
-    tags?: string[];
-    facts?: Fact[];
-  };
-  description?: string;
-  tags?: string[];
-  pinned?: boolean;
-  // ⭐ Notification IDs
-  notificationIds?: {
-    dueDate?: string;
-    reminder?: string;
-  };
-};
 
 export type NewNoteInput = Omit<Note, "id" | "createdAt" | "updatedAt" | "ai">;
 
@@ -74,6 +48,7 @@ export type NotesContextType = {
   generatingTitles: Set<string>;
   generateNoteSummary: (noteId: string) => Promise<void>;
   generatingSummaries: Set<string>;
+  toggleNotePrivate: (noteId: string) => Promise<void>; // ✅ Dodato
 };
 
 /** ===================== Kontekst ===================== */
@@ -129,7 +104,6 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
 
   // ⭐ Helper za scheduliranje notifications
   const scheduleNotificationsForNote = async (note: Note) => {
-    // ⭐ Find due_on fact - adaptirano za tvoj Fact format
     const dueFact = note.ai?.facts?.find((f) => f.predicate === "due_on");
 
     console.log(
@@ -409,7 +383,6 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
     async (id: string) => {
       console.log("🗑️ [deleteNote] Deleting:", id.slice(0, 8));
 
-      // ⭐ Log note pre brisanja
       const noteToDelete = notes.find((n) => n.id === id);
       console.log("🗑️ [deleteNote] Note:", {
         id: noteToDelete?.id.slice(0, 8),
@@ -417,7 +390,6 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
         notificationIds: noteToDelete?.notificationIds,
       });
 
-      // ⭐ Cancel notifications
       console.log("🗑️ [deleteNote] Calling cancelAllNotificationsForNote...");
       await cancelAllNotificationsForNote(id);
       console.log("🗑️ [deleteNote] Notifications cancelled");
@@ -506,6 +478,32 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
       AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedNotes)).catch(
         (err) => console.log("Storage error:", err)
       );
+
+      return updatedNotes;
+    });
+  }, []);
+
+  // ✅ Toggle Private Status
+  const toggleNotePrivate = useCallback(async (noteId: string) => {
+    console.log("🔒 [toggleNotePrivate] Toggling for:", noteId.slice(0, 8));
+
+    setNotes((prevNotes) => {
+      const updatedNotes = prevNotes.map((n) => {
+        if (n.id !== noteId) return n;
+
+        const newPrivateState = !n.isPrivate;
+        console.log("🔒 [toggleNotePrivate] New state:", newPrivateState);
+
+        return {
+          ...n,
+          isPrivate: newPrivateState,
+          updatedAt: Date.now(),
+        };
+      });
+
+      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedNotes))
+        .then(() => console.log("🔒 [toggleNotePrivate] Persisted"))
+        .catch((err) => console.log("🔒 [toggleNotePrivate] Error:", err));
 
       return updatedNotes;
     });
@@ -623,6 +621,7 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
         generatingTitles,
         generateNoteSummary,
         generatingSummaries,
+        toggleNotePrivate, // ✅ Dodato
       }}
     >
       {children}

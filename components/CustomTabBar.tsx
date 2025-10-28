@@ -1,10 +1,11 @@
 // components/CustomTabBar.tsx
+import FabMenu from "@/components/FabMenu";
 import { useTab } from "@/context/TabContext";
-import FabMenu from "@components/FabMenu";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { useColorScheme } from "nativewind";
 import React, { useCallback, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next"; // ✅ Dodato
 import {
   Platform,
   Pressable,
@@ -45,6 +46,8 @@ const getIconByRouteName = (route: string) => {
       return "mail-outline";
     case "assistant":
       return "chatbubble-ellipses-outline";
+    case "private":
+      return "lock-closed-outline";
     default:
       return "ellipse-outline";
   }
@@ -58,6 +61,7 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
   onTabPress,
   tabs,
 }) => {
+  const { t } = useTranslation("common"); // ✅ Dodato
   const { setActive, menuOpen, setMenuOpen } = useTab();
   const { colorScheme } = useColorScheme();
   const insets = useSafeAreaInsets();
@@ -134,6 +138,12 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
     },
     [tabs.length, currentIndex, segmentW, pillX]
   );
+
+  // ✅ Helper funkcija za dobijanje tab label-a
+  const getTabLabel = (tab: string) => {
+    const lowercaseTab = tab.toLowerCase();
+    return t(`tabs.${lowercaseTab}`);
+  };
 
   // Wrapper komponenta za Tab Bar sa platform-specific stilom
   const TabBarContent = ({ children }: { children: React.ReactNode }) => {
@@ -249,7 +259,7 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
                           : "text-ios-label2 dark:text-iosd-label2"
                       }`}
                     >
-                      {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                      {getTabLabel(tab)} {/* ✅ Promenjeno */}
                     </Text>
                   </AnimatedTouchableOpacity>
                 );

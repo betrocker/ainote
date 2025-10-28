@@ -1,4 +1,5 @@
 // components/EditNoteModal.tsx
+import { Note } from "@/types/note";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { useColorScheme } from "nativewind";
@@ -13,13 +14,6 @@ import {
   TextInput,
   View,
 } from "react-native";
-
-type Note = {
-  id: string;
-  title: string;
-  description?: string;
-  type: "audio" | "video" | "photo" | "text";
-};
 
 type EditNoteModalProps = {
   isVisible: boolean;

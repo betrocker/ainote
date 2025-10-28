@@ -1,0 +1,17 @@
+{
+  "ignores": [
+    "expo-dev-client",
+    "expo-splash-screen",
+    "expo-status-bar",
+    "expo-system-ui",
+    "expo-symbols",
+    "eslint-config-expo",
+    "eslint-import-resolver-typescript",
+    "@types/*"
+  ],
+  "ignore-patterns": [
+    "node_modules",
+    ".expo",
+    "dist"
+  ]
+}

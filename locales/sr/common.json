@@ -270,6 +270,156 @@
       "loadFailed": "Nije moguće učitati pakete",
       "purchaseFailed": "Kupovina nije uspela",
       "restoreFailed": "Vraćanje kupovina nije uspelo"
+    },
+    "trial": {
+      "days_one": "{{count}} dan besplatno",
+      "days_few": "{{count}} dana besplatno",
+      "days_other": "{{count}} dana besplatno",
+      "weeks_one": "{{count}} nedelja besplatno",
+      "weeks_few": "{{count}} nedelje besplatno",
+      "weeks_other": "{{count}} nedelja besplatno",
+      "months_one": "{{count}} mesec besplatno",
+      "months_few": "{{count}} meseca besplatno",
+      "months_other": "{{count}} meseci besplatno"
+    }
+  },
+  "tabs": {
+    "home": "Početna",
+    "inbox": "Inbox",
+    "assistant": "Asistent",
+    "private": "Privatno"
+  },
+  "noteDetail": {
+    "actions": {
+      "edit": "Izmeni",
+      "save": "Sačuvaj",
+      "back": "Nazad",
+      "togglePrivate": "Označi kao privatnu",
+      "removePrivate": "Ukloni privatnost"
+    },
+    "private": {
+      "badge": "Privatna beleška",
+      "authRequired": "Autentifikacija potrebna",
+      "authFailed": "Autentifikacija neuspešna",
+      "authFailedMessage": "Moraš se autentifikovati da bi označio belešku kao privatnu"
+    },
+    "errors": {
+      "invalidId": "Nevažeći ID beleške",
+      "loading": "Učitavanje beleške...",
+      "paywall": "Failed to show subscription options"
+    },
+    "date": {
+      "today": "Danas",
+      "tomorrow": "Sutra",
+      "dayAfterTomorrow": "Prekosutra",
+      "yesterday": "Juče",
+      "inDays": "Za {{count}} dana",
+      "daysAgo": "Pre {{count}} dana"
+    },
+    "sections": {
+      "description": "Opis",
+      "aiSummary": "AI Sažetak",
+      "aiInsights": "AI Insights",
+      "tags": "Tagovi",
+      "info": "Informacije"
+    },
+    "ai": {
+      "generateTitle": "AI Naslov",
+      "generatingTitle": "Generiše naslov...",
+      "generateSummary": "Generiši",
+      "generatingSummary": "Generiše...",
+      "regenerate": "Regeneriši",
+      "clickToView": "Klikni da vidiš sažetak"
+    },
+    "media": {
+      "tapToZoom": "Tap to zoom",
+      "tapToPlay": "Tap to play",
+      "voiceNote": "Voice Note",
+      "extractText": "Izvuci tekst",
+      "extractedText": "Izvučeni tekst",
+      "transcribe": "Transkribuj",
+      "transcription": "Transkripcija",
+      "reExtract": "Re-extract",
+      "reTranscribe": "Re-transcribe",
+      "processing": "Obrada u toku..."
+    },
+    "text": {
+      "placeholder": "Upiši tekst...",
+      "noContent": "Nema tekstualnog sadržaja"
+    },
+    "tags": {
+      "noTags": "Nema tagova. Dodaj prvi tag iznad."
+    },
+    "metadata": {
+      "status": "Status",
+      "pinned": "Pinovano",
+      "created": "Kreirano",
+      "updated": "Izmenjeno",
+      "type": "Tip",
+      "media": "Medija",
+      "yes": "Da"
+    },
+    "delete": {
+      "title": "Obriši belešku?",
+      "message": "Ova akcija se ne može poništiti.",
+      "cancel": "Otkaži",
+      "confirm": "Obriši"
+    },
+    "premium": {
+      "badge": "FREE",
+      "proBadge": "PRO"
+    }
+  },
+  "privateFolder": {
+    "title": "Privatni Folder",
+    "locked": {
+      "title": "Privatni Folder",
+      "description": "Tvoje privatne beleške su zaštićene sa {biometricType}",
+      "unlockButton": "Otključaj"
+    },
+    "unlocked": {
+      "title": "Privatne Beleške",
+      "lockButton": "Zaključaj",
+      "empty": {
+        "title": "Nemaš privatne beleške",
+        "subtitle": "Označi bilo koju belešku kao privatnu"
+      }
+    },
+    "errors": {
+      "noHardware": "Tvoj uređaj ne podržava biometric autentifikaciju",
+      "notEnrolled": "Biometrics nije podešen",
+      "notEnrolledMessage": "Prvo moraš da podesiš Face ID ili Touch ID u podešavanjima uređaja",
+      "authFailed": "Greška",
+      "authFailedMessage": "Autentifikacija nije uspela"
+    },
+    "biometricTypes": {
+      "faceId": "Face ID",
+      "touchId": "Touch ID",
+      "iris": "Iris",
+      "biometrics": "Biometrija"
+    }
+  },
+  "onboarding": {
+    "skip": "Preskoči",
+    "next": "Dalje",
+    "done": "Započni",
+    "pages": {
+      "transcription": {
+        "title": "AI Transkripcija",
+        "description": "Snimi audio ili video - AI će automatski pretvoriti u tekst"
+      },
+      "search": {
+        "title": "Pametna Pretraga",
+        "description": "Postavi pitanje - AI pretražuje sve tvoje beleške i daje odgovor"
+      },
+      "ocr": {
+        "title": "OCR Tehnologija",
+        "description": "Fotografiši tekst i automatski ga pretvori u digitalne beleške"
+      },
+      "private": {
+        "title": "Privatne Beleške",
+        "description": "Zaštiti osetljive informacije sa Face ID ili Touch ID"
+      }
     }
   },
   "home": {
@@ -399,11 +549,26 @@
     "singular_plural": "beležke",
     "singular_plural_2": "beležaka"
   },
-  "fab": {
-    "newText": "Nova tekstualna beleška",
-    "newAudio": "Nova audio beleška",
-    "newPhoto": "Nova foto beleška",
-    "newVideo": "Nova video beleška"
+  "fabMenu": {
+    "quickText": {
+      "title": "Brza Beleška",
+      "subtitle": "Zabeleži misao",
+      "placeholder": "Upiši ovde…",
+      "cancel": "Otkaži",
+      "save": "Sačuvaj"
+    },
+    "camera": {
+      "title": "Kamera",
+      "message": "Šta želiš da zabeležiš?",
+      "takePhoto": "Fotografiši",
+      "recordVideo": "Snimi Video",
+      "permissionDenied": "Kamera nije dozvoljena"
+    },
+    "actions": {
+      "writeIdea": "Napiši ideju",
+      "voiceNote": "Izgovori misao",
+      "captureмомent": "Uhvati momenat"
+    }
   },
   "assistant": {
     "section": "Sekcija {{index}}",
@@ -411,78 +576,5 @@
     "newNotesCount": "Imate {{count}} nove beleške",
     "askAnything": "Pitaj šta god",
     "powered": "pokreće AI"
-  },
-  "noteDetail": {
-    "actions": {
-      "edit": "Izmeni",
-      "save": "Sačuvaj",
-      "back": "Nazad"
-    },
-    "errors": {
-      "invalidId": "Nevažeći ID beleške",
-      "loading": "Učitavanje beleške...",
-      "paywall": "Failed to show subscription options"
-    },
-    "date": {
-      "today": "Danas",
-      "tomorrow": "Sutra",
-      "dayAfterTomorrow": "Prekosutra",
-      "yesterday": "Juče",
-      "inDays": "Za {{count}} dana",
-      "daysAgo": "Pre {{count}} dana"
-    },
-    "sections": {
-      "description": "Opis",
-      "aiSummary": "AI Sažetak",
-      "aiInsights": "AI Insights",
-      "tags": "Tagovi",
-      "info": "Informacije"
-    },
-    "ai": {
-      "generateTitle": "AI Naslov",
-      "generatingTitle": "Generiše naslov...",
-      "generateSummary": "Generiši",
-      "generatingSummary": "Generiše...",
-      "regenerate": "Regeneriši",
-      "clickToView": "Klikni da vidiš sažetak"
-    },
-    "media": {
-      "tapToZoom": "Tap to zoom",
-      "tapToPlay": "Tap to play",
-      "voiceNote": "Voice Note",
-      "extractText": "Izvuci tekst",
-      "extractedText": "Izvučeni tekst",
-      "transcribe": "Transkribuj",
-      "transcription": "Transkripcija",
-      "reExtract": "Re-extract",
-      "reTranscribe": "Re-transcribe",
-      "processing": "Obrada u toku..."
-    },
-    "text": {
-      "placeholder": "Upiši tekst...",
-      "noContent": "Nema tekstualnog sadržaja"
-    },
-    "tags": {
-      "noTags": "Nema tagova. Dodaj prvi tag iznad."
-    },
-    "metadata": {
-      "status": "Status",
-      "pinned": "Pinovano",
-      "created": "Kreirano",
-      "updated": "Izmenjeno",
-      "type": "Tip",
-      "media": "Medija",
-      "yes": "Da"
-    },
-    "delete": {
-      "title": "Obriši belešku?",
-      "message": "Ova akcija se ne može poništiti.",
-      "cancel": "Otkaži",
-      "confirm": "Obriši"
-    },
-    "premium": {
-      "badge": "FREE",
-      "proBadge": "PRO"
-    }
   }
 }

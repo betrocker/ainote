@@ -1,10 +1,12 @@
 // app/note/[id].tsx
+import CustomPaywall from "@/components/CustomPaywall";
 import ImageFullscreenViewer from "@/components/ImageFullscreenViewer";
 import TagChip from "@/components/TagChip";
 import TagInput from "@/components/TagInput";
 import VideoFullscreenPlayer from "@/components/VideoFullscreenPlayer";
 import { useNotes } from "@/context/NotesContext";
 import { usePremium } from "@/context/PremiumContext";
+import { authenticateWithBiometric } from "@/utils/biometric"; // ✅ Dodato
 import { Ionicons } from "@expo/vector-icons";
 import { Audio, AVPlaybackStatusSuccess } from "expo-av";
 import { Image } from "expo-image";
@@ -23,7 +25,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import RevenueCatUI from "react-native-purchases-ui";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 function formatDateFromISO(iso: string, t: any): string {
@@ -72,12 +73,14 @@ export default function NoteDetailScreen() {
     generatingTitles,
     generateNoteSummary,
     generatingSummaries,
+    toggleNotePrivate, // ✅ Dodato
   } = useNotes();
 
   const { isPremium } = usePremium();
   const router = useRouter();
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === "dark";
+  const [showPaywall, setShowPaywall] = useState(false);
 
   const note = notes.find((n) => n.id === id);
 
@@ -111,30 +114,38 @@ export default function NoteDetailScreen() {
 
     if (!isPremium) {
       console.log("❌ [Note] User is not premium, showing paywall");
-
-      try {
-        const result = await RevenueCatUI.presentPaywall();
-
-        console.log("💳 [Note] Paywall result:", result);
-
-        if (result === "PURCHASED" || result === "RESTORED") {
-          console.log(
-            "✅ [Note] Purchase successful, proceeding with:",
-            featureName
-          );
-          action();
-        } else {
-          console.log("⏭️ [Note] User dismissed paywall");
-        }
-      } catch (error) {
-        console.error("❌ [Note] Paywall error:", error);
-        Alert.alert(t("noteDetail.errors.paywall"));
-      }
+      setShowPaywall(true);
       return;
     }
 
     console.log("✅ [Note] User has premium, proceeding with:", featureName);
     action();
+  };
+
+  // ✅ Toggle Private Handler
+  const handleTogglePrivate = async () => {
+    if (!note) return;
+
+    if (!note.isPrivate) {
+      // Postavljanje kao privatna - zahteva autentifikaciju
+      console.log("🔒 [Note] Setting as private, authenticating...");
+      const success = await authenticateWithBiometric();
+
+      if (success) {
+        console.log("🔒 [Note] Authentication success, toggling...");
+        await toggleNotePrivate(note.id);
+      } else {
+        console.log("🔒 [Note] Authentication failed");
+        Alert.alert(
+          t("noteDetail.private.authFailed"),
+          t("noteDetail.private.authFailedMessage")
+        );
+      }
+    } else {
+      // Uklanjanje privatnog statusa - bez autentifikacije
+      console.log("🔒 [Note] Removing private status...");
+      await toggleNotePrivate(note.id);
+    }
   };
 
   // ⭐ Log kada se otvori screen
@@ -406,6 +417,22 @@ export default function NoteDetailScreen() {
               </View>
             )}
 
+            {/* ✅ Private Toggle Button */}
+            <TouchableOpacity
+              onPress={handleTogglePrivate}
+              className={[
+                "w-9 h-9 rounded-full items-center justify-center active:opacity-70",
+                note.isPrivate ? "bg-red-500" : "bg-gray-500/15",
+              ].join(" ")}
+              activeOpacity={1}
+            >
+              <Ionicons
+                name={note.isPrivate ? "lock-closed" : "lock-open-outline"}
+                size={18}
+                color={note.isPrivate ? "#FFF" : "#6B7280"}
+              />
+            </TouchableOpacity>
+
             {/* Pin dugme */}
             <TouchableOpacity
               onPress={() => togglePinNote(note.id)}
@@ -473,6 +500,18 @@ export default function NoteDetailScreen() {
             </Text>
           </View>
         </View>
+
+        {/* ✅ Private Indicator */}
+        {note.isPrivate && (
+          <View className="mt-2 flex-row items-center">
+            <View className="bg-red-500/15 rounded-full px-2 py-1 flex-row items-center">
+              <Ionicons name="lock-closed" size={12} color="#EF4444" />
+              <Text className="text-xs font-semibold text-red-600 dark:text-red-400 ml-1">
+                {t("noteDetail.private.badge")}
+              </Text>
+            </View>
+          </View>
+        )}
 
         {/* ⭐ Generate Title dugme - SA PREMIUM LOCK */}
         {note.text && note.text.length > 20 && (
@@ -1080,6 +1119,16 @@ export default function NoteDetailScreen() {
               )}
             </View>
           </View>
+          {/* Custom Paywall */}
+          <CustomPaywall
+            visible={showPaywall}
+            onClose={() => setShowPaywall(false)}
+            onSuccess={() => {
+              setShowPaywall(false);
+              // Optional: refresh premium status
+              // Može automatski retry action nakon kupovine
+            }}
+          />
         </View>
       </ScrollView>
 

@@ -9,7 +9,10 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "Koristimo Face ID za zaštitu tvojih privatnih beleški"
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -50,7 +53,13 @@
           "UIBackgroundModes": ["audio"]
         }
       ],
-      "expo-video"
+      "expo-video",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Omogući $(PRODUCT_NAME) da koristi Face ID za zaštitu privatnih beleški"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

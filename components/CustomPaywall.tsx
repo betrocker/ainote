@@ -65,6 +65,26 @@ export default function CustomPaywall({
     }
   };
 
+  // Dodaj ovu funkciju u CustomPaywall komponentu
+  const getTrialInfo = (pkg: PurchasesPackage) => {
+    const defaultOption = pkg.product.defaultOption;
+    const freePhase = defaultOption?.freePhase;
+
+    if (freePhase) {
+      const { value, unit } = freePhase.billingPeriod;
+
+      if (unit === "DAY") {
+        return t("paywall.trial.days", { count: value });
+      } else if (unit === "WEEK") {
+        return t("paywall.trial.weeks", { count: value });
+      } else if (unit === "MONTH") {
+        return t("paywall.trial.months", { count: value });
+      }
+    }
+
+    return null;
+  };
+
   const handlePurchase = async () => {
     if (!selectedPackage || purchasing) return;
 
@@ -206,6 +226,7 @@ export default function CustomPaywall({
                   const isSelected =
                     selectedPackage?.identifier === pkg.identifier;
                   const isAnnual = pkg.identifier === "$rc_annual";
+                  const trialInfo = getTrialInfo(pkg); // Dodaj ovo
 
                   return (
                     <Pressable
@@ -231,6 +252,16 @@ export default function CustomPaywall({
                           <Text className="text-lg font-bold text-gray-900 dark:text-white">
                             {getPackageName(pkg)}
                           </Text>
+
+                          {/* Prikaži Free Trial ako postoji */}
+                          {trialInfo && (
+                            <View className="bg-green-500 px-2 py-1 rounded-md mt-1 self-start">
+                              <Text className="text-white text-xs font-bold">
+                                {trialInfo}
+                              </Text>
+                            </View>
+                          )}
+
                           <Text className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                             {getPackagePrice(pkg)}
                           </Text>
