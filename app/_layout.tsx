@@ -4,7 +4,6 @@ import { NotesProvider } from "@/context/NotesContext";
 import { PremiumProvider } from "@/context/PremiumContext";
 import { TabProvider } from "@/context/TabContext";
 import { ThemeProvider } from "@/context/ThemeContext";
-import "@/i18n";
 import { registerForPushNotifications } from "@/utils/notifications";
 import { ClerkProvider } from "@clerk/clerk-expo";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -18,6 +17,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-get-random-values";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import "../global.css";
+import "../i18n";
 import "../utils/rc-init";
 
 const EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY =
@@ -30,40 +30,39 @@ const tokenCache = {
 };
 
 export default function RootLayout() {
+  // ✅ SVI HOOKS NA VRHU - UVEK SE POZIVAJU
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
 
+  const [fontsLoaded] = useFonts({
+    "MonaSans-Regular": require("../assets/fonts/MonaSans-Regular.ttf"),
+    "MonaSans-Bold": require("../assets/fonts/MonaSans-Bold.ttf"),
+    "MonaSans-Black": require("../assets/fonts/MonaSans-Black.ttf"),
+  });
+
+  const lastNotificationResponse = Notifications.useLastNotificationResponse();
+
+  // 🆕 Onboarding state
+  const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
+  const [hasViewedOnboarding, setHasViewedOnboarding] = useState(false);
+
+  // 🆕 Check onboarding status
   useEffect(() => {
+    async function checkOnboarding() {
+      try {
+        const viewed = await AsyncStorage.getItem("@viewedOnboarding");
+        setHasViewedOnboarding(viewed === "true");
+      } catch (error) {
+        console.error("❌ Error checking onboarding:", error);
+        setHasViewedOnboarding(true); // Fallback - skip onboarding on error
+      } finally {
+        setIsCheckingOnboarding(false);
+      }
+    }
+
     checkOnboarding();
   }, []);
 
-  const checkOnboarding = async () => {
-    try {
-      const hasSeenOnboarding = await AsyncStorage.getItem("hasSeenOnboarding");
-
-      if (!hasSeenOnboarding) {
-        router.replace("/onboarding");
-      }
-    } catch (error) {
-      console.error("Error checking onboarding:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <View className="flex-1 bg-black items-center justify-center">
-        <ActivityIndicator size="large" color="#007AFF" />
-      </View>
-    );
-  }
-
-  // ⭐ Hook za handling notification tap
-  const lastNotificationResponse = Notifications.useLastNotificationResponse();
-
   useEffect(() => {
-    // ⭐ Register notifications
     registerForPushNotifications().catch((err) => {
       console.error("❌ Notification registration error:", err);
     });
@@ -72,34 +71,22 @@ export default function RootLayout() {
   useEffect(() => {
     if (lastNotificationResponse) {
       console.log("📬 Notification tapped!");
-      console.log(
-        "📦 Response data:",
-        lastNotificationResponse.notification.request.content.data
-      );
-
       const noteId = lastNotificationResponse.notification.request.content.data
         ?.noteId as string | undefined;
 
       if (noteId) {
         console.log("📝 Navigating to note:", noteId);
-        router.push(`/note/[id]`);
-
         setTimeout(() => {
-          router.push(`/note/${noteId}`);
+          router.push(`/note/${noteId}` as any);
         }, 100);
       }
     }
   }, [lastNotificationResponse]);
 
-  const [fontsLoaded] = useFonts({
-    "MonaSans-Regular": require("../assets/fonts/MonaSans-Regular.ttf"),
-    "MonaSans-Bold": require("../assets/fonts/MonaSans-Bold.ttf"),
-    "MonaSans-Black": require("../assets/fonts/MonaSans-Black.ttf"),
-  });
-
-  if (!fontsLoaded) {
+  // ✅ Loading states
+  if (!fontsLoaded || isCheckingOnboarding) {
     return (
-      <View className="flex-1 items-center justify-center bg-ios-surface dark:bg-iosd-surface">
+      <View className="flex-1 items-center justify-center bg-black">
         <ActivityIndicator size="large" color="#0A84FF" />
       </View>
     );
@@ -113,13 +100,22 @@ export default function RootLayout() {
           tokenCache={tokenCache}
           telemetry={false}
         >
-          {/* ⭐ PremiumProvider sada interno konfiguriše RevenueCat */}
           <PremiumProvider>
             <NotesProvider>
               <TabProvider>
                 <ModalProvider>
                   <SafeAreaProvider>
                     <Stack screenOptions={{ headerShown: false }}>
+                      {/* 🆕 Conditional initial route */}
+                      {!hasViewedOnboarding && (
+                        <Stack.Screen
+                          name="onboarding"
+                          options={{
+                            gestureEnabled: false,
+                            animation: "fade",
+                          }}
+                        />
+                      )}
                       <Stack.Screen name="index" />
                       <Stack.Screen name="(auth)" />
                       <Stack.Screen name="(tabs)" />

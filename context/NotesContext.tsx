@@ -48,7 +48,6 @@ export type NotesContextType = {
   generatingTitles: Set<string>;
   generateNoteSummary: (noteId: string) => Promise<void>;
   generatingSummaries: Set<string>;
-  toggleNotePrivate: (noteId: string) => Promise<void>; // ✅ Dodato
 };
 
 /** ===================== Kontekst ===================== */
@@ -483,32 +482,6 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
     });
   }, []);
 
-  // ✅ Toggle Private Status
-  const toggleNotePrivate = useCallback(async (noteId: string) => {
-    console.log("🔒 [toggleNotePrivate] Toggling for:", noteId.slice(0, 8));
-
-    setNotes((prevNotes) => {
-      const updatedNotes = prevNotes.map((n) => {
-        if (n.id !== noteId) return n;
-
-        const newPrivateState = !n.isPrivate;
-        console.log("🔒 [toggleNotePrivate] New state:", newPrivateState);
-
-        return {
-          ...n,
-          isPrivate: newPrivateState,
-          updatedAt: Date.now(),
-        };
-      });
-
-      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedNotes))
-        .then(() => console.log("🔒 [toggleNotePrivate] Persisted"))
-        .catch((err) => console.log("🔒 [toggleNotePrivate] Error:", err));
-
-      return updatedNotes;
-    });
-  }, []);
-
   const generateTitle = useCallback(
     async (noteId: string) => {
       console.log("🤖 [generateTitle] Called for:", noteId.slice(0, 8));
@@ -621,7 +594,6 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
         generatingTitles,
         generateNoteSummary,
         generatingSummaries,
-        toggleNotePrivate, // ✅ Dodato
       }}
     >
       {children}

@@ -25,5 +25,4 @@ export type Note = {
     dueDate?: string;
     reminder?: string;
   };
-  isPrivate?: boolean; // ✅ Dodato za private folder
 };

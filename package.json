@@ -16,6 +16,7 @@
     "@expo/vector-icons": "^15.0.2",
     "@likashefqet/react-native-image-zoom": "^4.3.0",
     "@react-native-async-storage/async-storage": "2.2.0",
+    "@react-native-masked-view/masked-view": "0.3.2",
     "@react-navigation/material-top-tabs": "^7.3.7",
     "clsx": "^2.1.1",
     "expo": "~54.0.10",

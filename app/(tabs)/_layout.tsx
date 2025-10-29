@@ -31,7 +31,6 @@ export default function TabsLayout() {
       <MaterialTopTabs.Screen name="home" />
       <MaterialTopTabs.Screen name="inbox" />
       <MaterialTopTabs.Screen name="assistant" />
-      <MaterialTopTabs.Screen name="private" />
     </MaterialTopTabs>
   );
 }

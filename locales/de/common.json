@@ -400,26 +400,38 @@
     }
   },
   "onboarding": {
-    "skip": "Überspringen",
-    "next": "Weiter",
-    "done": "Loslegen",
-    "pages": {
-      "transcription": {
-        "title": "KI-Transkription",
-        "description": "Audio oder Video aufnehmen - KI konvertiert automatisch in Text"
+    "socialProof": "1,380+ Benutzer heute",
+    "slides": {
+      "voice": {
+        "badge": "10x schneller als Tippen",
+        "title": "Sprechen.\nWir Schreiben.",
+        "subtitle": "KI-Transkription in Sekunden"
       },
       "search": {
-        "title": "Intelligente Suche",
-        "description": "Stellen Sie eine Frage - KI durchsucht alle Ihre Notizen und gibt eine Antwort"
+        "badge": "Wie ChatGPT für dein Leben",
+        "title": "Frag Alles.",
+        "subtitle": "KI findet Antworten in deinen Notizen"
       },
-      "ocr": {
-        "title": "OCR-Technologie",
-        "description": "Text fotografieren und automatisch in digitale Notizen umwandeln"
+      "scan": {
+        "badge": "Dokumente, Notizen, Visitenkarten",
+        "title": "Scannen & Speichern",
+        "subtitle": "OCR extrahiert Text aus jedem Bild"
       },
       "private": {
-        "title": "Private Notizen",
-        "description": "Schützen Sie sensible Informationen mit Face ID oder Touch ID"
+        "badge": "Deine Daten, deine Kontrolle",
+        "title": "Völlig Privat",
+        "subtitle": "Sperre sensible Notizen mit Face ID",
+        "securityNote": "🔒 Keine Karte erforderlich. Jederzeit kündbar."
       }
+    },
+    "buttons": {
+      "skip": "Überspringen",
+      "next": "Weiter",
+      "start": "🚀 Kostenlos Starten"
+    },
+    "pricing": {
+      "trial": "7 Tage kostenlos testen. Dann {{price}}/Monat.",
+      "features": "Premium-Funktionen enthalten."
     }
   },
   "home": {

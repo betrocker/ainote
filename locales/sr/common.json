@@ -400,26 +400,38 @@
     }
   },
   "onboarding": {
-    "skip": "Preskoči",
-    "next": "Dalje",
-    "done": "Započni",
-    "pages": {
-      "transcription": {
-        "title": "AI Transkripcija",
-        "description": "Snimi audio ili video - AI će automatski pretvoriti u tekst"
+    "socialProof": "1,380+ korisnika danas",
+    "slides": {
+      "voice": {
+        "badge": "10x brže od kucanja",
+        "title": "Govori.\nMi zapisujemo.",
+        "subtitle": "AI transkript za sekunde"
       },
       "search": {
-        "title": "Pametna Pretraga",
-        "description": "Postavi pitanje - AI pretražuje sve tvoje beleške i daje odgovor"
+        "badge": "Kao ChatGPT za tvoj život",
+        "title": "Pitaj Bilo Šta.",
+        "subtitle": "AI pronalazi odgovore u tvojim beleškama"
       },
-      "ocr": {
-        "title": "OCR Tehnologija",
-        "description": "Fotografiši tekst i automatski ga pretvori u digitalne beleške"
+      "scan": {
+        "badge": "Dokumenti, beleške, vizit karte",
+        "title": "Skeniraj & Sačuvaj",
+        "subtitle": "OCR izvlači tekst iz bilo koje slike"
       },
       "private": {
-        "title": "Privatne Beleške",
-        "description": "Zaštiti osetljive informacije sa Face ID ili Touch ID"
+        "badge": "Tvoji podaci, tvoja kontrola",
+        "title": "Potpuno Privatno",
+        "subtitle": "Zaključaj osetljive beleške Face ID-om",
+        "securityNote": "🔒 Bez kartice. Otkaži bilo kada."
       }
+    },
+    "buttons": {
+      "skip": "Preskoči",
+      "next": "Dalje",
+      "start": "🚀 Počni Besplatno"
+    },
+    "pricing": {
+      "trial": "Probaj 7 dana besplatno. Zatim {{price}} din/mesečno.",
+      "features": "Premium funkcije uključene."
     }
   },
   "home": {

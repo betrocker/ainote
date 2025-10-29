@@ -46,8 +46,6 @@ const getIconByRouteName = (route: string) => {
       return "mail-outline";
     case "assistant":
       return "chatbubble-ellipses-outline";
-    case "private":
-      return "lock-closed-outline";
     default:
       return "ellipse-outline";
   }
@@ -248,8 +246,8 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
                             ? "#0A84FF"
                             : "#007AFF"
                           : isDark
-                            ? "#EBEBF599"
-                            : "#3C3C4399"
+                          ? "#EBEBF599"
+                          : "#3C3C4399"
                       }
                     />
                     <Text

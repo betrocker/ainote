@@ -400,26 +400,38 @@
     }
   },
   "onboarding": {
-    "skip": "Skip",
-    "next": "Next",
-    "done": "Get Started",
-    "pages": {
-      "transcription": {
-        "title": "AI Transcription",
-        "description": "Record audio or video - AI will automatically convert to text"
+    "socialProof": "1,380+ users today",
+    "slides": {
+      "voice": {
+        "badge": "10x faster than typing",
+        "title": "Speak.\nWe Write.",
+        "subtitle": "AI transcription in seconds"
       },
       "search": {
-        "title": "Smart Search",
-        "description": "Ask a question - AI searches all your notes and provides an answer"
+        "badge": "Like ChatGPT for your life",
+        "title": "Ask Anything.",
+        "subtitle": "AI finds answers in your notes"
       },
-      "ocr": {
-        "title": "OCR Technology",
-        "description": "Photograph text and automatically convert it to digital notes"
+      "scan": {
+        "badge": "Documents, notes, business cards",
+        "title": "Scan & Save",
+        "subtitle": "OCR extracts text from any image"
       },
       "private": {
-        "title": "Private Notes",
-        "description": "Protect sensitive information with Face ID or Touch ID"
+        "badge": "Your data, your control",
+        "title": "Fully Private",
+        "subtitle": "Lock sensitive notes with Face ID",
+        "securityNote": "🔒 No card required. Cancel anytime."
       }
+    },
+    "buttons": {
+      "skip": "Skip",
+      "next": "Next",
+      "start": "🚀 Start Free"
+    },
+    "pricing": {
+      "trial": "Try 7 days free. Then {{price}}/month.",
+      "features": "Premium features included."
     }
   },
   "home": {

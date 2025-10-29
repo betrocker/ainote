@@ -327,6 +327,40 @@ export default function Settings() {
     );
   }, [signOut, t]);
 
+  const handleResetOnboarding = useCallback(() => {
+    Alert.alert(
+      "Reset Onboarding",
+      "Da li želiš da ponovo vidiš onboarding ekrane pri sledećem pokretanju?",
+      [
+        {
+          text: "Otkaži",
+          style: "cancel",
+        },
+        {
+          text: "Resetuj",
+          style: "destructive",
+          onPress: async () => {
+            await AsyncStorage.removeItem("@viewedOnboarding");
+            haptics.success();
+            Alert.alert(
+              "✅ Gotovo",
+              "Onboarding će se prikazati pri sledećem pokretanju aplikacije.",
+              [
+                {
+                  text: "OK",
+                  onPress: () => {
+                    // Odmah prebaci na onboarding
+                    router.replace("/onboarding");
+                  },
+                },
+              ]
+            );
+          },
+        },
+      ]
+    );
+  }, []);
+
   if (!ready) return null;
 
   return (
@@ -376,6 +410,26 @@ export default function Settings() {
         {/* Notifications */}
         <View className="mt-6 mx-4 rounded-2xl overflow-hidden border border-black/10 dark:border-white/10 bg-white/80 dark:bg-white/10">
           <NotificationSettings />
+        </View>
+
+        {/* Reset Onboarding - 🆕 NOVO */}
+        <View className="mt-6 mx-4 rounded-2xl overflow-hidden border border-black/10 dark:border-white/10 bg-white/80 dark:bg-white/10">
+          <TouchableOpacity
+            className="flex-row items-center py-3 px-6 active:opacity-70"
+            onPress={handleResetOnboarding}
+          >
+            <View className="w-8 h-8 rounded-full bg-orange-500 items-center justify-center mr-3">
+              <Ionicons name="reload-outline" size={18} color="white" />
+            </View>
+            <View className="flex-1">
+              <Text className="text-base text-ios-label dark:text-iosd-label font-medium">
+                Resetuj Onboarding
+              </Text>
+              <Text className="text-[12px] mt-0.5 text-ios-secondary dark:text-iosd-label2">
+                Prikaži uvodni vodič ponovo
+              </Text>
+            </View>
+          </TouchableOpacity>
         </View>
 
         {/* About */}

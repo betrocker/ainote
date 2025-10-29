@@ -1,62 +1,167 @@
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { BlurView } from "expo-blur";
-import { useRouter } from "expo-router";
-import React, { useRef, useState } from "react";
+import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
+import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Dimensions, Pressable, Text, View } from "react-native";
 import Animated, {
+  Easing,
+  Extrapolation,
   interpolate,
-  interpolateColor,
   useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
+  withRepeat,
+  withSequence,
+  withTiming,
 } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const { width, height } = Dimensions.get("window");
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
-const onboardingData = [
-  {
-    id: 1,
-    icon: "mic-outline",
-    iconSet: "Ionicons",
-    title: "AI Transkripcija",
-    description: "Snimi audio ili video - AI će automatski pretvoriti u tekst",
-    backgroundColor: "#007AFF",
-  },
-  {
-    id: 2,
-    icon: "robot-outline",
-    iconSet: "MaterialCommunityIcons",
-    title: "Pametna Pretraga",
-    description:
-      "Postavi pitanje - AI pretražuje sve tvoje beleške i daje odgovor",
-    backgroundColor: "#5856D6",
-  },
-  {
-    id: 3,
-    icon: "scan-outline",
-    iconSet: "Ionicons",
-    title: "OCR Tehnologija",
-    description:
-      "Fotografiši tekst i automatski ga pretvori u digitalne beleške",
-    backgroundColor: "#FF9500",
-  },
-  {
-    id: 4,
-    icon: "lock-closed-outline",
-    iconSet: "Ionicons",
-    title: "Privatne Beleške",
-    description: "Zaštiti osetljive informacije sa Face ID ili Touch ID",
-    backgroundColor: "#34C759",
-  },
-];
+function AnimatedIcon({
+  name,
+  size,
+  color,
+  animation,
+}: {
+  name: any;
+  size: number;
+  color: string;
+  animation: string;
+}) {
+  const scale = useSharedValue(1);
+  const rotate = useSharedValue(0);
+
+  useEffect(() => {
+    if (animation === "pulse") {
+      scale.value = withRepeat(
+        withSequence(
+          withTiming(1.1, { duration: 1000, easing: Easing.ease }),
+          withTiming(1, { duration: 1000, easing: Easing.ease })
+        ),
+        -1,
+        false
+      );
+    } else if (animation === "sparkle") {
+      rotate.value = withRepeat(
+        withTiming(360, { duration: 3000, easing: Easing.linear }),
+        -1,
+        false
+      );
+    }
+  }, [animation]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }, { rotate: `${rotate.value}deg` }],
+  }));
+
+  // 🔧 Jednostavnije - bez opacity animacije
+  return (
+    <Animated.View style={animatedStyle}>
+      <View style={{ backgroundColor: "transparent" }}>
+        <Ionicons name={name} size={size} color={color} />
+      </View>
+    </Animated.View>
+  );
+}
+
+function SocialProof() {
+  const { t } = useTranslation();
+
+  return (
+    <BlurView
+      intensity={30}
+      tint="dark"
+      className="rounded-2xl overflow-hidden px-4 py-3 flex-row items-center"
+      style={{
+        backgroundColor: "rgba(255,255,255,0.05)",
+        borderWidth: 1,
+        borderColor: "rgba(255,255,255,0.1)",
+      }}
+    >
+      <View className="flex-row -space-x-2 mr-3">
+        {[1, 2, 3].map((i) => (
+          <View
+            key={i}
+            className="w-8 h-8 rounded-full bg-blue-500 border-2 border-black items-center justify-center"
+          >
+            <Text className="text-white text-xs font-bold">👤</Text>
+          </View>
+        ))}
+      </View>
+      <Text className="text-white text-sm font-medium">
+        {t("onboarding.socialProof")}
+      </Text>
+    </BlurView>
+  );
+}
+
+function FeatureBadge({ text }: { text: string }) {
+  return (
+    <BlurView
+      intensity={20}
+      tint="dark"
+      className="rounded-full overflow-hidden px-4 py-2"
+      style={{
+        backgroundColor: "rgba(255,255,255,0.1)",
+        borderWidth: 1,
+        borderColor: "rgba(255,255,255,0.2)",
+      }}
+    >
+      <Text className="text-white text-sm font-semibold">✨ {text}</Text>
+    </BlurView>
+  );
+}
 
 export default function OnboardingScreen() {
-  const router = useRouter();
-  const scrollX = useSharedValue(0);
-  const flatListRef = useRef<Animated.FlatList>(null);
+  const { t } = useTranslation();
   const [currentIndex, setCurrentIndex] = useState(0);
+  const scrollX = useSharedValue(0);
+  const insets = useSafeAreaInsets();
+  const scrollViewRef = useRef<Animated.ScrollView>(null);
+
+  const slides = [
+    {
+      icon: "mic" as const,
+      titleKey: "onboarding.slides.voice.title",
+      subtitleKey: "onboarding.slides.voice.subtitle",
+      benefitKey: "onboarding.slides.voice.badge",
+      gradient: ["#667eea", "#764ba2"],
+      accentColor: "#667eea",
+      animation: "pulse",
+    },
+    {
+      icon: "star" as const,
+      titleKey: "onboarding.slides.search.title",
+      subtitleKey: "onboarding.slides.search.subtitle",
+      benefitKey: "onboarding.slides.search.badge",
+      gradient: ["#f093fb", "#f5576c"],
+      accentColor: "#f093fb",
+      animation: "sparkle",
+    },
+    {
+      icon: "camera" as const,
+      titleKey: "onboarding.slides.scan.title",
+      subtitleKey: "onboarding.slides.scan.subtitle",
+      benefitKey: "onboarding.slides.scan.badge",
+      gradient: ["#4facfe", "#00f2fe"],
+      accentColor: "#4facfe",
+      animation: "scan",
+    },
+    {
+      icon: "lock-closed" as const,
+      titleKey: "onboarding.slides.private.title",
+      subtitleKey: "onboarding.slides.private.subtitle",
+      benefitKey: "onboarding.slides.private.badge",
+      gradient: ["#43e97b", "#38f9d7"],
+      accentColor: "#43e97b",
+      animation: "lock",
+      cta: true,
+    },
+  ];
 
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
@@ -64,177 +169,305 @@ export default function OnboardingScreen() {
     },
   });
 
-  const handleSkip = async () => {
-    await AsyncStorage.setItem("hasSeenOnboarding", "true");
+  const completeOnboarding = async () => {
+    await AsyncStorage.setItem("@viewedOnboarding", "true");
     router.replace("/(tabs)/home");
   };
 
-  const handleNext = () => {
-    if (currentIndex < onboardingData.length - 1) {
-      flatListRef.current?.scrollToIndex({
-        index: currentIndex + 1,
+  const goToNextSlide = () => {
+    if (currentIndex < slides.length - 1) {
+      // @ts-ignore
+      scrollViewRef.current?.scrollTo({
+        x: (currentIndex + 1) * SCREEN_WIDTH,
         animated: true,
       });
-      setCurrentIndex(currentIndex + 1);
     } else {
-      handleSkip();
+      completeOnboarding();
     }
   };
 
+  const isLastSlide = currentIndex === slides.length - 1;
+  const currentSlide = slides[currentIndex];
+
+  // Background animation
+  const backgroundScale = useSharedValue(1);
+  useEffect(() => {
+    backgroundScale.value = withRepeat(
+      withSequence(
+        withTiming(1.1, { duration: 8000, easing: Easing.ease }),
+        withTiming(1, { duration: 8000, easing: Easing.ease })
+      ),
+      -1,
+      false
+    );
+  }, []);
+
+  const backgroundStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: backgroundScale.value }],
+  }));
+
   return (
     <View className="flex-1 bg-black">
-      <Animated.FlatList
-        ref={flatListRef}
-        data={onboardingData}
+      {/* Animated Gradient Background */}
+      <Animated.View
+        style={[
+          { position: "absolute", width: "100%", height: "100%" },
+          backgroundStyle,
+        ]}
+      >
+        <LinearGradient
+          colors={[
+            currentSlide.gradient[0],
+            currentSlide.gradient[1],
+            "#000000",
+          ]}
+          style={{
+            flex: 1,
+          }}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        />
+      </Animated.View>
+
+      {/* Floating Orbs */}
+      <View
+        style={{
+          position: "absolute",
+          width: "100%",
+          height: "100%",
+          opacity: 0.3,
+        }}
+      >
+        <Animated.View
+          style={{
+            position: "absolute",
+            width: 300,
+            height: 300,
+            borderRadius: 150,
+            backgroundColor: currentSlide.accentColor,
+            top: -100,
+            left: -100,
+            opacity: 0.2,
+          }}
+        />
+        <Animated.View
+          style={{
+            position: "absolute",
+            width: 200,
+            height: 200,
+            borderRadius: 100,
+            backgroundColor: currentSlide.accentColor,
+            bottom: 100,
+            right: -50,
+            opacity: 0.15,
+          }}
+        />
+      </View>
+
+      {/* Top Social Proof */}
+      <View className="pt-16 px-6">
+        <SocialProof />
+      </View>
+
+      <Animated.ScrollView
+        ref={scrollViewRef}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         onScroll={scrollHandler}
         scrollEventThrottle={16}
-        onMomentumScrollEnd={(event) => {
-          const index = Math.round(event.nativeEvent.contentOffset.x / width);
+        onMomentumScrollEnd={(e) => {
+          const index = Math.round(
+            e.nativeEvent.contentOffset.x / SCREEN_WIDTH
+          );
           setCurrentIndex(index);
         }}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item, index }) => (
-          <OnboardingItem item={item} index={index} scrollX={scrollX} />
-        )}
-      />
+      >
+        {slides.map((slide, index) => (
+          <View
+            key={index}
+            style={{ width: SCREEN_WIDTH }}
+            className="items-center justify-center px-8 pt-12"
+          >
+            {/* Animated Icon Card */}
+            <View className="mb-10 items-center justify-center">
+              <LinearGradient
+                colors={[`${slide.accentColor}25`, `${slide.accentColor}05`]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={{
+                  width: SCREEN_WIDTH * 0.5,
+                  height: SCREEN_WIDTH * 0.5,
+                  borderRadius: (SCREEN_WIDTH * 0.5) / 2,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderWidth: 1.5,
+                  borderColor: "rgba(255,255,255,0.2)",
+                }}
+              >
+                <AnimatedIcon
+                  name={slide.icon}
+                  size={90}
+                  color={slide.accentColor}
+                  animation={slide.animation}
+                />
+              </LinearGradient>
+            </View>
 
-      {/* Skip Button */}
-      <View className="absolute top-14 right-6">
-        <Pressable onPress={handleSkip} className="px-4 py-2 active:opacity-60">
-          <Text className="text-white/60 text-base font-medium">Preskoči</Text>
-        </Pressable>
-      </View>
+            {/* Badge */}
+            <View className="mb-6">
+              <FeatureBadge text={t(slide.benefitKey)} />
+            </View>
+
+            {/* Title */}
+            <Text
+              className="text-5xl font-black text-center leading-tight px-4 mb-6"
+              style={{ color: "#ffffff" }}
+            >
+              {t(slide.titleKey)}
+            </Text>
+
+            {/* Subtitle */}
+            <Text className="text-xl text-gray-300 text-center leading-7 px-6">
+              {t(slide.subtitleKey)}
+            </Text>
+
+            {/* CTA for last slide */}
+            {slide.cta && (
+              <View className="mt-8">
+                <Text className="text-gray-400 text-center text-sm mb-2">
+                  {t("onboarding.slides.private.securityNote")}
+                </Text>
+              </View>
+            )}
+          </View>
+        ))}
+      </Animated.ScrollView>
 
       {/* Pagination Dots */}
-      <View className="absolute bottom-32 w-full items-center">
-        <View className="flex-row gap-2">
-          {onboardingData.map((_, index) => (
-            <PaginationDot
+      <View className="flex-row justify-center mb-8">
+        {slides.map((slide, index) => {
+          const dotStyle = useAnimatedStyle(() => {
+            const inputRange = [
+              (index - 1) * SCREEN_WIDTH,
+              index * SCREEN_WIDTH,
+              (index + 1) * SCREEN_WIDTH,
+            ];
+
+            const width = interpolate(
+              scrollX.value,
+              inputRange,
+              [10, 30, 10],
+              Extrapolation.CLAMP
+            );
+
+            const opacity = interpolate(
+              scrollX.value,
+              inputRange,
+              [0.4, 1, 0.4],
+              Extrapolation.CLAMP
+            );
+
+            return {
+              width,
+              opacity,
+              backgroundColor: slide.accentColor,
+            };
+          });
+
+          return (
+            <Animated.View
               key={index}
-              index={index}
-              scrollX={scrollX}
-              currentIndex={currentIndex}
+              className="h-2.5 rounded-full mx-1"
+              style={dotStyle}
             />
-          ))}
-        </View>
+          );
+        })}
       </View>
 
-      {/* Next/Get Started Button */}
-      <View className="absolute bottom-12 w-full px-6">
-        <Pressable
-          onPress={handleNext}
-          className="bg-white rounded-2xl py-4 active:opacity-80"
-        >
-          <Text className="text-black text-center text-base font-semibold">
-            {currentIndex === onboardingData.length - 1 ? "Započni" : "Dalje"}
+      {/* Bottom Buttons */}
+      <View
+        className="px-6"
+        style={{ paddingBottom: Math.max(insets.bottom, 12) + 16 }}
+      >
+        {isLastSlide ? (
+          <LinearGradient
+            colors={[currentSlide.accentColor, currentSlide.gradient[1]]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={{
+              borderRadius: 20,
+              shadowColor: currentSlide.accentColor,
+              shadowOffset: { width: 0, height: 10 },
+              shadowOpacity: 0.5,
+              shadowRadius: 20,
+              elevation: 10,
+            }}
+          >
+            <Pressable
+              onPress={completeOnboarding}
+              className="py-5 items-center active:opacity-80"
+            >
+              <Text className="text-white font-black text-lg">
+                {t("onboarding.buttons.start")}
+              </Text>
+            </Pressable>
+          </LinearGradient>
+        ) : (
+          <View className="flex-row gap-3">
+            <BlurView
+              intensity={40}
+              tint="dark"
+              className="flex-1 rounded-2xl overflow-hidden"
+              style={{
+                borderWidth: 1,
+                borderColor: "rgba(255,255,255,0.1)",
+                backgroundColor: "rgba(255,255,255,0.05)",
+              }}
+            >
+              <Pressable
+                onPress={completeOnboarding}
+                className="py-5 items-center active:opacity-60"
+              >
+                <Text className="text-white font-semibold text-base">
+                  {t("onboarding.buttons.skip")}
+                </Text>
+              </Pressable>
+            </BlurView>
+
+            <LinearGradient
+              colors={[currentSlide.accentColor, currentSlide.gradient[1]]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              className="flex-1 rounded-2xl overflow-hidden"
+              style={{
+                shadowColor: currentSlide.accentColor,
+                shadowOffset: { width: 0, height: 8 },
+                shadowOpacity: 0.4,
+                shadowRadius: 12,
+                elevation: 8,
+              }}
+            >
+              <Pressable
+                onPress={goToNextSlide}
+                className="py-5 items-center active:opacity-70"
+              >
+                <Text className="text-white font-bold text-base">
+                  {t("onboarding.buttons.next")}
+                </Text>
+              </Pressable>
+            </LinearGradient>
+          </View>
+        )}
+
+        {isLastSlide && (
+          <Text className="text-gray-400 text-center text-xs mt-4 leading-5">
+            {t("onboarding.pricing.trial", { price: "299" })}
+            {"\n"}
+            {t("onboarding.pricing.features")}
           </Text>
-        </Pressable>
+        )}
       </View>
     </View>
-  );
-}
-
-// Onboarding Item Component
-function OnboardingItem({ item, index, scrollX }: any) {
-  const animatedStyle = useAnimatedStyle(() => {
-    const inputRange = [
-      (index - 1) * width,
-      index * width,
-      (index + 1) * width,
-    ];
-
-    const scale = interpolate(scrollX.value, inputRange, [0.8, 1, 0.8]);
-
-    const opacity = interpolate(scrollX.value, inputRange, [0.3, 1, 0.3]);
-
-    return {
-      transform: [{ scale }],
-      opacity,
-    };
-  });
-
-  const backgroundStyle = useAnimatedStyle(() => {
-    const backgroundColor = interpolateColor(
-      scrollX.value,
-      onboardingData.map((_, i) => i * width),
-      onboardingData.map((item) => item.backgroundColor)
-    );
-
-    return { backgroundColor };
-  });
-
-  // Render icon based on iconSet
-  const renderIcon = () => {
-    const iconProps = {
-      name: item.icon,
-      size: 80,
-      color: "white",
-    };
-
-    if (item.iconSet === "MaterialCommunityIcons") {
-      return <MaterialCommunityIcons {...iconProps} />;
-    }
-    return <Ionicons {...iconProps} />;
-  };
-
-  return (
-    <View
-      style={{ width, height }}
-      className="justify-center items-center px-8"
-    >
-      <Animated.View style={backgroundStyle} className="absolute inset-0" />
-
-      <Animated.View style={animatedStyle} className="items-center">
-        {/* Icon Container with Glass Effect */}
-        <BlurView
-          intensity={20}
-          tint="dark"
-          className="w-40 h-40 rounded-full items-center justify-center mb-12 overflow-hidden"
-          style={{ backgroundColor: "rgba(255, 255, 255, 0.15)" }}
-        >
-          {renderIcon()}
-        </BlurView>
-
-        {/* Title */}
-        <Text className="text-white text-4xl font-bold text-center mb-4">
-          {item.title}
-        </Text>
-
-        {/* Description */}
-        <Text className="text-white/70 text-lg text-center leading-7 px-4">
-          {item.description}
-        </Text>
-      </Animated.View>
-    </View>
-  );
-}
-
-// Pagination Dot Component
-function PaginationDot({ index, scrollX, currentIndex }: any) {
-  const animatedStyle = useAnimatedStyle(() => {
-    const inputRange = [
-      (index - 1) * width,
-      index * width,
-      (index + 1) * width,
-    ];
-
-    const dotWidth = interpolate(scrollX.value, inputRange, [8, 24, 8]);
-
-    const opacity = interpolate(scrollX.value, inputRange, [0.3, 1, 0.3]);
-
-    return {
-      width: withSpring(dotWidth, { damping: 15 }),
-      opacity: withSpring(opacity),
-    };
-  });
-
-  return (
-    <Animated.View
-      style={animatedStyle}
-      className="h-2 bg-white rounded-full"
-    />
   );
 }

@@ -6,7 +6,6 @@ import TagInput from "@/components/TagInput";
 import VideoFullscreenPlayer from "@/components/VideoFullscreenPlayer";
 import { useNotes } from "@/context/NotesContext";
 import { usePremium } from "@/context/PremiumContext";
-import { authenticateWithBiometric } from "@/utils/biometric"; // ✅ Dodato
 import { Ionicons } from "@expo/vector-icons";
 import { Audio, AVPlaybackStatusSuccess } from "expo-av";
 import { Image } from "expo-image";
@@ -73,7 +72,6 @@ export default function NoteDetailScreen() {
     generatingTitles,
     generateNoteSummary,
     generatingSummaries,
-    toggleNotePrivate, // ✅ Dodato
   } = useNotes();
 
   const { isPremium } = usePremium();
@@ -120,32 +118,6 @@ export default function NoteDetailScreen() {
 
     console.log("✅ [Note] User has premium, proceeding with:", featureName);
     action();
-  };
-
-  // ✅ Toggle Private Handler
-  const handleTogglePrivate = async () => {
-    if (!note) return;
-
-    if (!note.isPrivate) {
-      // Postavljanje kao privatna - zahteva autentifikaciju
-      console.log("🔒 [Note] Setting as private, authenticating...");
-      const success = await authenticateWithBiometric();
-
-      if (success) {
-        console.log("🔒 [Note] Authentication success, toggling...");
-        await toggleNotePrivate(note.id);
-      } else {
-        console.log("🔒 [Note] Authentication failed");
-        Alert.alert(
-          t("noteDetail.private.authFailed"),
-          t("noteDetail.private.authFailedMessage")
-        );
-      }
-    } else {
-      // Uklanjanje privatnog statusa - bez autentifikacije
-      console.log("🔒 [Note] Removing private status...");
-      await toggleNotePrivate(note.id);
-    }
   };
 
   // ⭐ Log kada se otvori screen
@@ -417,22 +389,6 @@ export default function NoteDetailScreen() {
               </View>
             )}
 
-            {/* ✅ Private Toggle Button */}
-            <TouchableOpacity
-              onPress={handleTogglePrivate}
-              className={[
-                "w-9 h-9 rounded-full items-center justify-center active:opacity-70",
-                note.isPrivate ? "bg-red-500" : "bg-gray-500/15",
-              ].join(" ")}
-              activeOpacity={1}
-            >
-              <Ionicons
-                name={note.isPrivate ? "lock-closed" : "lock-open-outline"}
-                size={18}
-                color={note.isPrivate ? "#FFF" : "#6B7280"}
-              />
-            </TouchableOpacity>
-
             {/* Pin dugme */}
             <TouchableOpacity
               onPress={() => togglePinNote(note.id)}
@@ -500,18 +456,6 @@ export default function NoteDetailScreen() {
             </Text>
           </View>
         </View>
-
-        {/* ✅ Private Indicator */}
-        {note.isPrivate && (
-          <View className="mt-2 flex-row items-center">
-            <View className="bg-red-500/15 rounded-full px-2 py-1 flex-row items-center">
-              <Ionicons name="lock-closed" size={12} color="#EF4444" />
-              <Text className="text-xs font-semibold text-red-600 dark:text-red-400 ml-1">
-                {t("noteDetail.private.badge")}
-              </Text>
-            </View>
-          </View>
-        )}
 
         {/* ⭐ Generate Title dugme - SA PREMIUM LOCK */}
         {note.text && note.text.length > 20 && (
@@ -739,8 +683,8 @@ export default function NoteDetailScreen() {
                       {isTranscribing
                         ? t("noteDetail.media.processing")
                         : note.text
-                          ? t("noteDetail.media.reExtract")
-                          : t("noteDetail.media.extractText")}
+                        ? t("noteDetail.media.reExtract")
+                        : t("noteDetail.media.extractText")}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -814,8 +758,8 @@ export default function NoteDetailScreen() {
                       {isTranscribing
                         ? t("noteDetail.media.processing")
                         : note.text
-                          ? t("noteDetail.media.reTranscribe")
-                          : t("noteDetail.media.transcribe")}
+                        ? t("noteDetail.media.reTranscribe")
+                        : t("noteDetail.media.transcribe")}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -916,8 +860,8 @@ export default function NoteDetailScreen() {
                       {isTranscribing
                         ? t("noteDetail.media.processing")
                         : note.text
-                          ? t("noteDetail.media.reTranscribe")
-                          : t("noteDetail.media.transcribe")}
+                        ? t("noteDetail.media.reTranscribe")
+                        : t("noteDetail.media.transcribe")}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -979,10 +923,10 @@ export default function NoteDetailScreen() {
                         fact.predicate === "due_on"
                           ? "bg-red-500/15"
                           : fact.predicate === "number"
-                            ? "bg-blue-500/15"
-                            : fact.predicate === "topic"
-                              ? "bg-green-500/15"
-                              : "bg-gray-500/10"
+                          ? "bg-blue-500/15"
+                          : fact.predicate === "topic"
+                          ? "bg-green-500/15"
+                          : "bg-gray-500/10"
                       }`}
                     >
                       <Ionicons
@@ -990,20 +934,20 @@ export default function NoteDetailScreen() {
                           fact.predicate === "due_on"
                             ? "calendar-outline"
                             : fact.predicate === "number"
-                              ? "calculator-outline"
-                              : fact.predicate === "topic"
-                                ? "pricetag-outline"
-                                : "document-text-outline"
+                            ? "calculator-outline"
+                            : fact.predicate === "topic"
+                            ? "pricetag-outline"
+                            : "document-text-outline"
                         }
                         size={16}
                         color={
                           fact.predicate === "due_on"
                             ? "#EF4444"
                             : fact.predicate === "number"
-                              ? "#3B82F6"
-                              : fact.predicate === "topic"
-                                ? "#10B981"
-                                : "#6B7280"
+                            ? "#3B82F6"
+                            : fact.predicate === "topic"
+                            ? "#10B981"
+                            : "#6B7280"
                         }
                       />
                     </View>
@@ -1013,11 +957,11 @@ export default function NoteDetailScreen() {
                         {fact.predicate === "due_on"
                           ? formatDateFromISO(fact.object, t)
                           : fact.predicate === "number"
-                            ? fact.object
-                            : fact.predicate === "topic"
-                              ? fact.object.charAt(0).toUpperCase() +
-                                fact.object.slice(1)
-                              : fact.object.slice(0, 60) + "..."}
+                          ? fact.object
+                          : fact.predicate === "topic"
+                          ? fact.object.charAt(0).toUpperCase() +
+                            fact.object.slice(1)
+                          : fact.object.slice(0, 60) + "..."}
                       </Text>
                       {fact.subject && fact.predicate !== "note_contains" && (
                         <Text className="text-xs text-ios-secondary dark:text-iosd-label2 mt-0.5">
