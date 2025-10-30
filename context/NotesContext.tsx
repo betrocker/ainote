@@ -26,6 +26,7 @@ export type NewNoteInput = Omit<Note, "id" | "createdAt" | "updatedAt" | "ai">;
 
 export type NotesContextType = {
   notes: Note[];
+  isLoading: boolean;
   addNote: (note: NewNoteInput) => Promise<string>;
   addNoteFromText: (text: string, opts?: { title?: string }) => Promise<string>;
   addNoteFromPhoto: (uri: string, opts?: { title?: string }) => Promise<string>;
@@ -56,6 +57,7 @@ const NotesContext = createContext<NotesContextType | undefined>(undefined);
 /** ===================== Provider ===================== */
 export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
   const [notes, setNotes] = useState<Note[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [transcribingNotes, setTranscribingNotes] = useState<Set<string>>(
     new Set()
   );
@@ -76,6 +78,8 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
         if (json) setNotes(JSON.parse(json));
       } catch (err) {
         console.log("Error loading notes", err);
+      } finally {
+        setIsLoading(false); // 🆕
       }
     })();
   }, []);
@@ -184,7 +188,7 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
         makeId();
 
       const now = Date.now();
-      const base: Note = { id, createdAt: now, ...partial };
+      const base: Note = { id, createdAt: now, isPrivate: false, ...partial };
 
       // Auto-facts
       const textSrc = (base.text ?? base.content ?? "").trim();
@@ -240,7 +244,7 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
   const addNoteFromPhoto = useCallback(
     async (uri: string, opts?: { title?: string }) => {
       const title = opts?.title ?? "Photo";
-      return addNote({ type: "photo", title, fileUri: uri });
+      return addNote({ type: "photo", title, fileUri: uri, isPrivate: false });
     },
     [addNote]
   );
@@ -262,50 +266,51 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
   );
 
   // ⭐ Izmena beleške - sa notification update
-  const editNote = useCallback(async (id: string, updates: Partial<Note>) => {
-    console.log("📝 [editNote] Editing note:", id.slice(0, 8));
+  const editNote = useCallback(
+    async (id: string, updates: Partial<Omit<Note, "id" | "createdAt">>) => {
+      console.log("📝 [editNote] Editing note:", id.slice(0, 8));
 
-    setNotes((prevNotes) => {
-      const updatedNotes = prevNotes.map((n) => {
-        if (n.id !== id) return n;
+      setNotes((prevNotes) => {
+        const updatedNotes = prevNotes.map((n) => {
+          if (n.id !== id) return n;
 
-        const next: Note = { ...n, ...updates, updatedAt: Date.now() };
-        const changedText = Object.prototype.hasOwnProperty.call(
-          updates,
-          "text"
-        );
-        const textSrc = (next.text ?? next.content ?? "").trim();
+          const next: Note = { ...n, ...updates, updatedAt: Date.now() };
+          const changedText = Object.prototype.hasOwnProperty.call(
+            updates,
+            "text"
+          );
+          const textSrc = (next.text ?? next.content ?? "").trim();
 
-        console.log("📝 [editNote] Text changed:", changedText);
+          console.log("📝 [editNote] Text changed:", changedText);
 
-        if (changedText && textSrc.length > 0) {
-          const facts = genFactsFromText(textSrc, id);
-          next.ai = { ...(next.ai ?? {}), facts };
+          if (changedText && textSrc.length > 0) {
+            const facts = genFactsFromText(textSrc, id);
+            next.ai = { ...(next.ai ?? {}), facts };
 
-          console.log("📝 [editNote] Regenerated facts:", facts.length);
+            console.log("📝 [editNote] Regenerated facts:", facts.length);
 
-          // ⭐ Check if has due_on fact
-          const hasDueDate = facts.some((f) => f.predicate === "due_on");
-          console.log("📝 [editNote] Has due_on:", hasDueDate);
+            const hasDueDate = facts.some((f) => f.predicate === "due_on");
+            console.log("📝 [editNote] Has due_on:", hasDueDate);
 
-          if (hasDueDate) {
-            // Async - ne blokira state update
-            scheduleNotificationsForNote(next).catch((err) =>
-              console.error("📝 [editNote] Notification error:", err)
-            );
+            if (hasDueDate) {
+              scheduleNotificationsForNote(next).catch((err) =>
+                console.error("📝 [editNote] Notification error:", err)
+              );
+            }
           }
-        }
 
-        return next;
+          return next;
+        });
+
+        AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedNotes))
+          .then(() => console.log("📝 [editNote] Persisted to storage"))
+          .catch((err) => console.log("📝 [editNote] Storage error:", err));
+
+        return updatedNotes;
       });
-
-      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedNotes))
-        .then(() => console.log("📝 [editNote] Persisted to storage"))
-        .catch((err) => console.log("📝 [editNote] Storage error:", err));
-
-      return updatedNotes;
-    });
-  }, []);
+    },
+    []
+  );
 
   const transcribeNote = useCallback(
     async (noteId: string, audioUri: string) => {
@@ -576,6 +581,7 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
       value={{
         notes,
         addNote,
+        isLoading,
         addNoteFromText,
         addNoteFromPhoto,
         addNoteFromVideo,

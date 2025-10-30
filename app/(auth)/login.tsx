@@ -120,7 +120,7 @@ export default function Login() {
 
               {!pendingVerification ? (
                 <>
-                  <Text className="text-3xl font-bold text-ios-label dark:text-iosd-label mb-2">
+                  <Text className="text-3xl font-monaBold text-ios-label dark:text-iosd-label mb-2">
                     {t("auth.login.title")}
                   </Text>
                   <Text className="text-base text-ios-secondary dark:text-iosd-label2 text-center">
@@ -129,7 +129,7 @@ export default function Login() {
                 </>
               ) : (
                 <>
-                  <Text className="text-3xl font-bold text-ios-label dark:text-iosd-label mb-2">
+                  <Text className="text-3xl font-monaBold text-ios-label dark:text-iosd-label mb-2">
                     {t("auth.login.verifyTitle")}
                   </Text>
                   <Text className="text-base text-ios-secondary dark:text-iosd-label2 text-center px-8">

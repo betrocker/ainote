@@ -25,4 +25,5 @@ export type Note = {
     dueDate?: string;
     reminder?: string;
   };
+  isPrivate?: boolean;
 };

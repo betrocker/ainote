@@ -84,7 +84,7 @@ export default function FilterChips({ activeFilter, onFilterChange }: Props) {
             />
             <Text
               className={[
-                "text-sm font-semibold",
+                "text-sm font-monaBold",
                 isActive ? "" : "text-ios-secondary dark:text-iosd-label2",
               ].join(" ")}
               style={isActive ? { color: filter.color } : {}}

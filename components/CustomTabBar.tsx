@@ -4,13 +4,12 @@ import { useTab } from "@/context/TabContext";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { useColorScheme } from "nativewind";
-import React, { useCallback, useEffect, useRef } from "react";
-import { useTranslation } from "react-i18next"; // ✅ Dodato
+import React from "react";
+import { useTranslation } from "react-i18next";
 import {
   Platform,
   Pressable,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -18,12 +17,7 @@ import Animated, {
   Easing,
   FadeIn,
   FadeOut,
-  LinearTransition,
   useAnimatedStyle,
-  useDerivedValue,
-  useSharedValue,
-  withSequence,
-  withSpring,
   withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -34,18 +28,17 @@ interface CustomTabBarProps {
   tabs: readonly string[];
 }
 
-const AnimatedTouchableOpacity =
-  Animated.createAnimatedComponent(TouchableOpacity);
-
-const getIconByRouteName = (route: string) => {
+const getIconByRouteName = (route: string, isFocused: boolean) => {
   const r = route.toLowerCase();
   switch (r) {
     case "home":
-      return "home-outline";
+      return isFocused ? "home" : "home-outline";
     case "inbox":
-      return "mail-outline";
+      return isFocused ? "mail" : "mail-outline";
     case "assistant":
-      return "chatbubble-ellipses-outline";
+      return isFocused ? "chatbubble-ellipses" : "chatbubble-ellipses-outline";
+    case "private":
+      return isFocused ? "lock-closed" : "lock-closed-outline";
     default:
       return "ellipse-outline";
   }
@@ -53,14 +46,16 @@ const getIconByRouteName = (route: string) => {
 
 const BASE_TABBAR_HEIGHT = 64;
 const ANDROID_FALLBACK_BOTTOM = 16;
+const ACTIVE_TAB_WIDTH = 100;
+const INACTIVE_TAB_WIDTH = 48;
 
 const CustomTabBar: React.FC<CustomTabBarProps> = ({
   currentIndex,
   onTabPress,
   tabs,
 }) => {
-  const { t } = useTranslation("common"); // ✅ Dodato
-  const { setActive, menuOpen, setMenuOpen } = useTab();
+  const { t } = useTranslation("common");
+  const { menuOpen, setMenuOpen } = useTab();
   const { colorScheme } = useColorScheme();
   const insets = useSafeAreaInsets();
 
@@ -74,76 +69,17 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
         : ANDROID_FALLBACK_BOTTOM
       : insets.bottom;
 
-  // ====== Shared i anim vrednosti ======
-  const segmentW = useSharedValue(0);
-  const pillX = useSharedValue(0);
-  const pillScale = useSharedValue(1);
-  const currentIdxSV = useSharedValue(currentIndex);
+  // ⭐ NULL CHECK
+  const tabsArray = (
+    tabs && tabs.length > 0 ? Array.from(tabs) : []
+  ) as string[];
 
-  useEffect(() => {
-    currentIdxSV.value = currentIndex;
-  }, [currentIndex, currentIdxSV]);
-
-  const triggerBounce = useCallback(() => {
-    pillScale.value = withSequence(
-      withTiming(0.9, { duration: 80 }),
-      withTiming(1.05, { duration: 110 }),
-      withSpring(1, { damping: 16, stiffness: 220 })
-    );
-  }, [pillScale]);
-
-  useDerivedValue(() => {
-    if (segmentW.value <= 0) return;
-    const newWidth = segmentW.value * 0.9;
-    const segmentCenter =
-      currentIdxSV.value * segmentW.value + segmentW.value / 2;
-    const targetX = segmentCenter - newWidth / 2;
-    pillX.value = withTiming(targetX, {
-      duration: 260,
-      easing: Easing.out(Easing.cubic),
-    });
-  });
-
-  const pillStyle = useAnimatedStyle(() => {
-    if (segmentW.value <= 0) return {};
-    return {
-      width: segmentW.value * 0.9,
-      height: 46,
-      borderRadius: 9999,
-      position: "absolute",
-      top: "50%",
-      transform: [
-        { translateY: -23 },
-        { translateX: pillX.value },
-        { scale: pillScale.value },
-      ],
-    };
-  });
-
-  const prevWidth = useRef(0);
-  const onLayout = useCallback(
-    (event: any) => {
-      const w = event.nativeEvent.layout.width;
-      if (tabs.length > 0 && w > 0 && w !== prevWidth.current) {
-        prevWidth.current = w;
-        const segWidth = w / tabs.length;
-        segmentW.value = segWidth;
-
-        const newWidth = segWidth * 0.9;
-        const segmentCenter = currentIndex * segWidth + segWidth / 2;
-        pillX.value = segmentCenter - newWidth / 2;
-      }
-    },
-    [tabs.length, currentIndex, segmentW, pillX]
-  );
-
-  // ✅ Helper funkcija za dobijanje tab label-a
   const getTabLabel = (tab: string) => {
     const lowercaseTab = tab.toLowerCase();
     return t(`tabs.${lowercaseTab}`);
   };
 
-  // Wrapper komponenta za Tab Bar sa platform-specific stilom
+  // Wrapper komponenta za Tab Bar
   const TabBarContent = ({ children }: { children: React.ReactNode }) => {
     if (Platform.OS === "ios") {
       return (
@@ -157,7 +93,6 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
       );
     }
 
-    // Android fallback - solid background sa opacity
     return (
       <View
         className={`rounded-full overflow-hidden h-16 border ${
@@ -178,9 +113,12 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
     );
   };
 
+  const totalWidth =
+    (tabsArray.length - 1) * INACTIVE_TAB_WIDTH + ACTIVE_TAB_WIDTH + 16;
+
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
-      {/* Overlay kad je FAB meni otvoren */}
+      {/* Overlay */}
       {menuOpen && (
         <Animated.View
           entering={FadeIn.duration(180)}
@@ -212,54 +150,78 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
         <Animated.View
           entering={FadeIn.duration(220)}
           exiting={FadeOut.duration(220)}
-          className="absolute left-4 w-[70%] rounded-full overflow-visible"
-          style={{ bottom: bottomSpace + 4 }}
+          className="absolute left-4 rounded-full overflow-visible"
+          style={{
+            bottom: bottomSpace + 4,
+            width: totalWidth,
+          }}
           pointerEvents="box-none"
         >
           <TabBarContent>
-            <View
-              className="relative flex-row h-full items-center"
-              onLayout={onLayout}
-            >
-              <Animated.View
-                style={[pillStyle, { minWidth: 80 }]}
-                className="absolute bg-gray-800/[0.15] dark:bg-white/15 border border-gray-800/[0.2] dark:border-white/20"
-              />
-              {tabs.map((tab, index) => {
+            <View className="relative flex-row h-full items-center px-2">
+              {tabsArray.map((tab, index) => {
                 const isFocused = currentIndex === index;
+
+                // ⭐ SIMPLE ANIMATED STYLE - BEZ DYNAMIC HOOK-A
+                const animatedStyle = useAnimatedStyle(() => ({
+                  width: withTiming(
+                    currentIndex === index
+                      ? ACTIVE_TAB_WIDTH
+                      : INACTIVE_TAB_WIDTH,
+                    {
+                      duration: 260,
+                      easing: Easing.out(Easing.cubic),
+                    }
+                  ),
+                }));
+
                 return (
-                  <AnimatedTouchableOpacity
-                    key={tab}
-                    layout={LinearTransition.springify().damping(16)}
-                    onPress={() => {
-                      onTabPress(index);
-                      triggerBounce();
-                    }}
-                    className="flex-1 items-center justify-center h-full"
-                  >
-                    <Ionicons
-                      name={getIconByRouteName(tab)}
-                      size={22}
-                      color={
-                        isFocused
-                          ? isDark
-                            ? "#0A84FF"
-                            : "#007AFF"
-                          : isDark
-                          ? "#EBEBF599"
-                          : "#3C3C4399"
-                      }
-                    />
-                    <Text
-                      className={`mt-1 text-xs font-medium ${
-                        isFocused
-                          ? "text-ios-blue dark:text-iosd-blue"
-                          : "text-ios-label2 dark:text-iosd-label2"
-                      }`}
+                  <Animated.View key={tab} style={animatedStyle}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        onTabPress(index);
+                      }}
+                      className="h-full items-center justify-center"
+                      activeOpacity={1}
                     >
-                      {getTabLabel(tab)} {/* ✅ Promenjeno */}
-                    </Text>
-                  </AnimatedTouchableOpacity>
+                      {isFocused ? (
+                        <BlurView
+                          intensity={20}
+                          tint={isDark ? "dark" : "light"}
+                          className="flex-row items-center gap-1 px-4 py-3 rounded-full overflow-hidden"
+                          style={{
+                            backgroundColor: isDark
+                              ? "rgba(10, 132, 255, 0.2)"
+                              : "rgba(0, 122, 255, 0.18)",
+                          }}
+                        >
+                          {/* Ikona */}
+                          <Ionicons
+                            name={getIconByRouteName(tab, isFocused)}
+                            size={22}
+                            color={isDark ? "#0A84FF" : "#007AFF"}
+                          />
+
+                          {/* Tekst */}
+                          <Animated.Text
+                            className="text-xs font-semibold text-ios-blue dark:text-iosd-blue"
+                            numberOfLines={1}
+                          >
+                            {getTabLabel(tab)}
+                          </Animated.Text>
+                        </BlurView>
+                      ) : (
+                        // Neaktivan tab
+                        <View className="w-12 h-12 items-center justify-center">
+                          <Ionicons
+                            name={getIconByRouteName(tab, isFocused)}
+                            size={22}
+                            color={isDark ? "#EBEBF599" : "#3C3C4399"}
+                          />
+                        </View>
+                      )}
+                    </TouchableOpacity>
+                  </Animated.View>
                 );
               })}
             </View>

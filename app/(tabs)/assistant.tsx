@@ -171,7 +171,7 @@ export default function AssistantScreen() {
               <View className="w-20 h-20 rounded-full bg-ios-blue/15 dark:bg-ios-blue/20 items-center justify-center mb-4">
                 <Ionicons name="sparkles" size={40} color="#0A84FF" />
               </View>
-              <Text className="text-2xl font-bold text-ios-label dark:text-iosd-label mb-2 text-center">
+              <Text className="text-2xl font-monaBold text-ios-label dark:text-iosd-label mb-2 text-center">
                 AI Asistent
               </Text>
               <Text className="text-base text-ios-secondary dark:text-iosd-label2 text-center px-8">
@@ -181,7 +181,7 @@ export default function AssistantScreen() {
 
             {/* Suggested Queries */}
             <View className="mb-6">
-              <Text className="text-sm font-semibold text-ios-secondary dark:text-iosd-label2 mb-3 px-1">
+              <Text className="text-sm font-monaBold text-ios-secondary dark:text-iosd-label2 mb-3 px-1">
                 Predlozi:
               </Text>
               {SUGGESTED_QUERIES.map((suggestion, i) => (
@@ -214,7 +214,7 @@ export default function AssistantScreen() {
                   size={16}
                   color="#8E8E93"
                 />
-                <Text className="ml-2 text-sm font-semibold text-ios-secondary dark:text-iosd-label2">
+                <Text className="ml-2 text-sm font-monaBold text-ios-secondary dark:text-iosd-label2">
                   Dostupno
                 </Text>
               </View>
@@ -242,7 +242,9 @@ export default function AssistantScreen() {
         {messages.map((msg) => (
           <View
             key={msg.id}
-            className={`mb-3 ${msg.type === "user" ? "items-end" : "items-start"}`}
+            className={`mb-3 ${
+              msg.type === "user" ? "items-end" : "items-start"
+            }`}
           >
             <View
               className={`max-w-[85%] px-4 py-3 rounded-2xl ${

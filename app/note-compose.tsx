@@ -73,7 +73,7 @@ export default function NoteCompose() {
               onSubmitEditing={() => bodyRef.current?.focus()}
               autoFocus
               numberOfLines={1}
-              className="text-2xl font-semibold text-ios-label dark:text-iosd-label"
+              className="text-2xl font-monaBold text-ios-label dark:text-iosd-label"
               style={{ paddingVertical: 8 }}
             />
 

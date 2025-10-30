@@ -234,7 +234,7 @@ export default function ActionSheet({
                     <Ionicons name="close" size={22} color={headerIcon} />
                   </Pressable>
 
-                  <Text className="text-base font-semibold text-ios-label dark:text-white">
+                  <Text className="text-base font-monaBold text-ios-label dark:text-white">
                     {sheetTitle}
                   </Text>
 

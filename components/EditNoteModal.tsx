@@ -120,7 +120,7 @@ export default function EditNoteModal({
                       size={24}
                       color={colorScheme === "dark" ? "#fff" : "#000"}
                     />
-                    <Text className="text-2xl font-bold text-ios-label dark:text-iosd-label">
+                    <Text className="text-2xl font-monaBold text-ios-label dark:text-iosd-label">
                       Izmeni belešku
                     </Text>
                   </View>
@@ -139,7 +139,7 @@ export default function EditNoteModal({
                 >
                   {/* Title Input */}
                   <View className="mb-4">
-                    <Text className="text-sm font-semibold mb-2 text-ios-label dark:text-iosd-label">
+                    <Text className="text-sm font-monaBold mb-2 text-ios-label dark:text-iosd-label">
                       Naslov *
                     </Text>
                     <TextInput
@@ -168,7 +168,7 @@ export default function EditNoteModal({
 
                   {/* Description Input */}
                   <View className="mb-6">
-                    <Text className="text-sm font-semibold mb-2 text-ios-label dark:text-iosd-label">
+                    <Text className="text-sm font-monaBold mb-2 text-ios-label dark:text-iosd-label">
                       Opis (opciono)
                     </Text>
                     <TextInput
@@ -200,7 +200,7 @@ export default function EditNoteModal({
                     onPress={handleClose}
                     className="flex-1 py-3 rounded-xl bg-ios-fill dark:bg-iosd-fill active:opacity-70"
                   >
-                    <Text className="text-center font-semibold text-ios-label dark:text-iosd-label">
+                    <Text className="text-center font-monaBold text-ios-label dark:text-iosd-label">
                       Otkaži
                     </Text>
                   </Pressable>
@@ -215,7 +215,7 @@ export default function EditNoteModal({
                     }`}
                   >
                     <Text
-                      className={`text-center font-semibold ${
+                      className={`text-center font-monaBold ${
                         isFormValid
                           ? "text-white"
                           : "text-gray-400 dark:text-gray-600"

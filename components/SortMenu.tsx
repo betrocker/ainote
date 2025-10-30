@@ -59,7 +59,7 @@ export default function SortMenu({
               {/* Header */}
               <View className="px-4 py-4 border-b border-ios-sep dark:border-iosd-sep">
                 <View className="flex-row items-center justify-between">
-                  <Text className="text-lg font-bold text-ios-label dark:text-iosd-label">
+                  <Text className="text-lg font-monaBold text-ios-label dark:text-iosd-label">
                     Sort by
                   </Text>
                   <TouchableOpacity

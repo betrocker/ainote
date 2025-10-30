@@ -129,7 +129,7 @@ export default function FabMenu() {
                 className="min-w-[120px] px-6 py-3 rounded-full items-center justify-center bg-[#2C2C2E]"
                 activeOpacity={0.9}
               >
-                <Text className="text-white font-semibold">
+                <Text className="text-white font-monaBold">
                   {t("fabMenu.quickText.cancel")}
                 </Text>
               </TouchableOpacity>
@@ -154,7 +154,7 @@ export default function FabMenu() {
                 className="min-w-[120px] px-6 py-3 rounded-full items-center justify-center bg-[#007AFF]"
                 activeOpacity={0.9}
               >
-                <Text className="text-white font-semibold">
+                <Text className="text-white font-monaBold">
                   {t("fabMenu.quickText.save")}
                 </Text>
               </TouchableOpacity>

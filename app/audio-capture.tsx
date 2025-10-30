@@ -194,7 +194,7 @@ export default function AudioCapture() {
         style={{ paddingTop: headerHeight, flex: 1 }}
         className="items-center justify-center px-8"
       >
-        <Text className="text-4xl font-semibold text-ios-label dark:text-iosd-label mb-8">
+        <Text className="text-4xl font-monaBold text-ios-label dark:text-iosd-label mb-8">
           {mm}:{ss}
         </Text>
 

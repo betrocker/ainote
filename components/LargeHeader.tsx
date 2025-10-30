@@ -103,7 +103,7 @@ export default function LargeHeader({
     >
       {/* Title row */}
       <View className="flex-row items-center justify-between">
-        <Text className="text-3xl font-bold text-ios-label dark:text-iosd-label">
+        <Text className="text-3xl font-monaBold text-ios-label dark:text-iosd-label">
           {title}
         </Text>
 

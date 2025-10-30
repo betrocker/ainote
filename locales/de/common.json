@@ -367,38 +367,6 @@
       "proBadge": "PRO"
     }
   },
-  "privateFolder": {
-    "title": "Privater Ordner",
-    "locked": {
-      "title": "Privater Ordner",
-      "description": "Ihre privaten Notizen sind mit {biometricType} geschützt",
-      "unlockButton": "Entsperren"
-    },
-    "unlocked": {
-      "title": "Private Notizen",
-      "lockButton": "Sperren",
-      "empty": {
-        "title": "Sie haben keine privaten Notizen",
-        "subtitle": "Markieren Sie eine beliebige Notiz als privat"
-      },
-      "noteContent": {
-        "noContent": "Kein Inhalt"
-      }
-    },
-    "errors": {
-      "noHardware": "Ihr Gerät unterstützt keine biometrische Authentifizierung",
-      "notEnrolled": "Biometrie nicht eingerichtet",
-      "notEnrolledMessage": "Sie müssen zuerst Face ID oder Touch ID in den Geräteeinstellungen einrichten",
-      "authFailed": "Fehler",
-      "authFailedMessage": "Authentifizierung fehlgeschlagen"
-    },
-    "biometricTypes": {
-      "faceId": "Face ID",
-      "touchId": "Touch ID",
-      "iris": "Iris",
-      "biometrics": "Biometrie"
-    }
-  },
   "onboarding": {
     "socialProof": "1,380+ Benutzer heute",
     "slides": {
@@ -427,7 +395,8 @@
     "buttons": {
       "skip": "Überspringen",
       "next": "Weiter",
-      "start": "🚀 Kostenlos Starten"
+      "start": "Kostenlos Starten",
+      "later": "Später"
     },
     "pricing": {
       "trial": "7 Tage kostenlos testen. Dann {{price}}/Monat.",
@@ -570,5 +539,26 @@
     "newNotesCount": "Sie haben {{count}} neue Notizen",
     "askAnything": "Fragen Sie alles",
     "powered": "angetrieben von KI"
+  },
+  "privateFolder": {
+    "title": "Privater Ordner",
+    "description": "Ihre privaten Notizen sind geschützt",
+    "biometricNotAvailable": "Biometrie nicht verfügbar",
+    "biometricError": "Bitte richten Sie Face ID oder Touch ID in den Geräteeinstellungen ein",
+    "unlock": "Mit Face ID entsperren",
+    "unlockTouch": "Mit Touch ID entsperren",
+    "locked": "Gesperrt",
+    "unlocked": "Entsperrt",
+    "notes": "private Notiz | private Notizen",
+    "noPrivateNotes": "Keine privaten Notizen",
+    "noPrivateNotesDesc": "Markieren Sie Notizen im Notizenmenü als privat",
+    "togglePrivate": "Privat machen",
+    "togglePublic": "Öffentlich machen",
+    "makePrivate": "Privat machen",
+    "makePublic": "Öffentlich machen",
+    "locked_badge": "Gesperrt",
+    "autoLockTime": "Automatisches Sperren nach 5 Minuten",
+    "notesCount_one": "{{count}} private Notiz",
+    "notesCount_other": "{{count}} private Notizen"
   }
 }

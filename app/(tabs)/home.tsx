@@ -7,29 +7,27 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 
-function MiniWeekChart({ counts }: { counts: number[] }) {
-  const { t } = useTranslation("common");
+function MiniWeekChart({
+  counts,
+  days,
+  thisWeekLabel,
+}: {
+  counts: number[];
+  days: string[];
+  thisWeekLabel: string;
+}) {
   const max = Math.max(1, ...counts);
-  const days = [
-    t("week.monShort"),
-    t("week.tueShort"),
-    t("week.wedShort"),
-    t("week.thuShort"),
-    t("week.friShort"),
-    t("week.satShort"),
-    t("week.sunShort"),
-  ];
 
   return (
     <Animated.View
       entering={FadeInDown.delay(200).springify()}
       className="rounded-2xl border border-ios-sepSoft dark:border-iosd-sepSoft bg-white/70 dark:bg-white/10 p-4"
     >
-      <Text className="text-ios-label dark:text-iosd-label font-semibold mb-3">
-        {t("home.thisWeek")}
+      <Text className="text-ios-label dark:text-iosd-label font-monaBold mb-3">
+        {thisWeekLabel}
       </Text>
       <View className="flex-row justify-between items-end h-24">
         {counts.map((v, i) => {
@@ -83,7 +81,7 @@ function StatCard({
       >
         <Ionicons name={icon as any} size={16} color={iconColor} />
       </View>
-      <Text className="text-base font-semibold text-ios-label dark:text-iosd-label mr-1">
+      <Text className="text-base font-monaBold text-ios-label dark:text-iosd-label mr-1">
         {count}
       </Text>
       <Text className="text-sm text-ios-secondary dark:text-iosd-label2">
@@ -96,9 +94,40 @@ function StatCard({
 export default function HomeScreen() {
   const { t } = useTranslation("common");
   const router = useRouter();
-  const { notes } = useNotes();
+  const { notes, isLoading } = useNotes();
 
-  // ⭐ Stats
+  // ⭐ SVE TRANSLATION STRINGOVE NA VRHU
+  const weekLabels = [
+    t("week.monShort"),
+    t("week.tueShort"),
+    t("week.wedShort"),
+    t("week.thuShort"),
+    t("week.friShort"),
+    t("week.satShort"),
+    t("week.sunShort"),
+  ];
+
+  // ⭐ Loading state
+  if (isLoading) {
+    return (
+      <ScreenBackground variant="grouped">
+        <LargeHeader
+          title={t("home.title")}
+          rightButtons={
+            <HeaderButton
+              icon="settings-outline"
+              onPress={() => router.push("/settings")}
+            />
+          }
+        />
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" color="#0A84FF" />
+        </View>
+      </ScreenBackground>
+    );
+  }
+
+  // ⭐ Stats - samo ako nema isLoading
   const stats = useMemo(() => {
     const now = new Date();
     const todayStr = now.toDateString();
@@ -121,11 +150,10 @@ export default function HomeScreen() {
     ).length;
     const withSummary = notes.filter((n: any) => n.ai?.summary).length;
 
-    // Weekly counts (Mon-Sun)
     const weekCounts = [0, 0, 0, 0, 0, 0, 0];
     const getWeekIndex = (d: Date) => {
-      const js = d.getDay(); // 0=Sun
-      return (js + 6) % 7; // 0=Mon
+      const js = d.getDay();
+      return (js + 6) % 7;
     };
 
     notes.forEach((n: any) => {
@@ -145,7 +173,6 @@ export default function HomeScreen() {
     };
   }, [notes]);
 
-  // ⭐ Upcoming dates
   const upcomingNotes = useMemo(() => {
     return notes
       .filter((n: any) =>
@@ -190,31 +217,30 @@ export default function HomeScreen() {
             {t("home.welcome")}
           </Text>
 
-          <Text className="text-2xl font-bold text-ios-label dark:text-iosd-label mt-1">
+          <Text className="text-2xl font-monaBold text-ios-label dark:text-iosd-label mt-1">
             {t("home.todayCount", {
               count: stats.todayCount,
             })}
           </Text>
         </Animated.View>
 
-        {/* ⭐ Kompaktna Stats kartica */}
+        {/* Stats kartica */}
         {stats.total > 0 && (
           <Animated.View
             entering={FadeInDown.delay(100).springify()}
             className="mb-6 p-4 bg-white/70 dark:bg-white/10 rounded-2xl border border-ios-sepSoft dark:border-iosd-sepSoft"
           >
             <View className="flex-row items-center justify-between mb-3">
-              <Text className="text-lg font-bold text-ios-label dark:text-iosd-label">
+              <Text className="text-lg font-monaBold text-ios-label dark:text-iosd-label">
                 {t("home.overview")}
               </Text>
               <View className="bg-ios-blue/15 rounded-full px-2 py-1">
-                <Text className="text-xs font-semibold text-ios-blue">
+                <Text className="text-xs font-monaBold text-ios-blue">
                   {t("home.totalCount", { count: stats.total })}
                 </Text>
               </View>
             </View>
 
-            {/* Grid sa 4 key metrics */}
             <View className="flex-row flex-wrap gap-y-3">
               <StatCard
                 icon="document-text"
@@ -289,19 +315,23 @@ export default function HomeScreen() {
           </Animated.View>
         )}
 
-        {/* Weekly Chart - prikaži samo ako ima beleški */}
+        {/* Weekly Chart - ⭐ UVIJEK RENDERUJ */}
         {stats.total > 0 && (
           <View className="mb-6">
-            <MiniWeekChart counts={stats.weekCounts} />
+            <MiniWeekChart
+              counts={stats.weekCounts}
+              days={weekLabels}
+              thisWeekLabel={t("home.thisWeek")}
+            />
           </View>
         )}
 
-        {/* ⭐ Quick links - prikaži SAMO ako ima beleški */}
+        {/* Quick links */}
         {stats.total > 0 && (
           <View className="mb-6">
             <Animated.Text
               entering={FadeInDown.delay(400).springify()}
-              className="text-lg font-bold text-ios-label dark:text-iosd-label mb-3"
+              className="text-lg font-monaBold text-ios-label dark:text-iosd-label mb-3"
             >
               {t("home.browse")}
             </Animated.Text>
@@ -318,7 +348,7 @@ export default function HomeScreen() {
                       <Ionicons name="pin" size={20} color="#F59E0B" />
                     </View>
                     <View>
-                      <Text className="text-base font-semibold text-ios-label dark:text-iosd-label">
+                      <Text className="text-base font-monaBold text-ios-label dark:text-iosd-label">
                         {t("home.links.pinned")}
                       </Text>
                       <Text className="text-xs text-ios-secondary dark:text-iosd-label2">
@@ -347,7 +377,7 @@ export default function HomeScreen() {
                       />
                     </View>
                     <View>
-                      <Text className="text-base font-semibold text-ios-label dark:text-iosd-label">
+                      <Text className="text-base font-monaBold text-ios-label dark:text-iosd-label">
                         {t("home.upcoming")}
                       </Text>
                       <Text className="text-xs text-ios-secondary dark:text-iosd-label2">
@@ -373,7 +403,7 @@ export default function HomeScreen() {
                     <Ionicons name="albums-outline" size={20} color="#0A84FF" />
                   </View>
                   <View>
-                    <Text className="text-base font-semibold text-ios-blue">
+                    <Text className="text-base font-monaBold text-ios-blue">
                       {t("home.allNotes")}
                     </Text>
                     <Text className="text-xs text-ios-blue">
@@ -396,25 +426,23 @@ export default function HomeScreen() {
             <View className="w-24 h-24 rounded-full bg-ios-blue/10 items-center justify-center mb-4">
               <Ionicons name="sparkles" size={48} color="#0A84FF" />
             </View>
-            <Text className="text-2xl font-bold text-ios-label dark:text-iosd-label mb-2 text-center">
+            <Text className="text-2xl font-monaBold text-ios-label dark:text-iosd-label mb-2 text-center">
               {t("home.empty.title")}
             </Text>
             <Text className="text-base text-ios-secondary dark:text-iosd-label2 text-center mb-8">
               {t("home.empty.subtitle")}
             </Text>
 
-            {/* Mini tutorial */}
             <View className="w-full">
-              {/* Korak 1 */}
               <Animated.View
                 entering={FadeInDown.delay(300).springify()}
                 className="flex-row items-start p-4 bg-white/70 dark:bg-white/10 rounded-xl mb-4"
               >
                 <View className="w-8 h-8 rounded-full bg-ios-blue/15 items-center justify-center mr-3">
-                  <Text className="text-ios-blue font-bold">1</Text>
+                  <Text className="text-ios-blue font-monaBold">1</Text>
                 </View>
                 <View className="flex-1">
-                  <Text className="text-sm font-semibold text-ios-label dark:text-iosd-label">
+                  <Text className="text-sm font-monaBold text-ios-label dark:text-iosd-label">
                     {t("home.empty.tutorial.step1.title")}
                   </Text>
                   <Text className="text-xs text-ios-secondary dark:text-iosd-label2 mt-1">
@@ -423,16 +451,15 @@ export default function HomeScreen() {
                 </View>
               </Animated.View>
 
-              {/* Korak 2 */}
               <Animated.View
                 entering={FadeInDown.delay(400).springify()}
                 className="flex-row items-start p-4 bg-white/70 dark:bg-white/10 rounded-xl mb-4"
               >
                 <View className="w-8 h-8 rounded-full bg-purple-500/15 items-center justify-center mr-3">
-                  <Text className="text-purple-500 font-bold">2</Text>
+                  <Text className="text-purple-500 font-monaBold">2</Text>
                 </View>
                 <View className="flex-1">
-                  <Text className="text-sm font-semibold text-ios-label dark:text-iosd-label">
+                  <Text className="text-sm font-monaBold text-ios-label dark:text-iosd-label">
                     {t("home.empty.tutorial.step2.title")}
                   </Text>
                   <Text className="text-xs text-ios-secondary dark:text-iosd-label2 mt-1">
@@ -441,16 +468,15 @@ export default function HomeScreen() {
                 </View>
               </Animated.View>
 
-              {/* Korak 3 */}
               <Animated.View
                 entering={FadeInDown.delay(500).springify()}
                 className="flex-row items-start p-4 bg-white/70 dark:bg-white/10 rounded-xl"
               >
                 <View className="w-8 h-8 rounded-full bg-green-500/15 items-center justify-center mr-3">
-                  <Text className="text-green-500 font-bold">3</Text>
+                  <Text className="text-green-500 font-monaBold">3</Text>
                 </View>
                 <View className="flex-1">
-                  <Text className="text-sm font-semibold text-ios-label dark:text-iosd-label">
+                  <Text className="text-sm font-monaBold text-ios-label dark:text-iosd-label">
                     {t("home.empty.tutorial.step3.title")}
                   </Text>
                   <Text className="text-xs text-ios-secondary dark:text-iosd-label2 mt-1">

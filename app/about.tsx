@@ -58,7 +58,7 @@ export default function About() {
           <View className="w-24 h-24 rounded-3xl bg-purple-500 items-center justify-center mb-4 shadow-lg">
             <Ionicons name="book" size={48} color="#FFF" />
           </View>
-          <Text className="text-2xl font-bold text-ios-label dark:text-iosd-label">
+          <Text className="text-2xl font-monaBold text-ios-label dark:text-iosd-label">
             AInote
           </Text>
           <Text className="text-base text-ios-secondary dark:text-iosd-label2 mt-1">

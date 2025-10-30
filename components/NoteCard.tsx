@@ -1,5 +1,6 @@
-import type { Note } from "@/context/NotesContext";
 import { useNotes } from "@/context/NotesContext";
+import { usePrivate } from "@/context/PrivateContext";
+import type { Note } from "@/types/note";
 import { Ionicons } from "@expo/vector-icons";
 import {
   Audio,
@@ -47,6 +48,7 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
     togglePinNote,
   } = useNotes();
   const router = useRouter();
+  const { authenticateUser, isInPrivateFolder } = usePrivate();
 
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
 
@@ -64,26 +66,26 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
   const iconName = isAudio
     ? "mic-outline"
     : isPhoto
-      ? "image-outline"
-      : isVideo
-        ? "videocam-outline"
-        : "document-text-outline";
+    ? "image-outline"
+    : isVideo
+    ? "videocam-outline"
+    : "document-text-outline";
 
   const iconColor = isAudio
     ? "#A855F7"
     : isPhoto
-      ? "#10B981"
-      : isVideo
-        ? "#F59E0B"
-        : "#0A84FF";
+    ? "#10B981"
+    : isVideo
+    ? "#F59E0B"
+    : "#0A84FF";
 
   const bgColor = isAudio
     ? "bg-purple-500/15 dark:bg-purple-500/22"
     : isPhoto
-      ? "bg-green-500/15 dark:bg-green-500/22"
-      : isVideo
-        ? "bg-amber-500/15 dark:bg-amber-500/22"
-        : "bg-ios-blue/15 dark:bg-ios-blue/22";
+    ? "bg-green-500/15 dark:bg-green-500/22"
+    : isVideo
+    ? "bg-amber-500/15 dark:bg-amber-500/22"
+    : "bg-ios-blue/15 dark:bg-ios-blue/22";
 
   // ⭐ DODAJ - Video thumbnail state
   const [videoThumb, setVideoThumb] = useState<string | null>(null);
@@ -176,15 +178,27 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
     } catch {}
   };
 
-  const handlePress = () => {
+  const handlePress = async () => {
     console.log("🔵 [NoteCard] Pressed note:", note.id.slice(0, 8));
+
+    // ⭐ CHECK ZA PRIVATNU BELESKU
+    if (note.isPrivate) {
+      // ⭐ AKO JE KORISNIK VEĆ U PRIVATNOM FOLDERU, NE TRAŽI BIOMETRIJU
+      if (!isInPrivateFolder) {
+        console.log("🔴 [NoteCard] Private note - requesting authentication");
+        const authenticated = await authenticateUser();
+        if (!authenticated) {
+          console.log("🔴 [NoteCard] Authentication failed, not opening");
+          return;
+        }
+      }
+    }
 
     if (onPress) {
       console.log("🔵 [NoteCard] Using custom onPress");
       onPress(note);
     } else {
       console.log("🔵 [NoteCard] Navigating to detail view");
-      // ⭐ Koristi href objekat umesto stringa
       router.push({
         pathname: "/note/[id]",
         params: { id: note.id },
@@ -236,6 +250,13 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
               <Ionicons name="pin" size={8} color="#FFF" />
             </View>
           )}
+
+          {/* ⭐ Lock badge za privatne beleske */}
+          {note.isPrivate && (
+            <View className="absolute top-0 right-1 w-4 h-4 rounded-full bg-red-500 items-center justify-center border border-white dark:border-black">
+              <Ionicons name="lock-closed" size={8} color="#FFF" />
+            </View>
+          )}
         </View>
 
         {/* tekstualni deo */}
@@ -243,7 +264,7 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
           {/* ⭐ Header sa title, pin i edit dugmićima */}
           <View className="flex-row items-center justify-between">
             <Text
-              className="flex-1 text-lg font-semibold text-ios-label dark:text-iosd-label"
+              className="flex-1 text-lg font-monaBold text-ios-label dark:text-iosd-label"
               numberOfLines={1}
             >
               {note.title?.trim() || "Untitled"}
@@ -573,12 +594,7 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
         {/* Edit Modal */}
         <EditNoteModal
           isVisible={isEditModalVisible}
-          note={{
-            id: note.id,
-            title: note.title,
-            description: note.description,
-            type: note.type,
-          }}
+          note={note}
           onClose={() => setIsEditModalVisible(false)}
           onSave={handleSave}
         />

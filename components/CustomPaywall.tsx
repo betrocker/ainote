@@ -167,7 +167,7 @@ export default function CustomPaywall({
         <View className="bg-white dark:bg-gray-900 rounded-t-3xl overflow-hidden">
           {/* Header */}
           <View className="flex-row items-center justify-between p-6 border-b border-gray-200 dark:border-gray-800">
-            <Text className="text-2xl font-bold text-gray-900 dark:text-white">
+            <Text className="text-2xl font-monaBold text-gray-900 dark:text-white">
               {t("paywall.title")}
             </Text>
             <Pressable
@@ -185,7 +185,7 @@ export default function CustomPaywall({
           <ScrollView className="max-h-[70vh]">
             {/* Features */}
             <View className="p-6">
-              <Text className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              <Text className="text-lg font-monaBold text-gray-900 dark:text-white mb-4">
                 {t("paywall.features.title")}
               </Text>
 
@@ -218,7 +218,7 @@ export default function CustomPaywall({
               </View>
             ) : (
               <View className="px-6 pb-6">
-                <Text className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                <Text className="text-lg font-monaBold text-gray-900 dark:text-white mb-4">
                   {t("paywall.choosePlan")}
                 </Text>
 
@@ -241,7 +241,7 @@ export default function CustomPaywall({
                       {/* Best Value Badge */}
                       {isAnnual && (
                         <View className="bg-green-500 py-1.5">
-                          <Text className="text-white text-xs font-bold text-center">
+                          <Text className="text-white text-xs font-monaBold text-center">
                             {t("paywall.bestValue")}
                           </Text>
                         </View>
@@ -249,14 +249,14 @@ export default function CustomPaywall({
 
                       <View className="p-4 flex-row items-center justify-between">
                         <View className="flex-1">
-                          <Text className="text-lg font-bold text-gray-900 dark:text-white">
+                          <Text className="text-lg font-monaBold text-gray-900 dark:text-white">
                             {getPackageName(pkg)}
                           </Text>
 
                           {/* Prikaži Free Trial ako postoji */}
                           {trialInfo && (
                             <View className="bg-green-500 px-2 py-1 rounded-md mt-1 self-start">
-                              <Text className="text-white text-xs font-bold">
+                              <Text className="text-white text-xs font-monaBold">
                                 {trialInfo}
                               </Text>
                             </View>
@@ -314,7 +314,7 @@ export default function CustomPaywall({
               {purchasing ? (
                 <ActivityIndicator color="white" />
               ) : (
-                <Text className="text-white text-lg font-bold">
+                <Text className="text-white text-lg font-monaBold">
                   {t("paywall.subscribe")}
                 </Text>
               )}

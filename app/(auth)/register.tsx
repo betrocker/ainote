@@ -155,7 +155,7 @@ export default function Register() {
 
               {!pendingVerification ? (
                 <>
-                  <Text className="text-3xl font-bold text-ios-label dark:text-iosd-label mb-2">
+                  <Text className="text-3xl font-monaBold text-ios-label dark:text-iosd-label mb-2">
                     {t("auth.register.title")}
                   </Text>
                   <Text className="text-base text-ios-secondary dark:text-iosd-label2 text-center">
@@ -164,7 +164,7 @@ export default function Register() {
                 </>
               ) : (
                 <>
-                  <Text className="text-3xl font-bold text-ios-label dark:text-iosd-label mb-2">
+                  <Text className="text-3xl font-monaBold text-ios-label dark:text-iosd-label mb-2">
                     {t("auth.register.verifyTitle")}
                   </Text>
                   <Text className="text-base text-ios-secondary dark:text-iosd-label2 text-center px-8">
@@ -231,8 +231,8 @@ export default function Register() {
                                 ? index === 0
                                   ? "bg-red-500"
                                   : index === 1
-                                    ? "bg-yellow-500"
-                                    : "bg-green-500"
+                                  ? "bg-yellow-500"
+                                  : "bg-green-500"
                                 : "bg-gray-300 dark:bg-gray-600"
                             }`}
                           />
@@ -354,7 +354,9 @@ export default function Register() {
                       }`}
                     >
                       {resendCooldown > 0
-                        ? `${t("auth.register.resendCode")} (${resendCooldown}s)`
+                        ? `${t(
+                            "auth.register.resendCode"
+                          )} (${resendCooldown}s)`
                         : t("auth.register.resendCode")}
                     </Text>
                   </TouchableOpacity>

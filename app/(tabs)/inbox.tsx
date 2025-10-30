@@ -31,7 +31,7 @@ export default function InboxScreen() {
   const hasActiveFilters = filterType !== "all" || selectedTags.length > 0;
 
   const filteredNotes = useMemo(() => {
-    let filtered = notes;
+    let filtered = notes.filter((note) => !note.isPrivate); // ⭐ DODAJ - Isključi privatne beleške
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
@@ -166,7 +166,7 @@ export default function InboxScreen() {
             {/* Tag Filter */}
             {allTags.length > 0 && (
               <View className="mt-3">
-                <Text className="text-xs font-semibold text-ios-secondary dark:text-iosd-label2 mb-2">
+                <Text className="text-xs font-monaBold text-ios-secondary dark:text-iosd-label2 mb-2">
                   {t("inbox.filters.byTags")}
                 </Text>
                 <View className="flex-row flex-wrap gap-2">
@@ -191,7 +191,7 @@ export default function InboxScreen() {
                 className="mt-3 py-2 px-3 rounded-full bg-red-500/10 border border-red-500/30 self-start"
                 activeOpacity={0.7}
               >
-                <Text className="text-xs font-semibold text-red-600 dark:text-red-400">
+                <Text className="text-xs font-monaBold text-red-600 dark:text-red-400">
                   {t("inbox.filters.clear")}
                 </Text>
               </TouchableOpacity>
@@ -221,7 +221,7 @@ export default function InboxScreen() {
                 color="#8E8E93"
               />
             </View>
-            <Text className="text-lg font-semibold text-ios-label dark:text-iosd-label mb-1 text-center">
+            <Text className="text-lg font-monaBold text-ios-label dark:text-iosd-label mb-1 text-center">
               {searchQuery
                 ? t("inbox.empty.noResults")
                 : t("inbox.empty.title")}
@@ -301,7 +301,7 @@ function FilterPill({
           color={active ? "#FFF" : "#8E8E93"}
         />
         <Text
-          className={`ml-1.5 text-xs font-semibold ${
+          className={`ml-1.5 text-xs font-monaBold ${
             active ? "text-white" : "text-ios-label dark:text-iosd-label"
           }`}
         >

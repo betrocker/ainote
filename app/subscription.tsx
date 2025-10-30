@@ -167,14 +167,14 @@ export default function SubscriptionScreen() {
     return (
       <View className="flex-1 bg-ios-bg dark:bg-iosd-bg items-center justify-center p-6">
         <Ionicons name="alert-circle-outline" size={64} color="#EF4444" />
-        <Text className="text-lg font-semibold text-ios-label dark:text-iosd-label mt-4 text-center">
+        <Text className="text-lg font-monaBold text-ios-label dark:text-iosd-label mt-4 text-center">
           No Plans Available
         </Text>
         <TouchableOpacity
           onPress={() => router.back()}
           className="mt-6 px-6 py-3 bg-ios-blue rounded-full"
         >
-          <Text className="text-white font-semibold">Go Back</Text>
+          <Text className="text-white font-monaBold">Go Back</Text>
         </TouchableOpacity>
       </View>
     );
@@ -202,7 +202,7 @@ export default function SubscriptionScreen() {
           <View className="w-20 h-20 rounded-full bg-white/20 items-center justify-center mb-4">
             <Ionicons name="diamond" size={40} color="#FFF" />
           </View>
-          <Text className="text-3xl font-bold text-white mb-2">
+          <Text className="text-3xl font-monaBold text-white mb-2">
             AInote Premium
           </Text>
           <Text className="text-white/80 text-center text-base">
@@ -215,7 +215,7 @@ export default function SubscriptionScreen() {
         <View className="p-6">
           {/* Benefits */}
           <View className="mb-6">
-            <Text className="text-xl font-bold text-ios-label dark:text-iosd-label mb-4">
+            <Text className="text-xl font-monaBold text-ios-label dark:text-iosd-label mb-4">
               What you'll get:
             </Text>
 
@@ -262,7 +262,7 @@ export default function SubscriptionScreen() {
 
           {/* Plans */}
           <View className="mb-6">
-            <Text className="text-xl font-bold text-ios-label dark:text-iosd-label mb-4">
+            <Text className="text-xl font-monaBold text-ios-label dark:text-iosd-label mb-4">
               Choose your plan:
             </Text>
 
@@ -278,14 +278,14 @@ export default function SubscriptionScreen() {
               >
                 {/* Best Value Badge */}
                 <View className="absolute -top-2 right-4 bg-gradient-to-r from-purple-500 to-pink-500 px-3 py-1 rounded-full">
-                  <Text className="text-white text-xs font-bold">
+                  <Text className="text-white text-xs font-monaBold">
                     BEST VALUE
                   </Text>
                 </View>
 
                 <View className="flex-row items-center justify-between mb-2">
                   <View className="flex-1">
-                    <Text className="text-lg font-bold text-ios-label dark:text-iosd-label">
+                    <Text className="text-lg font-monaBold text-ios-label dark:text-iosd-label">
                       Annual
                     </Text>
                     <Text className="text-sm text-ios-secondary dark:text-iosd-label2">
@@ -325,7 +325,7 @@ export default function SubscriptionScreen() {
               >
                 <View className="flex-row items-center justify-between mb-2">
                   <View className="flex-1">
-                    <Text className="text-lg font-bold text-ios-label dark:text-iosd-label">
+                    <Text className="text-lg font-monaBold text-ios-label dark:text-iosd-label">
                       Monthly
                     </Text>
                     <Text className="text-sm text-ios-secondary dark:text-iosd-label2">
@@ -367,7 +367,7 @@ export default function SubscriptionScreen() {
             {purchasing ? (
               <ActivityIndicator color="#FFF" />
             ) : (
-              <Text className="text-white text-lg font-bold">
+              <Text className="text-white text-lg font-monaBold">
                 Start 7-Day Free Trial
               </Text>
             )}

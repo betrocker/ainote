@@ -370,35 +370,6 @@
       "proBadge": "PRO"
     }
   },
-  "privateFolder": {
-    "title": "Privatni Folder",
-    "locked": {
-      "title": "Privatni Folder",
-      "description": "Tvoje privatne beleške su zaštićene sa {biometricType}",
-      "unlockButton": "Otključaj"
-    },
-    "unlocked": {
-      "title": "Privatne Beleške",
-      "lockButton": "Zaključaj",
-      "empty": {
-        "title": "Nemaš privatne beleške",
-        "subtitle": "Označi bilo koju belešku kao privatnu"
-      }
-    },
-    "errors": {
-      "noHardware": "Tvoj uređaj ne podržava biometric autentifikaciju",
-      "notEnrolled": "Biometrics nije podešen",
-      "notEnrolledMessage": "Prvo moraš da podesiš Face ID ili Touch ID u podešavanjima uređaja",
-      "authFailed": "Greška",
-      "authFailedMessage": "Autentifikacija nije uspela"
-    },
-    "biometricTypes": {
-      "faceId": "Face ID",
-      "touchId": "Touch ID",
-      "iris": "Iris",
-      "biometrics": "Biometrija"
-    }
-  },
   "onboarding": {
     "socialProof": "1,380+ korisnika danas",
     "slides": {
@@ -427,7 +398,8 @@
     "buttons": {
       "skip": "Preskoči",
       "next": "Dalje",
-      "start": "🚀 Počni Besplatno"
+      "start": "Počni Besplatno",
+      "later": "Kasnije"
     },
     "pricing": {
       "trial": "Probaj 7 dana besplatno. Zatim {{price}} din/mesečno.",
@@ -588,5 +560,28 @@
     "newNotesCount": "Imate {{count}} nove beleške",
     "askAnything": "Pitaj šta god",
     "powered": "pokreće AI"
+  },
+  "privateFolder": {
+    "title": "Privatna Fascikla",
+    "description": "Vaše privatne beleške su zaštićene",
+    "biometricNotAvailable": "Biometrija nije dostupna",
+    "biometricError": "Molimo postavite Face ID ili Touch ID u setingima",
+    "unlock": "Otključaj pomoću Face ID",
+    "unlockTouch": "Otključaj pomoću Touch ID",
+    "locked": "Zaključano",
+    "unlocked": "Otključano",
+    "notes": "privatna belešku | privatnih beleški",
+    "noPrivateNotes": "Nema privatnih beleški",
+    "noPrivateNotesDesc": "Označi beleške kao privatne iz menija",
+    "togglePrivate": "Učini privatnom",
+    "togglePublic": "Učini javnom",
+    "makePrivate": "Učini privatnom",
+    "makePublic": "Učini javnom",
+    "locked_badge": "Zaključano",
+    "autoLockTime": "Automatski zaključavanje nakon 5 minuta",
+    "notesCount_one": "{{count}} privatna beleška",
+    "notesCount_few": "{{count}} privatne beleške",
+    "notesCount_many": "{{count}} privatnih beleški",
+    "notesCount_other": "{{count}} privatnih beleški"
   }
 }

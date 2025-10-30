@@ -33,7 +33,7 @@ export default function Privacy() {
           >
             <Ionicons name={icon as any} size={20} color="white" />
           </View>
-          <Text className="text-lg font-bold text-ios-label dark:text-iosd-label flex-1">
+          <Text className="text-lg font-monaBold text-ios-label dark:text-iosd-label flex-1">
             {title}
           </Text>
         </View>
@@ -134,7 +134,7 @@ export default function Privacy() {
               <View className="w-10 h-10 rounded-full bg-yellow-500 items-center justify-center mr-3">
                 <Ionicons name="mail" size={20} color="white" />
               </View>
-              <Text className="text-lg font-bold text-ios-label dark:text-iosd-label flex-1">
+              <Text className="text-lg font-monaBold text-ios-label dark:text-iosd-label flex-1">
                 {t("privacy.contact.title")}
               </Text>
               <Ionicons name="chevron-forward" size={20} color="#999" />

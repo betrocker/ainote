@@ -6,6 +6,7 @@ import TagInput from "@/components/TagInput";
 import VideoFullscreenPlayer from "@/components/VideoFullscreenPlayer";
 import { useNotes } from "@/context/NotesContext";
 import { usePremium } from "@/context/PremiumContext";
+import { usePrivate } from "@/context/PrivateContext";
 import { Ionicons } from "@expo/vector-icons";
 import { Audio, AVPlaybackStatusSuccess } from "expo-av";
 import { Image } from "expo-image";
@@ -102,6 +103,17 @@ export default function NoteDetailScreen() {
   const isGeneratingSummary = generatingSummaries.has(id || "");
   const hasSummary = !!note?.ai?.summary && note.ai.summary.length > 0;
   const canGenerateSummary = !!note?.text && note.text.length > 50;
+
+  const { isAuthAvailable } = usePrivate();
+
+  // Toggle funkcija:
+  const togglePrivate = async () => {
+    if (!note) return;
+
+    await editNote(note.id, {
+      isPrivate: !note.isPrivate,
+    });
+  };
 
   // ⭐ Premium check helper
   const checkPremiumAndProceed = async (
@@ -227,14 +239,14 @@ export default function NoteDetailScreen() {
     return (
       <View className="flex-1 bg-ios-bg dark:bg-iosd-bg items-center justify-center p-4">
         <Ionicons name="alert-circle-outline" size={64} color="#EF4444" />
-        <Text className="text-lg font-semibold text-ios-label dark:text-iosd-label mt-4 text-center">
+        <Text className="text-lg font-monaBold text-ios-label dark:text-iosd-label mt-4 text-center">
           {t("noteDetail.errors.invalidId")}
         </Text>
         <TouchableOpacity
           onPress={() => router.back()}
           className="mt-6 px-6 py-3 bg-ios-blue rounded-full"
         >
-          <Text className="text-white font-semibold">
+          <Text className="text-white font-monaBold">
             {t("noteDetail.actions.back")}
           </Text>
         </TouchableOpacity>
@@ -383,7 +395,7 @@ export default function NoteDetailScreen() {
             {/* ⭐ Premium Badge (ako nema premium) */}
             {!isPremium && (
               <View className="px-2 py-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mr-1">
-                <Text className="text-white text-[10px] font-bold">
+                <Text className="text-white text-[10px] font-monaBold">
                   {t("noteDetail.premium.badge")}
                 </Text>
               </View>
@@ -405,13 +417,31 @@ export default function NoteDetailScreen() {
               />
             </TouchableOpacity>
 
+            {/* Private Toggle dugme */}
+            {isAuthAvailable && (
+              <TouchableOpacity
+                onPress={togglePrivate}
+                className={[
+                  "w-9 h-9 rounded-full items-center justify-center active:opacity-70",
+                  note.isPrivate ? "bg-green-500" : "bg-green-500/15",
+                ].join(" ")}
+                activeOpacity={1}
+              >
+                <Ionicons
+                  name={note.isPrivate ? "lock-closed" : "lock-open-outline"}
+                  size={18}
+                  color={note.isPrivate ? "#FFF" : "#48BB78"}
+                />
+              </TouchableOpacity>
+            )}
+
             {note.type === "text" && (
               <TouchableOpacity
                 onPress={() => (isEditing ? handleSave() : setIsEditing(true))}
                 className="px-4 h-9 rounded-full items-center justify-center bg-ios-blue active:opacity-80"
                 activeOpacity={1}
               >
-                <Text className="text-white font-semibold text-sm">
+                <Text className="text-white font-monaBold text-sm">
                   {isEditing
                     ? t("noteDetail.actions.save")
                     : t("noteDetail.actions.edit")}
@@ -443,7 +473,7 @@ export default function NoteDetailScreen() {
 
         {/* Naslov i Type badge */}
         <View className="flex-row items-center justify-between">
-          <Text className="flex-1 text-2xl font-bold text-ios-label dark:text-iosd-label mr-3">
+          <Text className="flex-1 text-2xl font-monaBold text-ios-label dark:text-iosd-label mr-3">
             {note.title}
           </Text>
 
@@ -451,7 +481,7 @@ export default function NoteDetailScreen() {
             className={`px-3 py-1.5 rounded-full flex-row items-center ${typeColor.bg}`}
           >
             <Ionicons name={getTypeIcon()} size={14} color={typeColor.icon} />
-            <Text className={`text-xs font-semibold ml-1 ${typeColor.text}`}>
+            <Text className={`text-xs font-monaBold ml-1 ${typeColor.text}`}>
               {note.type.toUpperCase()}
             </Text>
           </View>
@@ -479,7 +509,7 @@ export default function NoteDetailScreen() {
                 </Text>
                 {!isPremium && (
                   <View className="ml-2 bg-yellow-500 rounded-full px-1.5 py-0.5">
-                    <Text className="text-[9px] font-bold text-white">
+                    <Text className="text-[9px] font-monaBold text-white">
                       {t("noteDetail.premium.proBadge")}
                     </Text>
                   </View>
@@ -518,7 +548,7 @@ export default function NoteDetailScreen() {
                   size={16}
                   color="#6B7280"
                 />
-                <Text className="ml-2 text-xs font-semibold text-ios-secondary dark:text-iosd-label2 uppercase tracking-wide">
+                <Text className="ml-2 text-xs font-monaBold text-ios-secondary dark:text-iosd-label2 uppercase tracking-wide">
                   {t("noteDetail.sections.description")}
                 </Text>
               </View>
@@ -537,12 +567,12 @@ export default function NoteDetailScreen() {
                   <View className="w-8 h-8 rounded-full bg-purple-500/15 dark:bg-purple-500/20 items-center justify-center mr-2">
                     <Ionicons name="sparkles" size={16} color="#A855F7" />
                   </View>
-                  <Text className="text-lg font-semibold text-ios-label dark:text-iosd-label">
+                  <Text className="text-lg font-monaBold text-ios-label dark:text-iosd-label">
                     {t("noteDetail.sections.aiSummary")}
                   </Text>
                   {!isPremium && (
                     <View className="ml-2 bg-yellow-500 rounded-full px-2 py-0.5">
-                      <Text className="text-[9px] font-bold text-white">
+                      <Text className="text-[9px] font-monaBold text-white">
                         {t("noteDetail.premium.proBadge")}
                       </Text>
                     </View>
@@ -658,7 +688,7 @@ export default function NoteDetailScreen() {
                     </Text>
                     {!isPremium && (
                       <View className="ml-2 bg-yellow-500 rounded-full px-1.5 py-0.5">
-                        <Text className="text-[8px] font-bold text-white">
+                        <Text className="text-[8px] font-monaBold text-white">
                           {t("noteDetail.premium.proBadge")}
                         </Text>
                       </View>
@@ -733,7 +763,7 @@ export default function NoteDetailScreen() {
                     </Text>
                     {!isPremium && (
                       <View className="ml-2 bg-yellow-500 rounded-full px-1.5 py-0.5">
-                        <Text className="text-[8px] font-bold text-white">
+                        <Text className="text-[8px] font-monaBold text-white">
                           {t("noteDetail.premium.proBadge")}
                         </Text>
                       </View>
@@ -798,7 +828,7 @@ export default function NoteDetailScreen() {
                   </TouchableOpacity>
 
                   <View className="flex-1">
-                    <Text className="text-lg font-semibold text-ios-label dark:text-iosd-label">
+                    <Text className="text-lg font-monaBold text-ios-label dark:text-iosd-label">
                       {t("noteDetail.media.voiceNote")}
                     </Text>
                     <Text className="text-sm text-ios-secondary dark:text-iosd-label2 mt-0.5">
@@ -835,7 +865,7 @@ export default function NoteDetailScreen() {
                     </Text>
                     {!isPremium && (
                       <View className="ml-2 bg-yellow-500 rounded-full px-1.5 py-0.5">
-                        <Text className="text-[8px] font-bold text-white">
+                        <Text className="text-[8px] font-monaBold text-white">
                           {t("noteDetail.premium.proBadge")}
                         </Text>
                       </View>
@@ -903,7 +933,7 @@ export default function NoteDetailScreen() {
                 <View className="w-8 h-8 rounded-full bg-ios-blue/15 dark:bg-ios-blue/20 items-center justify-center mr-2">
                   <Ionicons name="sparkles" size={16} color="#0A84FF" />
                 </View>
-                <Text className="text-lg font-semibold text-ios-label dark:text-iosd-label">
+                <Text className="text-lg font-monaBold text-ios-label dark:text-iosd-label">
                   {t("noteDetail.sections.aiInsights")}
                 </Text>
               </View>
@@ -981,7 +1011,7 @@ export default function NoteDetailScreen() {
               <View className="w-8 h-8 rounded-full bg-ios-blue/15 dark:bg-ios-blue/20 items-center justify-center mr-2">
                 <Ionicons name="pricetags" size={16} color="#0A84FF" />
               </View>
-              <Text className="text-lg font-semibold text-ios-label dark:text-iosd-label">
+              <Text className="text-lg font-monaBold text-ios-label dark:text-iosd-label">
                 {t("noteDetail.sections.tags")}
               </Text>
             </View>
@@ -1023,7 +1053,7 @@ export default function NoteDetailScreen() {
                   color="#6B7280"
                 />
               </View>
-              <Text className="text-lg font-semibold text-ios-label dark:text-iosd-label">
+              <Text className="text-lg font-monaBold text-ios-label dark:text-iosd-label">
                 {t("noteDetail.sections.info")}
               </Text>
             </View>
@@ -1132,7 +1162,7 @@ function MetadataRow({
       {isPinned ? (
         <View className="bg-amber-500 rounded-full px-2 py-1 flex-row items-center">
           <Ionicons name="pin" size={10} color="#FFF" />
-          <Text className="text-xs font-bold text-white ml-1">{value}</Text>
+          <Text className="text-xs font-monaBold text-white ml-1">{value}</Text>
         </View>
       ) : (
         <Text className="text-sm text-ios-label dark:text-iosd-label font-medium">

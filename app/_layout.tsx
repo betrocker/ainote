@@ -2,6 +2,7 @@
 import { ModalProvider } from "@/context/ModalContext";
 import { NotesProvider } from "@/context/NotesContext";
 import { PremiumProvider } from "@/context/PremiumContext";
+import { PrivateProvider } from "@/context/PrivateContext";
 import { TabProvider } from "@/context/TabContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { registerForPushNotifications } from "@/utils/notifications";
@@ -100,32 +101,34 @@ export default function RootLayout() {
           tokenCache={tokenCache}
           telemetry={false}
         >
-          <PremiumProvider>
-            <NotesProvider>
-              <TabProvider>
-                <ModalProvider>
-                  <SafeAreaProvider>
-                    <Stack screenOptions={{ headerShown: false }}>
-                      {/* 🆕 Conditional initial route */}
-                      {!hasViewedOnboarding && (
-                        <Stack.Screen
-                          name="onboarding"
-                          options={{
-                            gestureEnabled: false,
-                            animation: "fade",
-                          }}
-                        />
-                      )}
-                      <Stack.Screen name="index" />
-                      <Stack.Screen name="(auth)" />
-                      <Stack.Screen name="(tabs)" />
-                      <Stack.Screen name="settings" />
-                    </Stack>
-                  </SafeAreaProvider>
-                </ModalProvider>
-              </TabProvider>
-            </NotesProvider>
-          </PremiumProvider>
+          <PrivateProvider>
+            <PremiumProvider>
+              <NotesProvider>
+                <TabProvider>
+                  <ModalProvider>
+                    <SafeAreaProvider>
+                      <Stack screenOptions={{ headerShown: false }}>
+                        {/* 🆕 Conditional initial route */}
+                        {!hasViewedOnboarding && (
+                          <Stack.Screen
+                            name="onboarding"
+                            options={{
+                              gestureEnabled: false,
+                              animation: "fade",
+                            }}
+                          />
+                        )}
+                        <Stack.Screen name="index" />
+                        <Stack.Screen name="(auth)" />
+                        <Stack.Screen name="(tabs)" />
+                        <Stack.Screen name="settings" />
+                      </Stack>
+                    </SafeAreaProvider>
+                  </ModalProvider>
+                </TabProvider>
+              </NotesProvider>
+            </PremiumProvider>
+          </PrivateProvider>
         </ClerkProvider>
       </ThemeProvider>
     </GestureHandlerRootView>

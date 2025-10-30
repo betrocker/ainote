@@ -118,7 +118,7 @@ export default function AppModal({
               >
                 <View className="px-6 pt-6 pb-6">
                   {title ? (
-                    <Text className="text-xl font-bold text-ios-label dark:text-white mb-2">
+                    <Text className="text-xl font-monaBold text-ios-label dark:text-white mb-2">
                       {title}
                     </Text>
                   ) : null}

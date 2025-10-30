@@ -367,38 +367,6 @@
       "proBadge": "PRO"
     }
   },
-  "privateFolder": {
-    "title": "Private Folder",
-    "locked": {
-      "title": "Private Folder",
-      "description": "Your private notes are protected with {biometricType}",
-      "unlockButton": "Unlock"
-    },
-    "unlocked": {
-      "title": "Private Notes",
-      "lockButton": "Lock",
-      "empty": {
-        "title": "You have no private notes",
-        "subtitle": "Mark any note as private"
-      },
-      "noteContent": {
-        "noContent": "No content"
-      }
-    },
-    "errors": {
-      "noHardware": "Your device doesn't support biometric authentication",
-      "notEnrolled": "Biometrics not set up",
-      "notEnrolledMessage": "You must first set up Face ID or Touch ID in device settings",
-      "authFailed": "Error",
-      "authFailedMessage": "Authentication failed"
-    },
-    "biometricTypes": {
-      "faceId": "Face ID",
-      "touchId": "Touch ID",
-      "iris": "Iris",
-      "biometrics": "Biometrics"
-    }
-  },
   "onboarding": {
     "socialProof": "1,380+ users today",
     "slides": {
@@ -427,7 +395,8 @@
     "buttons": {
       "skip": "Skip",
       "next": "Next",
-      "start": "🚀 Start Free"
+      "start": "Start Free",
+      "later": "Later"
     },
     "pricing": {
       "trial": "Try 7 days free. Then {{price}}/month.",
@@ -570,5 +539,26 @@
     "newNotesCount": "You have {{count}} new notes",
     "askAnything": "Ask anything",
     "powered": "powered by AI"
+  },
+  "privateFolder": {
+    "title": "Private Folder",
+    "description": "Your private notes are protected",
+    "biometricNotAvailable": "Biometric Not Available",
+    "biometricError": "Please set up Face ID or Touch ID in device settings",
+    "unlock": "Unlock with Face ID",
+    "unlockTouch": "Unlock with Touch ID",
+    "locked": "Locked",
+    "unlocked": "Unlocked",
+    "notes": "private note | private notes",
+    "noPrivateNotes": "No Private Notes",
+    "noPrivateNotesDesc": "Mark notes as private from the note menu",
+    "togglePrivate": "Make Private",
+    "togglePublic": "Make Public",
+    "makePrivate": "Make Private",
+    "makePublic": "Make Public",
+    "locked_badge": "Locked",
+    "autoLockTime": "Auto-lock after 5 minutes",
+    "notesCount_one": "{{count}} private note",
+    "notesCount_other": "{{count}} private notes"
   }
 }

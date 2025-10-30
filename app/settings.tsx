@@ -178,7 +178,7 @@ function PremiumSettings() {
         <>
           <View className="h-px bg-ios-sep dark:bg-iosd-sep ml-14" />
           <View className="py-3 px-6">
-            <Text className="text-[11px] uppercase font-semibold text-ios-secondary dark:text-iosd-label2 mb-2">
+            <Text className="text-[11px] uppercase font-monaBold text-ios-secondary dark:text-iosd-label2 mb-2">
               {t("settings.premium.benefits.title")}
             </Text>
             <View className="space-y-2">
@@ -384,7 +384,7 @@ export default function Settings() {
         showsVerticalScrollIndicator={false}
       >
         <View className="px-6 mb-8">
-          <Text className="text-xl font-semibold text-ios-label dark:text-iosd-label">
+          <Text className="text-xl font-monaBold text-ios-label dark:text-iosd-label">
             {user?.fullName || t("user.fallbackName")}
           </Text>
           <Text className="text-ios-secondary dark:text-iosd-label2">
@@ -463,7 +463,7 @@ export default function Settings() {
             <View className="w-8 h-8 rounded-full bg-red-500 items-center justify-center mr-3">
               <Ionicons name="exit-outline" size={18} color="white" />
             </View>
-            <Text className="text-base font-semibold text-red-500">
+            <Text className="text-base font-monaBold text-red-500">
               {t("settings.logout.button")}
             </Text>
           </TouchableOpacity>
