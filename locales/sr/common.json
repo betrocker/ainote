@@ -406,6 +406,38 @@
       "features": "Premium funkcije uključene."
     }
   },
+  "assistant": {
+    "title": "Asistent",
+    "stats": {
+      "questions": "Pitanja",
+      "notes": "Beleške",
+      "aiReady": "AI Spreman"
+    },
+    "quickQuestions": "Brza pitanja",
+    "quickSuggestions": {
+      "one": "Kada u Niš?",
+      "two": "Zamena ulja?",
+      "three": "Šta sutra?",
+      "four": "Projekat status?",
+      "five": "Obaveze?"
+    },
+    "title_main": "Postavi pitanje",
+    "subtitle": "AI će pretraživati tvoje beleške i dati konkretan odgovor",
+    "question": "Pitanje",
+    "answer": "Odgovor",
+    "searching": "Tražim odgovor...",
+    "showNote": "Prikaži belešku",
+    "source": "Izvor podatka",
+    "lastQuestions": "Zadnja pitanja",
+    "clearAll": "Obriši sve",
+    "clearConfirm": "Da li želiš da obrišeš sve pitanja i odgovore?",
+    "cancel": "Otkaži",
+    "delete": "Obriši",
+    "placeholder": "Postavi pitanje...",
+    "errors": {
+      "failed": "Došlo je do greške. Pokušaj ponovo."
+    }
+  },
   "home": {
     "title": "Početna",
     "welcome": "Dobrodošao nazad!",
@@ -551,15 +583,8 @@
     "actions": {
       "writeIdea": "Napiši ideju",
       "voiceNote": "Izgovori misao",
-      "captureмомent": "Uhvati momenat"
+      "capture": "Uhvati momenat"
     }
-  },
-  "assistant": {
-    "section": "Sekcija {{index}}",
-    "today": "Danas",
-    "newNotesCount": "Imate {{count}} nove beleške",
-    "askAnything": "Pitaj šta god",
-    "powered": "pokreće AI"
   },
   "privateFolder": {
     "title": "Privatna Fascikla",

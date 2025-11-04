@@ -69,7 +69,6 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
         : ANDROID_FALLBACK_BOTTOM
       : insets.bottom;
 
-  // ⭐ NULL CHECK
   const tabsArray = (
     tabs && tabs.length > 0 ? Array.from(tabs) : []
   ) as string[];
@@ -79,7 +78,19 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
     return t(`tabs.${lowercaseTab}`);
   };
 
-  // Wrapper komponenta za Tab Bar
+  // ✅ PREBAČENO IZVAN MAP-A - PRIJE RENDER-A
+  const animatedStyles = tabsArray.map((_, index) =>
+    useAnimatedStyle(() => ({
+      width: withTiming(
+        currentIndex === index ? ACTIVE_TAB_WIDTH : INACTIVE_TAB_WIDTH,
+        {
+          duration: 260,
+          easing: Easing.out(Easing.cubic),
+        }
+      ),
+    }))
+  );
+
   const TabBarContent = ({ children }: { children: React.ReactNode }) => {
     if (Platform.OS === "ios") {
       return (
@@ -162,21 +173,8 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
               {tabsArray.map((tab, index) => {
                 const isFocused = currentIndex === index;
 
-                // ⭐ SIMPLE ANIMATED STYLE - BEZ DYNAMIC HOOK-A
-                const animatedStyle = useAnimatedStyle(() => ({
-                  width: withTiming(
-                    currentIndex === index
-                      ? ACTIVE_TAB_WIDTH
-                      : INACTIVE_TAB_WIDTH,
-                    {
-                      duration: 260,
-                      easing: Easing.out(Easing.cubic),
-                    }
-                  ),
-                }));
-
                 return (
-                  <Animated.View key={tab} style={animatedStyle}>
+                  <Animated.View key={tab} style={animatedStyles[index]}>
                     <TouchableOpacity
                       onPress={() => {
                         onTabPress(index);
@@ -195,14 +193,12 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
                               : "rgba(0, 122, 255, 0.18)",
                           }}
                         >
-                          {/* Ikona */}
                           <Ionicons
                             name={getIconByRouteName(tab, isFocused)}
                             size={22}
                             color={isDark ? "#0A84FF" : "#007AFF"}
                           />
 
-                          {/* Tekst */}
                           <Animated.Text
                             className="text-xs font-semibold text-ios-blue dark:text-iosd-blue"
                             numberOfLines={1}
@@ -211,7 +207,6 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
                           </Animated.Text>
                         </BlurView>
                       ) : (
-                        // Neaktivan tab
                         <View className="w-12 h-12 items-center justify-center">
                           <Ionicons
                             name={getIconByRouteName(tab, isFocused)}

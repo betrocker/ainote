@@ -26,7 +26,6 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-/** ========== Konstante / stil ========== */
 const FAB_SIZE = 56;
 const BLUR_INTENSITY = 20;
 const MIN_MENU_W = 160;
@@ -48,7 +47,6 @@ export default function FabMenu() {
   const blurTint: "dark" | "light" = isDark ? "dark" : "light";
   const router = useRouter();
 
-  /** ========== Animacija ========== */
   const open = useSharedValue(0);
   const [naturalW, setNaturalW] = React.useState<number>(MIN_MENU_W);
   const [naturalH, setNaturalH] = React.useState<number>(MIN_MENU_H);
@@ -103,9 +101,6 @@ export default function FabMenu() {
     />
   );
 
-  /** ========== Akcije ========== */
-
-  // TEXT (quick add preko modala)
   const onText = () => {
     rAF(() => {
       let draft = "";
@@ -165,13 +160,11 @@ export default function FabMenu() {
     });
   };
 
-  // AUDIO – placeholder (čuva se na posebnom ekranu)
   const onAudio = () => {
     setMenuOpen(false);
     rAF(() => router.push("/audio-capture"));
   };
 
-  // PHOTO/VIDEO – direktno kroz ImagePicker i kreiranje note
   const onCamera = () => {
     rAF(() => {
       openModal({
@@ -270,7 +263,6 @@ export default function FabMenu() {
     });
   };
 
-  /** ========== Meni sadržaj (3 akcije) ========== */
   const MenuContent = () => (
     <View
       style={{
@@ -315,13 +307,12 @@ export default function FabMenu() {
       >
         <Ionicons name="camera-outline" size={20} color={iconColor} />
         <Text className={`ml-2 text-base ${textColor}`}>
-          {t("fabMenu.actions.captureМoment")}
+          {t("fabMenu.actions.capture")}
         </Text>
       </TouchableOpacity>
     </View>
   );
 
-  /** ========== Merenje prirodnih dimenzija ========== */
   const onGhostLayout = (e: LayoutChangeEvent) => {
     if (menuOpen) return;
     const { width: w, height: h } = e.nativeEvent.layout;
@@ -331,7 +322,6 @@ export default function FabMenu() {
     }
   };
 
-  // Background wrapper - iOS blur, Android solid
   const BackgroundWrapper = ({ children }: { children: React.ReactNode }) => {
     if (Platform.OS === "ios") {
       return (
@@ -346,7 +336,6 @@ export default function FabMenu() {
       );
     }
 
-    // Android fallback
     return (
       <View
         className={isDark ? "bg-gray-900/95" : "bg-white/95"}
@@ -357,10 +346,8 @@ export default function FabMenu() {
     );
   };
 
-  /** ========== Render ========== */
   return (
     <>
-      {/* Nevidljivi "ghost" za merenje */}
       <View
         style={{
           position: "absolute",
@@ -374,7 +361,6 @@ export default function FabMenu() {
         <MenuContent />
       </View>
 
-      {/* Glavni FAB kontejner */}
       <Animated.View
         style={[
           containerStyle,
@@ -391,7 +377,6 @@ export default function FabMenu() {
         ]}
       >
         <BackgroundWrapper>
-          {/* Overlay tint kada je otvoren */}
           <Animated.View
             pointerEvents="none"
             style={[
@@ -400,13 +385,11 @@ export default function FabMenu() {
             ]}
           />
 
-          {/* Outline */}
           <Animated.View
             pointerEvents="none"
             style={[{ position: "absolute", inset: 0 }, outlineStyle]}
           />
 
-          {/* Touchable area - UNUTAR animated view-a */}
           <Pressable
             onPress={toggle}
             style={{ flex: 1 }}

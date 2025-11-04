@@ -403,6 +403,38 @@
       "features": "Premium-Funktionen enthalten."
     }
   },
+  "assistant": {
+    "title": "Assistent",
+    "stats": {
+      "questions": "Fragen",
+      "notes": "Notizen",
+      "aiReady": "KI Bereit"
+    },
+    "quickQuestions": "Schnelle Fragen",
+    "quickSuggestions": {
+      "one": "Wann fahre ich nach Niš?",
+      "two": "Wann ist der nächste Ölwechsel?",
+      "three": "Was ist morgen?",
+      "four": "Projektstand?",
+      "five": "Welche Aufgaben habe ich?"
+    },
+    "title_main": "Stellen Sie eine Frage",
+    "subtitle": "KI durchsucht deine Notizen und gibt eine direkte Antwort",
+    "question": "Frage",
+    "answer": "Antwort",
+    "searching": "Suche läuft...",
+    "showNote": "Notiz anzeigen",
+    "source": "Datenquelle",
+    "lastQuestions": "Letzte Fragen",
+    "clearAll": "Alles löschen",
+    "clearConfirm": "Möchtest du alle Fragen und Antworten löschen?",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "placeholder": "Stelle eine Frage...",
+    "errors": {
+      "failed": "Ein Fehler ist aufgetreten. Versuchen Sie es erneut."
+    }
+  },
   "home": {
     "title": "Startseite",
     "welcome": "Willkommen zurück!",
@@ -532,13 +564,6 @@
       "voiceNote": "Sprachnotiz",
       "captureМoment": "Moment erfassen"
     }
-  },
-  "assistant": {
-    "section": "Abschnitt {{index}}",
-    "today": "Heute",
-    "newNotesCount": "Sie haben {{count}} neue Notizen",
-    "askAnything": "Fragen Sie alles",
-    "powered": "angetrieben von KI"
   },
   "privateFolder": {
     "title": "Privater Ordner",

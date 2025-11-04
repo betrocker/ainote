@@ -51,7 +51,7 @@ export default function PrivateFolderScreen() {
   if (!isAuthAvailable) {
     return (
       <ScreenBackground variant="grouped">
-        <LargeHeader title="Private" />
+        <LargeHeader title={t("privateFolder.title")} />
         <View className="flex-1 items-center justify-center px-8">
           <Ionicons name="lock-closed" size={64} color="#999" />
           {/* Biometric Not Available state */}
@@ -68,9 +68,9 @@ export default function PrivateFolderScreen() {
 
   if (!isUnlocked || !showContent) {
     return (
-      <ScreenBackground>
+      <ScreenBackground variant="grouped">
         <LargeHeader
-          title="Private"
+          title={t("privateFolder.title")}
           rightButtons={
             isUnlocked && (
               <Pressable onPress={lockFolder}>

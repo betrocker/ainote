@@ -403,6 +403,38 @@
       "features": "Premium features included."
     }
   },
+  "assistant": {
+    "title": "Assistant",
+    "stats": {
+      "questions": "Questions",
+      "notes": "Notes",
+      "aiReady": "AI Ready"
+    },
+    "quickQuestions": "Quick Questions",
+    "quickSuggestions": {
+      "one": "When am I going to Niš?",
+      "two": "When is the next oil change?",
+      "three": "What is tomorrow?",
+      "four": "Project status?",
+      "five": "What are my tasks?"
+    },
+    "title_main": "Ask a Question",
+    "subtitle": "AI will search your notes and provide a direct answer",
+    "question": "Question",
+    "answer": "Answer",
+    "searching": "Searching...",
+    "showNote": "Show Note",
+    "source": "Source data",
+    "lastQuestions": "Last Questions",
+    "clearAll": "Clear All",
+    "clearConfirm": "Would you like to delete all questions and answers?",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "placeholder": "Ask a question...",
+    "errors": {
+      "failed": "An error occurred. Try again."
+    }
+  },
   "home": {
     "title": "Home",
     "welcome": "Welcome back!",
@@ -532,13 +564,6 @@
       "voiceNote": "Voice note",
       "captureМoment": "Capture moment"
     }
-  },
-  "assistant": {
-    "section": "Section {{index}}",
-    "today": "Today",
-    "newNotesCount": "You have {{count}} new notes",
-    "askAnything": "Ask anything",
-    "powered": "powered by AI"
   },
   "privateFolder": {
     "title": "Private Folder",
