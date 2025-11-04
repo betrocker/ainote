@@ -7,7 +7,7 @@
     "icon": "./assets/images/icon.png",
     "scheme": "ainote",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": false,
+    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
@@ -15,6 +15,7 @@
       }
     },
     "android": {
+      "newArchEnabled": true,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -59,7 +60,8 @@
         {
           "faceIDPermission": "Omogući $(PRODUCT_NAME) da koristi Face ID za zaštitu privatnih beleški"
         }
-      ]
+      ],
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true,

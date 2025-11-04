@@ -12,6 +12,7 @@ import {
   scheduleDueDateNotification,
   scheduleReminderNotification,
 } from "@/utils/notifications";
+import { generateId } from "@/utils/uuid";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, {
   createContext,
@@ -20,7 +21,6 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { v4 as uuidv4 } from "uuid";
 
 export type NewNoteInput = Omit<Note, "id" | "createdAt" | "updatedAt" | "ai">;
 
@@ -79,7 +79,7 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
       } catch (err) {
         console.log("Error loading notes", err);
       } finally {
-        setIsLoading(false); // 🆕
+        setIsLoading(false);
       }
     })();
   }, []);
@@ -101,9 +101,6 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
       console.log("💾 [save] Error:", err);
     }
   }, []);
-
-  const makeId = () =>
-    `n_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 9)}`;
 
   // ⭐ Helper za scheduliranje notifications
   const scheduleNotificationsForNote = async (note: Note) => {
@@ -182,10 +179,7 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
   // Kreiraj belešku
   const addNote = useCallback(
     async (partial: Omit<Note, "id" | "createdAt">) => {
-      const id =
-        (typeof uuidv4 === "function" && uuidv4()) ||
-        (global as any).crypto?.randomUUID?.() ||
-        makeId();
+      const id = generateId();
 
       const now = Date.now();
       const base: Note = { id, createdAt: now, isPrivate: false, ...partial };

@@ -1,4 +1,4 @@
-// src/lib/revenuecat-init.ts
+// utils/rc-init.ts
 import Purchases, { LOG_LEVEL } from "react-native-purchases";
 
 // 1) Uvek postavi validan log handler ODMAH (pre bilo čega drugog)

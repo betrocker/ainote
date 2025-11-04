@@ -3,17 +3,8 @@ import { Text, TextProps } from "react-native";
 
 type LabelProps = TextProps & {
   children: React.ReactNode;
-  /**
-   * Veličina teksta (default: md)
-   */
   size?: "xs" | "sm" | "md" | "lg" | "xl";
-  /**
-   * Težina fonta (default: semibold) — radi lepo sa Mona Sans varijabilnim.
-   */
   weight?: "regular" | "medium" | "semibold" | "bold";
-  /**
-   * Semantička boja (default: primary)
-   */
   color?: "primary" | "secondary" | "tertiary" | "quaternary" | "blue";
   className?: string;
   numberOfLines?: number;

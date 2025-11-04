@@ -1,16 +1,31 @@
 {
-  "extends": "expo/tsconfig.base",
   "compilerOptions": {
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "strict": true,
     "baseUrl": ".",
-    "types": ["nativewind/types"],
+    "types": [
+      "nativewind/types"
+    ],
     "paths": {
-      "@/*": ["*"],
-      "@app/*": ["app/*"],
-      "@components/*": ["components/*"],
-      "@assets/*": ["assets/*"],
-      "@lib/*": ["lib/*"],
-      "@context/*": ["context/*"]
+      "@/*": [
+        "*"
+      ],
+      "@app/*": [
+        "app/*"
+      ],
+      "@components/*": [
+        "components/*"
+      ],
+      "@assets/*": [
+        "assets/*"
+      ],
+      "@lib/*": [
+        "lib/*"
+      ],
+      "@context/*": [
+        "context/*"
+      ]
     }
   },
   "include": [
@@ -26,5 +41,6 @@
     "metro.config.js",
     "jest.config.js",
     "webpack.config.js"
-  ]
+  ],
+  "extends": "expo/tsconfig.base"
 }
