@@ -49,6 +49,126 @@ const ANDROID_FALLBACK_BOTTOM = 16;
 const ACTIVE_TAB_WIDTH = 100;
 const INACTIVE_TAB_WIDTH = 48;
 
+const TabBarContent = ({
+  children,
+  blurTint,
+  isDark,
+}: {
+  children: React.ReactNode;
+  blurTint: "dark" | "light";
+  isDark: boolean;
+}) => {
+  if (Platform.OS === "ios") {
+    return (
+      <BlurView
+        intensity={50}
+        tint={blurTint}
+        className="rounded-full overflow-hidden h-16 border border-black/10 dark:border-white/10"
+      >
+        {children}
+      </BlurView>
+    );
+  }
+
+  return (
+    <View
+      className={`rounded-full overflow-hidden h-16 border ${
+        isDark
+          ? "bg-gray-900/95 border-white/10"
+          : "bg-white/95 border-black/10"
+      }`}
+      style={{
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 8,
+        elevation: 5,
+      }}
+    >
+      {children}
+    </View>
+  );
+};
+
+type TabButtonProps = {
+  tab: string;
+  index: number;
+  currentIndex: number;
+  onPress: () => void;
+  isDark: boolean;
+  blurTint: "dark" | "light";
+  getTabLabel: (tab: string) => string;
+};
+
+const TabButton: React.FC<TabButtonProps> = ({
+  tab,
+  index,
+  currentIndex,
+  onPress,
+  isDark,
+  blurTint,
+  getTabLabel,
+}) => {
+  const isFocused = currentIndex === index;
+
+  const animatedStyle = useAnimatedStyle(
+    () => ({
+      width: withTiming(
+        currentIndex === index ? ACTIVE_TAB_WIDTH : INACTIVE_TAB_WIDTH,
+        {
+          duration: 260,
+          easing: Easing.out(Easing.cubic),
+        }
+      ),
+    }),
+    [currentIndex, index]
+  );
+
+  return (
+    <Animated.View style={animatedStyle}>
+      <TouchableOpacity
+        onPress={onPress}
+        className="h-full items-center justify-center"
+        activeOpacity={1}
+      >
+        {isFocused ? (
+          <BlurView
+            intensity={20}
+            tint={isDark ? "dark" : "light"}
+            className="flex-row items-center gap-1 px-4 py-3 rounded-full overflow-hidden"
+            style={{
+              backgroundColor: isDark
+                ? "rgba(10, 132, 255, 0.2)"
+                : "rgba(0, 122, 255, 0.18)",
+            }}
+          >
+            <Ionicons
+              name={getIconByRouteName(tab, isFocused)}
+              size={22}
+              color={isDark ? "#0A84FF" : "#007AFF"}
+            />
+
+            <Animated.Text
+              className="text-xs font-semibold text-ios-blue dark:text-iosd-blue"
+              numberOfLines={1}
+            >
+              {getTabLabel(tab)}
+            </Animated.Text>
+          </BlurView>
+        ) : (
+          <View className="w-12 h-12 items-center justify-center">
+            <Ionicons
+              name={getIconByRouteName(tab, isFocused)}
+              size={22}
+              color={isDark ? "#EBEBF599" : "#3C3C4399"}
+            />
+          </View>
+        )}
+      </TouchableOpacity>
+    </Animated.View>
+  );
+};
+
 const CustomTabBar: React.FC<CustomTabBarProps> = ({
   currentIndex,
   onTabPress,
@@ -60,7 +180,7 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
   const insets = useSafeAreaInsets();
 
   const isDark = colorScheme === "dark";
-  const blurTint = isDark ? "dark" : "light";
+  const blurTint: "dark" | "light" = isDark ? "dark" : "light";
 
   const bottomSpace =
     Platform.OS === "android"
@@ -76,52 +196,6 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
   const getTabLabel = (tab: string) => {
     const lowercaseTab = tab.toLowerCase();
     return t(`tabs.${lowercaseTab}`);
-  };
-
-  // ✅ PREBAČENO IZVAN MAP-A - PRIJE RENDER-A
-  const animatedStyles = tabsArray.map((_, index) =>
-    useAnimatedStyle(() => ({
-      width: withTiming(
-        currentIndex === index ? ACTIVE_TAB_WIDTH : INACTIVE_TAB_WIDTH,
-        {
-          duration: 260,
-          easing: Easing.out(Easing.cubic),
-        }
-      ),
-    }))
-  );
-
-  const TabBarContent = ({ children }: { children: React.ReactNode }) => {
-    if (Platform.OS === "ios") {
-      return (
-        <BlurView
-          intensity={50}
-          tint={blurTint}
-          className="rounded-full overflow-hidden h-16 border border-black/10 dark:border-white/10"
-        >
-          {children}
-        </BlurView>
-      );
-    }
-
-    return (
-      <View
-        className={`rounded-full overflow-hidden h-16 border ${
-          isDark
-            ? "bg-gray-900/95 border-white/10"
-            : "bg-white/95 border-black/10"
-        }`}
-        style={{
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.25,
-          shadowRadius: 8,
-          elevation: 5,
-        }}
-      >
-        {children}
-      </View>
-    );
   };
 
   const totalWidth =
@@ -168,57 +242,20 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
           }}
           pointerEvents="box-none"
         >
-          <TabBarContent>
+          <TabBarContent blurTint={blurTint} isDark={isDark}>
             <View className="relative flex-row h-full items-center px-2">
-              {tabsArray.map((tab, index) => {
-                const isFocused = currentIndex === index;
-
-                return (
-                  <Animated.View key={tab} style={animatedStyles[index]}>
-                    <TouchableOpacity
-                      onPress={() => {
-                        onTabPress(index);
-                      }}
-                      className="h-full items-center justify-center"
-                      activeOpacity={1}
-                    >
-                      {isFocused ? (
-                        <BlurView
-                          intensity={20}
-                          tint={isDark ? "dark" : "light"}
-                          className="flex-row items-center gap-1 px-4 py-3 rounded-full overflow-hidden"
-                          style={{
-                            backgroundColor: isDark
-                              ? "rgba(10, 132, 255, 0.2)"
-                              : "rgba(0, 122, 255, 0.18)",
-                          }}
-                        >
-                          <Ionicons
-                            name={getIconByRouteName(tab, isFocused)}
-                            size={22}
-                            color={isDark ? "#0A84FF" : "#007AFF"}
-                          />
-
-                          <Animated.Text
-                            className="text-xs font-semibold text-ios-blue dark:text-iosd-blue"
-                            numberOfLines={1}
-                          >
-                            {getTabLabel(tab)}
-                          </Animated.Text>
-                        </BlurView>
-                      ) : (
-                        <View className="w-12 h-12 items-center justify-center">
-                          <Ionicons
-                            name={getIconByRouteName(tab, isFocused)}
-                            size={22}
-                            color={isDark ? "#EBEBF599" : "#3C3C4399"}
-                          />
-                        </View>
-                      )}
-                    </TouchableOpacity>
-                  </Animated.View>
-                );
-              })}
+              {tabsArray.map((tab, index) => (
+                <TabButton
+                  key={tab}
+                  tab={tab}
+                  index={index}
+                  currentIndex={currentIndex}
+                  onPress={() => onTabPress(index)}
+                  isDark={isDark}
+                  blurTint={blurTint}
+                  getTabLabel={getTabLabel}
+                />
+              ))}
             </View>
           </TabBarContent>
         </Animated.View>

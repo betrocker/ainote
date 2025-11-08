@@ -53,7 +53,6 @@ export default function CustomPaywall({
         const pkgs = offerings.current.availablePackages;
         setPackages(pkgs);
 
-        // Auto-select najčešći paket (obično monthly)
         const monthly = pkgs.find((p) => p.identifier === "$rc_monthly");
         setSelectedPackage(monthly || pkgs[0]);
       }
@@ -65,7 +64,6 @@ export default function CustomPaywall({
     }
   };
 
-  // Dodaj ovu funkciju u CustomPaywall komponentu
   const getTrialInfo = (pkg: PurchasesPackage) => {
     const defaultOption = pkg.product.defaultOption;
     const freePhase = defaultOption?.freePhase;
@@ -183,30 +181,51 @@ export default function CustomPaywall({
           </View>
 
           <ScrollView className="max-h-[70vh]">
-            {/* Features */}
+            {/* Premium Benefits */}
             <View className="p-6">
               <Text className="text-lg font-monaBold text-gray-900 dark:text-white mb-4">
                 {t("paywall.features.title")}
               </Text>
 
               {[
-                { icon: "infinite", text: t("paywall.features.unlimited") },
-                { icon: "videocam", text: t("paywall.features.video") },
-                { icon: "cloud", text: t("paywall.features.sync") },
-                { icon: "search", text: t("paywall.features.search") },
-              ].map((feature, idx) => (
-                <View key={idx} className="flex-row items-center mb-3">
-                  <View className="w-10 h-10 rounded-full bg-green-500 items-center justify-center mr-3">
+                {
+                  icon: "mic-outline",
+                  title: t("paywall.benefits.transcription.title"),
+                  subtitle: t("paywall.benefits.transcription.subtitle"),
+                },
+                {
+                  icon: "scan-outline",
+                  title: t("paywall.benefits.ocr.title"),
+                  subtitle: t("paywall.benefits.ocr.subtitle"),
+                },
+                {
+                  icon: "sparkles-outline",
+                  title: t("paywall.benefits.ai.title"),
+                  subtitle: t("paywall.benefits.ai.subtitle"),
+                },
+                {
+                  icon: "lock-closed-outline",
+                  title: t("paywall.benefits.private.title"),
+                  subtitle: t("paywall.benefits.private.subtitle"),
+                },
+              ].map((benefit, idx) => (
+                <View key={idx} className="flex-row items-start mb-4">
+                  <View className="w-10 h-10 rounded-full bg-orange-500 items-center justify-center mr-3">
                     <Ionicons
-                      name={feature.icon as any}
+                      name={benefit.icon as any}
                       size={20}
                       color="white"
                     />
                   </View>
-                  <Text className="text-base text-gray-700 dark:text-gray-300 flex-1">
-                    {feature.text}
-                  </Text>
-                  <Ionicons name="checkmark" size={24} color="#22C55E" />
+                  <View className="flex-1">
+                    <Text className="text-base font-monaBold text-gray-900 dark:text-white">
+                      {benefit.title}
+                    </Text>
+                    <Text className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
+                      {benefit.subtitle}
+                    </Text>
+                  </View>
+                  <Ionicons name="checkmark-circle" size={24} color="#22C55E" />
                 </View>
               ))}
             </View>
@@ -226,7 +245,7 @@ export default function CustomPaywall({
                   const isSelected =
                     selectedPackage?.identifier === pkg.identifier;
                   const isAnnual = pkg.identifier === "$rc_annual";
-                  const trialInfo = getTrialInfo(pkg); // Dodaj ovo
+                  const trialInfo = getTrialInfo(pkg);
 
                   return (
                     <Pressable
@@ -234,11 +253,10 @@ export default function CustomPaywall({
                       onPress={() => setSelectedPackage(pkg)}
                       className={`mb-3 rounded-2xl border-2 overflow-hidden ${
                         isSelected
-                          ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                          ? "border-orange-500 bg-orange-50 dark:bg-orange-900/20"
                           : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
                       }`}
                     >
-                      {/* Best Value Badge */}
                       {isAnnual && (
                         <View className="bg-green-500 py-1.5">
                           <Text className="text-white text-xs font-monaBold text-center">
@@ -253,7 +271,6 @@ export default function CustomPaywall({
                             {getPackageName(pkg)}
                           </Text>
 
-                          {/* Prikaži Free Trial ako postoji */}
                           {trialInfo && (
                             <View className="bg-green-500 px-2 py-1 rounded-md mt-1 self-start">
                               <Text className="text-white text-xs font-monaBold">
@@ -270,7 +287,7 @@ export default function CustomPaywall({
                         <View
                           className={`w-6 h-6 rounded-full border-2 items-center justify-center ${
                             isSelected
-                              ? "border-blue-500 bg-blue-500"
+                              ? "border-orange-500 bg-orange-500"
                               : "border-gray-300 dark:border-gray-600"
                           }`}
                         >
@@ -300,7 +317,7 @@ export default function CustomPaywall({
           {/* CTA Buttons */}
           <View
             className="p-6 border-t border-gray-200 dark:border-gray-800"
-            style={{ paddingBottom: Math.max(insets.bottom + 24, 24) }} // Dynamic bottom padding
+            style={{ paddingBottom: Math.max(insets.bottom + 24, 24) }}
           >
             <Pressable
               onPress={handlePurchase}
@@ -308,7 +325,7 @@ export default function CustomPaywall({
               className={`py-4 rounded-2xl items-center ${
                 purchasing || !selectedPackage
                   ? "bg-gray-300 dark:bg-gray-700"
-                  : "bg-blue-500"
+                  : "bg-orange-500"
               }`}
             >
               {purchasing ? (
@@ -325,7 +342,7 @@ export default function CustomPaywall({
               disabled={purchasing}
               className="py-3 mt-3"
             >
-              <Text className="text-center text-blue-500 font-medium">
+              <Text className="text-center text-orange-500 font-medium">
                 {t("paywall.restore.button")}
               </Text>
             </Pressable>

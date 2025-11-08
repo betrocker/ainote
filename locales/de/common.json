@@ -11,6 +11,7 @@
   },
   "auth": {
     "login": {
+      "unmatched": "Ups, diese Seite wurde nicht gefunden...",
       "title": "Willkommen zurück",
       "subtitle": "Melden Sie sich an, um fortzufahren",
       "emailPlaceholder": "E-Mail",
@@ -62,6 +63,45 @@
     }
   },
   "settings": {
+    "profile": {
+      "edit": "Profil bearbeiten",
+      "save": "Speichern",
+      "cancel": "Abbrechen",
+      "firstName": "Vorname",
+      "lastName": "Nachname",
+      "firstNamePlaceholder": "Vorname eingeben",
+      "lastNamePlaceholder": "Nachname eingeben",
+      "memberSince": "Mitglied seit",
+      "lastSignIn": "Letzte Anmeldung",
+      "permission": {
+        "title": "Berechtigung erforderlich",
+        "message": "Bitte erlauben Sie den Zugriff auf Ihre Fotobibliothek, um ein Profilbild hochzuladen."
+      },
+      "error": {
+        "title": "Fehler",
+        "message": "Profil konnte nicht aktualisiert werden"
+      }
+    },
+    "deleteAccount": {
+      "button": "Konto löschen",
+      "subtitle": "Konto und alle Daten dauerhaft löschen",
+      "confirm": {
+        "title": "Konto löschen",
+        "message": "Sind Sie sicher, dass Sie Ihr Konto dauerhaft löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden und alle Ihre Daten gehen verloren.",
+        "cancel": "Abbrechen",
+        "confirm": "Löschen"
+      },
+      "finalConfirm": {
+        "title": "Letzte Bestätigung",
+        "message": "Dies ist Ihre letzte Chance. Diese Aktion kann nicht rückgängig gemacht werden.",
+        "cancel": "Abbrechen",
+        "confirm": "Ich verstehe, löschen"
+      },
+      "error": {
+        "title": "Fehler",
+        "message": "Konto konnte nicht gelöscht werden. Bitte versuchen Sie es erneut oder kontaktieren Sie den Support."
+      }
+    },
     "done": "Fertig",
     "premium": {
       "status": "Premium-Status",
@@ -237,6 +277,24 @@
     }
   },
   "paywall": {
+    "benefits": {
+      "transcription": {
+        "title": "Audio-Transkription",
+        "subtitle": "Sprachnachrichten in Text umwandeln"
+      },
+      "ocr": {
+        "title": "Bild-OCR",
+        "subtitle": "Text aus Fotos extrahieren"
+      },
+      "ai": {
+        "title": "KI-Assistent",
+        "subtitle": "Fragen zu Notizen stellen"
+      },
+      "private": {
+        "title": "Privater Ordner",
+        "subtitle": "Notizen mit Biometrie schützen"
+      }
+    },
     "title": "Auf Premium upgraden",
     "choosePlan": "Plan wählen",
     "subscribe": "Abonnieren",
@@ -562,7 +620,7 @@
     "actions": {
       "writeIdea": "Idee schreiben",
       "voiceNote": "Sprachnotiz",
-      "captureМoment": "Moment erfassen"
+      "capture": "Moment erfassen"
     }
   },
   "privateFolder": {

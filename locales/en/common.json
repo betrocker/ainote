@@ -11,6 +11,7 @@
   },
   "auth": {
     "login": {
+      "unmatched": "Ooops, page doesn't exist...",
       "title": "Welcome Back",
       "subtitle": "Sign in to continue to AInote",
       "emailPlaceholder": "Email",
@@ -62,6 +63,45 @@
     }
   },
   "settings": {
+    "profile": {
+      "edit": "Edit Profile",
+      "save": "Save",
+      "cancel": "Cancel",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "firstNamePlaceholder": "Enter first name",
+      "lastNamePlaceholder": "Enter last name",
+      "memberSince": "Member since",
+      "lastSignIn": "Last sign in",
+      "permission": {
+        "title": "Permission Required",
+        "message": "Please allow access to your photo library to upload a profile picture."
+      },
+      "error": {
+        "title": "Error",
+        "message": "Failed to update profile"
+      }
+    },
+    "deleteAccount": {
+      "button": "Delete Account",
+      "subtitle": "Permanently delete account and all data",
+      "confirm": {
+        "title": "Delete Account",
+        "message": "Are you sure you want to permanently delete your account? This action cannot be undone and all your data will be lost.",
+        "cancel": "Cancel",
+        "confirm": "Delete"
+      },
+      "finalConfirm": {
+        "title": "Final Confirmation",
+        "message": "This is your last chance. This action cannot be undone.",
+        "cancel": "Cancel",
+        "confirm": "I Understand, Delete"
+      },
+      "error": {
+        "title": "Error",
+        "message": "Failed to delete account. Please try again or contact support."
+      }
+    },
     "done": "Done",
     "premium": {
       "status": "Premium Status",
@@ -237,6 +277,24 @@
     }
   },
   "paywall": {
+    "benefits": {
+      "transcription": {
+        "title": "Audio transcription",
+        "subtitle": "Convert voice messages to text"
+      },
+      "ocr": {
+        "title": "Image OCR",
+        "subtitle": "Extract text from photos"
+      },
+      "ai": {
+        "title": "AI assistant",
+        "subtitle": "Ask questions about your notes"
+      },
+      "private": {
+        "title": "Private folder",
+        "subtitle": "Protect notes with biometrics"
+      }
+    },
     "title": "Upgrade to Premium",
     "choosePlan": "Choose Plan",
     "subscribe": "Subscribe",
@@ -562,7 +620,7 @@
     "actions": {
       "writeIdea": "Write idea",
       "voiceNote": "Voice note",
-      "captureМoment": "Capture moment"
+      "capture": "Capture moment"
     }
   },
   "privateFolder": {

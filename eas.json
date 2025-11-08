@@ -8,9 +8,6 @@
       "distribution": "internal",
       "android": {
         "buildType": "apk"
-      },
-      "env": {
-        "EXPO_PUBLIC_OPENAI_API_KEY": "@OPENAI_API_KEY"
       }
     },
     "preview": {
@@ -18,9 +15,6 @@
       "distribution": "internal",
       "android": {
         "buildType": "apk"
-      },
-      "env": {
-        "EXPO_PUBLIC_OPENAI_API_KEY": "@OPENAI_API_KEY"
       }
     },
     "production": {
@@ -28,9 +22,6 @@
       "distribution": "store",
       "android": {
         "buildType": "app-bundle"
-      },
-      "env": {
-        "EXPO_PUBLIC_OPENAI_API_KEY": "@OPENAI_API_KEY"
       }
     }
   }

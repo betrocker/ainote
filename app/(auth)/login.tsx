@@ -51,11 +51,7 @@ export default function Login() {
     setLoading(true);
 
     try {
-      console.log("🔐 [Login] Attempting login for:", email);
-
       const result = await signIn.create({ identifier: email, password });
-
-      console.log("✅ [Login] Login result status:", result.status);
 
       if (
         result.status === "needs_first_factor" ||
@@ -64,10 +60,8 @@ export default function Login() {
         setPendingVerification(true);
       } else if (result.status === "complete") {
         await setActive!({ session: result.createdSessionId });
-        console.log("🎉 [Login] Login complete!");
       }
     } catch (err: any) {
-      console.error("❌ [Login] Error:", err);
       setError(err.errors?.[0]?.message || t("auth.login.errors.loginFailed"));
     } finally {
       setLoading(false);
@@ -81,8 +75,6 @@ export default function Login() {
     setLoading(true);
 
     try {
-      console.log("🔐 [Login] Verifying code...");
-
       const result = await signIn.attemptFirstFactor({
         strategy: "email_code",
         code,
@@ -90,10 +82,8 @@ export default function Login() {
 
       if (result.status === "complete") {
         await setActive!({ session: result.createdSessionId });
-        console.log("🎉 [Login] Verification complete!");
       }
     } catch (err: any) {
-      console.error("❌ [Login] Verification error:", err);
       setError(err.errors?.[0]?.message || t("auth.login.errors.invalidCode"));
     } finally {
       setLoading(false);

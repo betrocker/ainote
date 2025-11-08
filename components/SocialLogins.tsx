@@ -1,21 +1,26 @@
 // components/SocialLogins.tsx
 import Button from "@/components/ui/Button";
-import { useOAuth } from "@clerk/clerk-expo";
+import { useSSO } from "@clerk/clerk-expo";
+import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { View } from "react-native";
 
 WebBrowser.maybeCompleteAuthSession();
 
 export default function SocialLogins() {
-  const apple = useOAuth({ strategy: "oauth_apple" });
-  const google = useOAuth({ strategy: "oauth_google" });
+  const { startSSOFlow } = useSSO();
+  const router = useRouter();
 
   const handleApple = async () => {
-    if (!apple || !apple.startOAuthFlow) return;
     try {
-      const { createdSessionId, setActive } = await apple.startOAuthFlow();
-      if (createdSessionId) {
-        await setActive!({ session: createdSessionId });
+      const { createdSessionId, setActive } = await startSSOFlow({
+        strategy: "oauth_apple",
+        redirectUrl: "ainote://sso-callback", // koristi tačan URL iz dashboard-a
+      });
+
+      if (createdSessionId && setActive) {
+        await setActive({ session: createdSessionId });
+        router.replace("/(tabs)/home"); // ili tvoja početna stranica
       }
     } catch (err) {
       console.log("Apple login error", err);
@@ -23,11 +28,15 @@ export default function SocialLogins() {
   };
 
   const handleGoogle = async () => {
-    if (!google || !google.startOAuthFlow) return;
     try {
-      const { createdSessionId, setActive } = await google.startOAuthFlow();
-      if (createdSessionId) {
-        await setActive!({ session: createdSessionId });
+      const { createdSessionId, setActive } = await startSSOFlow({
+        strategy: "oauth_google",
+        redirectUrl: "ainote://sso-callback", // koristi tačan URL iz dashboard-a
+      });
+
+      if (createdSessionId && setActive) {
+        await setActive({ session: createdSessionId });
+        router.replace("/(tabs)/home"); // ili tvoja početna stranica
       }
     } catch (err) {
       console.log("Google login error", err);
@@ -39,7 +48,6 @@ export default function SocialLogins() {
       <Button
         title="Sign in with Apple"
         onPress={handleApple}
-        disabled={!apple || !apple.startOAuthFlow}
         variant="secondary"
         size="md"
         fullWidth
@@ -49,7 +57,6 @@ export default function SocialLogins() {
       <Button
         title="Sign in with Google"
         onPress={handleGoogle}
-        disabled={!google || !google.startOAuthFlow}
         variant="secondary"
         size="md"
         fullWidth

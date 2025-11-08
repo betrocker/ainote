@@ -15,6 +15,17 @@
       }
     },
     "android": {
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "ainote"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ],
       "newArchEnabled": true,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",

@@ -11,6 +11,7 @@
   },
   "auth": {
     "login": {
+      "unmatched": "Ups, ne postoji ta stranica...",
       "title": "Dobrodošli nazad",
       "subtitle": "Prijavite se da nastavite u AInote",
       "emailPlaceholder": "Email",
@@ -62,6 +63,45 @@
     }
   },
   "settings": {
+    "profile": {
+      "edit": "Izmeni profil",
+      "save": "Sačuvaj",
+      "cancel": "Otkaži",
+      "firstName": "Ime",
+      "lastName": "Prezime",
+      "firstNamePlaceholder": "Unesite ime",
+      "lastNamePlaceholder": "Unesite prezime",
+      "memberSince": "Član od",
+      "lastSignIn": "Poslednja prijava",
+      "permission": {
+        "title": "Dozvola potrebna",
+        "message": "Molimo dozvolite pristup galeriji za upload slike."
+      },
+      "error": {
+        "title": "Greška",
+        "message": "Nije uspelo ažuriranje profila"
+      }
+    },
+    "deleteAccount": {
+      "button": "Obriši nalog",
+      "subtitle": "Trajno obriši nalog i sve podatke",
+      "confirm": {
+        "title": "Obriši nalog",
+        "message": "Da li si siguran da želiš trajno da obrišeš svoj nalog? Ova akcija ne može da se poništi i svi tvoji podaci će biti izgubljeni.",
+        "cancel": "Otkaži",
+        "confirm": "Obriši"
+      },
+      "finalConfirm": {
+        "title": "Poslednja potvrda",
+        "message": "Ovo je tvoja poslednja šansa. Ova akcija ne može da se poništi.",
+        "cancel": "Otkaži",
+        "confirm": "Razumem, obriši"
+      },
+      "error": {
+        "title": "Greška",
+        "message": "Brisanje naloga nije uspelo. Pokušaj ponovo ili kontaktiraj podršku."
+      }
+    },
     "done": "Gotovo",
     "premium": {
       "status": "Premium Status",
@@ -237,6 +277,24 @@
     }
   },
   "paywall": {
+    "benefits": {
+      "transcription": {
+        "title": "Audio transkripcija",
+        "subtitle": "Pretvori glasovne poruke u tekst"
+      },
+      "ocr": {
+        "title": "OCR za slike",
+        "subtitle": "Izvuci tekst iz fotografija"
+      },
+      "ai": {
+        "title": "AI asistent",
+        "subtitle": "Postavi pitanja o svojim beleskama"
+      },
+      "private": {
+        "title": "Privatni folder",
+        "subtitle": "Zaštiti beleške biometrijom"
+      }
+    },
     "title": "Nadogradi na Premium",
     "choosePlan": "Izaberi plan",
     "subscribe": "Pretplati se",
