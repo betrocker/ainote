@@ -57,7 +57,7 @@ export default function AnimatedSplash({ onFinish }: AnimatedSplashProps) {
   }));
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 items-center justify-center">
       <LinearGradient
         colors={["#FF9500", "#FF6B00", "#FF9500"]}
         start={{ x: 0, y: 0 }}
@@ -67,23 +67,11 @@ export default function AnimatedSplash({ onFinish }: AnimatedSplashProps) {
 
       <Animated.View style={animatedStyle}>
         <Image
-          source={require("@/assets/icon.png")}
-          style={styles.icon}
+          source={require("@/assets/images/icon.png")}
+          className="w-[200px] h-[200px]"
           resizeMode="contain"
         />
       </Animated.View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  icon: {
-    width: 200,
-    height: 200,
-  },
-});
