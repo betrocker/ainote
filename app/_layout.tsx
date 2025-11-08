@@ -1,4 +1,5 @@
 // app/_layout.tsx
+import AnimatedSplash from "@/components/AnimatedSplash";
 import { ModalProvider } from "@/context/ModalContext";
 import { NotesProvider } from "@/context/NotesContext";
 import { PremiumProvider } from "@/context/PremiumContext";
@@ -12,8 +13,8 @@ import { useFonts } from "expo-font";
 import * as Notifications from "expo-notifications";
 import { Stack, useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
+import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-get-random-values";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -30,6 +31,9 @@ const tokenCache = {
     SecureStore.setItemAsync(key, value),
 };
 
+// Prevent auto-hide of native splash
+SplashScreen.preventAutoHideAsync();
+
 export default function RootLayout() {
   // ✅ SVI HOOKS NA VRHU - UVEK SE POZIVAJU
   const router = useRouter();
@@ -42,9 +46,15 @@ export default function RootLayout() {
 
   const lastNotificationResponse = Notifications.useLastNotificationResponse();
 
-  // 🆕 Onboarding state
+  // 🆕 Splash & onboarding states
+  const [appReady, setAppReady] = useState(false);
   const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
   const [hasViewedOnboarding, setHasViewedOnboarding] = useState(false);
+
+  // Hide native splash immediately when component mounts
+  useEffect(() => {
+    SplashScreen.hideAsync();
+  }, []);
 
   // 🆕 Check onboarding status
   useEffect(() => {
@@ -84,13 +94,13 @@ export default function RootLayout() {
     }
   }, [lastNotificationResponse]);
 
-  // ✅ Loading states
-  if (!fontsLoaded || isCheckingOnboarding) {
-    return (
-      <View className="flex-1 items-center justify-center bg-black">
-        <ActivityIndicator size="large" color="#0A84FF" />
-      </View>
-    );
+  const handleSplashFinish = () => {
+    setAppReady(true);
+  };
+
+  // ✅ Show animated splash while loading fonts or checking onboarding
+  if (!fontsLoaded || isCheckingOnboarding || !appReady) {
+    return <AnimatedSplash onFinish={handleSplashFinish} />;
   }
 
   return (
