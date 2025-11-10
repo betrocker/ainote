@@ -4,7 +4,6 @@ import React, { useEffect } from "react";
 import { Image, StyleSheet, View } from "react-native";
 import Animated, {
   Easing,
-  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
@@ -40,16 +39,14 @@ export default function AnimatedSplash({ onFinish }: AnimatedSplashProps) {
       withTiming(0, { duration: 300 })
     );
 
-    // Fade out after showing
-    opacity.value = withDelay(
-      1400,
-      withTiming(0, { duration: 400 }, (finished) => {
-        if (finished) {
-          runOnJS(onFinish)();
-        }
-      })
-    );
-  }, []);
+    // Fade out after showing (BEZ callback-a)
+    opacity.value = withDelay(1400, withTiming(0, { duration: 400 }));
+
+    // Pozovi onFinish nakon ukupnog vremena
+    const timer = setTimeout(onFinish, 1800); // 1400 + 400 = 1800ms
+
+    return () => clearTimeout(timer);
+  }, [onFinish]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }, { rotate: `${rotation.value}deg` }],
@@ -68,7 +65,7 @@ export default function AnimatedSplash({ onFinish }: AnimatedSplashProps) {
       <Animated.View style={animatedStyle}>
         <Image
           source={require("@/assets/images/icon.png")}
-          className="w-[200px] h-[200px]"
+          className="w-[250px] h-[250px]"
           resizeMode="contain"
         />
       </Animated.View>
