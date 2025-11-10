@@ -113,7 +113,7 @@
       "upgradeSubtitle": "Unbegrenzte KI-Funktionen freischalten",
       "success": {
         "title": "Erfolg!",
-        "message": "Willkommen bei AInote Premium! Genießen Sie unbegrenzte KI-Funktionen."
+        "message": "Willkommen bei AEnote Premium! Genießen Sie unbegrenzte KI-Funktionen."
       },
       "benefits": {
         "title": "Premium-Vorteile",
@@ -168,13 +168,13 @@
     }
   },
   "app": {
-    "version": "AiNote v{{version}}"
+    "version": "AeNote v{{version}}"
   },
   "about": {
     "title": "Über",
     "tagline": "Intelligente Notizen mit KI",
     "version": "Version {{version}} ({{buildNumber}})",
-    "description": "AInote ist eine moderne Notiz-App, die künstliche Intelligenz verwendet, um Ihre Ideen zu organisieren. Nehmen Sie Audio, Text, Fotos und Videos auf, und die KI erstellt automatisch Titel, Zusammenfassungen und Tags.",
+    "description": "AEnote ist eine moderne Notiz-App, die künstliche Intelligenz verwendet, um Ihre Ideen zu organisieren. Nehmen Sie Audio, Text, Fotos und Videos auf, und die KI erstellt automatisch Titel, Zusammenfassungen und Tags.",
     "feedback": "Feedback",
     "links": {
       "privacy": "Datenschutzrichtlinie",
@@ -231,20 +231,20 @@
   },
   "terms": {
     "title": "Nutzungsbedingungen",
-    "intro": "Durch die Nutzung der AInote-App akzeptieren Sie die folgenden Nutzungsbedingungen. Bitte lesen Sie sie sorgfältig durch.",
+    "intro": "Durch die Nutzung der AEnote-App akzeptieren Sie die folgenden Nutzungsbedingungen. Bitte lesen Sie sie sorgfältig durch.",
     "lastUpdated": "Zuletzt aktualisiert: 26. Oktober 2025.",
     "sections": {
       "acceptance": {
         "title": "Annahme der Bedingungen",
-        "content": "Durch den Zugriff und die Nutzung der AInote-App erklären Sie sich damit einverstanden, an diese Bedingungen gebunden zu sein. Wenn Sie mit einem Teil der Bedingungen nicht einverstanden sind, dürfen Sie die App nicht verwenden."
+        "content": "Durch den Zugriff und die Nutzung der AEnote-App erklären Sie sich damit einverstanden, an diese Bedingungen gebunden zu sein. Wenn Sie mit einem Teil der Bedingungen nicht einverstanden sind, dürfen Sie die App nicht verwenden."
       },
       "account": {
         "title": "Benutzerkonto",
-        "content": "Um AInote zu verwenden, müssen Sie ein Konto erstellen. Sie sind für die Aufrechterhaltung der Sicherheit Ihres Kontos und Passworts verantwortlich. Sie übernehmen die Verantwortung für alle Aktivitäten, die unter Ihrem Konto stattfinden."
+        "content": "Um AEnote zu verwenden, müssen Sie ein Konto erstellen. Sie sind für die Aufrechterhaltung der Sicherheit Ihres Kontos und Passworts verantwortlich. Sie übernehmen die Verantwortung für alle Aktivitäten, die unter Ihrem Konto stattfinden."
       },
       "license": {
         "title": "Nutzungslizenz",
-        "content": "Wir gewähren Ihnen eine eingeschränkte, nicht exklusive, nicht übertragbare Lizenz zur Nutzung der AInote-App für persönliche, nicht kommerzielle Zwecke. Diese Lizenz beinhaltet nicht das Recht zum Weiterverkauf oder zur kommerziellen Nutzung."
+        "content": "Wir gewähren Ihnen eine eingeschränkte, nicht exklusive, nicht übertragbare Lizenz zur Nutzung der AEnote-App für persönliche, nicht kommerzielle Zwecke. Diese Lizenz beinhaltet nicht das Recht zum Weiterverkauf oder zur kommerziellen Nutzung."
       },
       "userContent": {
         "title": "Benutzerinhalte",
@@ -350,9 +350,13 @@
       "save": "Speichern",
       "back": "Zurück",
       "togglePrivate": "Als privat markieren",
-      "removePrivate": "Datenschutz entfernen"
+      "removePrivate": "Datenschutz entfernen",
+      "cancel": "Abbrechen",
+      "upgrade": "Upgraden"
     },
     "private": {
+      "premiumRequired": "Premium-Funktion",
+      "premiumMessage": "Der private Ordner ist eine Premium-Funktion. Upgraden Sie, um Ihre sensiblen Notizen zu schützen.",
       "badge": "Private Notiz",
       "authRequired": "Authentifizierung erforderlich",
       "authFailed": "Authentifizierung fehlgeschlagen",
@@ -531,7 +535,7 @@
       "other": "Notizen"
     },
     "empty": {
-      "title": "Willkommen bei AiNote!",
+      "title": "Willkommen bei AeNote!",
       "subtitle": "Ihr intelligenter Notiz-Assistent. Erfassen Sie Ideen mit Stimme, Bildern oder Text.",
       "tutorial": {
         "step1": {
@@ -624,6 +628,9 @@
     }
   },
   "privateFolder": {
+    "premiumRequired": "Premium-Funktion",
+    "premiumMessage": "Der private Ordner ist nur für Premium-Benutzer verfügbar. Schützen Sie Ihre sensiblen Notizen mit biometrischer Authentifizierung.",
+    "upgradeToPremium": "Auf Premium upgraden",
     "title": "Privater Ordner",
     "description": "Ihre privaten Notizen sind geschützt",
     "biometricNotAvailable": "Biometrie nicht verfügbar",

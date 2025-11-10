@@ -13,7 +13,7 @@
     "login": {
       "unmatched": "Ups, ne postoji ta stranica...",
       "title": "Dobrodošli nazad",
-      "subtitle": "Prijavite se da nastavite u AInote",
+      "subtitle": "Prijavite se da nastavite u AEnote",
       "emailPlaceholder": "Email",
       "passwordPlaceholder": "Lozinka",
       "signInButton": "Prijavi se",
@@ -113,7 +113,7 @@
       "upgradeSubtitle": "Otključaj neograničene AI funkcije",
       "success": {
         "title": "Uspeh!",
-        "message": "Dobrodošli u AInote Premium! Uživajte u neograničenim AI funkcijama."
+        "message": "Dobrodošli u AEnote Premium! Uživajte u neograničenim AI funkcijama."
       },
       "benefits": {
         "title": "Premium Prednosti",
@@ -168,13 +168,13 @@
     }
   },
   "app": {
-    "version": "AiNote v{{version}}"
+    "version": "AeNote v{{version}}"
   },
   "about": {
     "title": "O aplikaciji",
     "tagline": "Pametno beleženje sa AI",
     "version": "Verzija {{version}} ({{buildNumber}})",
-    "description": "AInote je moderna aplikacija za beleženje koja koristi veštačku inteligenciju da organizuje vaše ideje. Snimajte audio, tekst, fotografije i video, a AI će automatski kreirati naslove, sažetke i tagove.",
+    "description": "AEnote je moderna aplikacija za beleženje koja koristi veštačku inteligenciju da organizuje vaše ideje. Snimajte audio, tekst, fotografije i video, a AI će automatski kreirati naslove, sažetke i tagove.",
     "feedback": "Povratne informacije",
     "links": {
       "privacy": "Politika privatnosti",
@@ -231,20 +231,20 @@
   },
   "terms": {
     "title": "Uslovi korišćenja",
-    "intro": "Korišćenjem AInote aplikacije prihvatate sledeće uslove korišćenja. Molimo vas da ih pažljivo pročitate.",
+    "intro": "Korišćenjem AEnote aplikacije prihvatate sledeće uslove korišćenja. Molimo vas da ih pažljivo pročitate.",
     "lastUpdated": "Poslednje ažurirano: 26. oktobar 2025.",
     "sections": {
       "acceptance": {
         "title": "Prihvatanje uslova",
-        "content": "Pristupajući i korišćenjem AInote aplikacije, prihvatate da budete vezani ovim uslovima. Ako se ne slažete sa bilo kojim delom uslova, ne smete koristiti aplikaciju."
+        "content": "Pristupajući i korišćenjem AEnote aplikacije, prihvatate da budete vezani ovim uslovima. Ako se ne slažete sa bilo kojim delom uslova, ne smete koristiti aplikaciju."
       },
       "account": {
         "title": "Korisnički nalog",
-        "content": "Da biste koristili AInote, morate kreirati nalog. Odgovorni ste za održavanje sigurnosti svog naloga i lozinke. Prihvatate odgovornost za sve aktivnosti koje se dešavaju pod vašim nalogom."
+        "content": "Da biste koristili AEnote, morate kreirati nalog. Odgovorni ste za održavanje sigurnosti svog naloga i lozinke. Prihvatate odgovornost za sve aktivnosti koje se dešavaju pod vašim nalogom."
       },
       "license": {
         "title": "Licenca za korišćenje",
-        "content": "Dajemo vam ograničenu, neekskluzivnu, neprenosivu licencu za korišćenje AInote aplikacije za lične, nekomercijalne svrhe. Ova licenca ne uključuje pravo na preprodaju ili komercijalnu upotrebu."
+        "content": "Dajemo vam ograničenu, neekskluzivnu, neprenosivu licencu za korišćenje AEnote aplikacije za lične, nekomercijalne svrhe. Ova licenca ne uključuje pravo na preprodaju ili komercijalnu upotrebu."
       },
       "userContent": {
         "title": "Korisnički sadržaj",
@@ -353,9 +353,13 @@
       "save": "Sačuvaj",
       "back": "Nazad",
       "togglePrivate": "Označi kao privatnu",
-      "removePrivate": "Ukloni privatnost"
+      "removePrivate": "Ukloni privatnost",
+      "cancel": "Otkaži",
+      "upgrade": "Nadogradi"
     },
     "private": {
+      "premiumRequired": "Premium funkcija",
+      "premiumMessage": "Privatni folder je Premium funkcija. Nadogradi da bi zaštitio svoje osetljive beleške.",
       "badge": "Privatna beleška",
       "authRequired": "Autentifikacija potrebna",
       "authFailed": "Autentifikacija neuspešna",
@@ -549,7 +553,7 @@
       "other": "beležaka"
     },
     "empty": {
-      "title": "Dobrodošao u AiNote!",
+      "title": "Dobrodošao u AeNote!",
       "subtitle": "Tvoj pametni asistent za beleženje. Snimaj ideje glasom, slikama ili tekstom.",
       "tutorial": {
         "step1": {
@@ -645,6 +649,9 @@
     }
   },
   "privateFolder": {
+    "premiumRequired": "Premium funkcija",
+    "premiumMessage": "Privatni folder je dostupan samo za Premium korisnike. Zaštiti svoje osetljive beleške biometrijskom autentifikacijom.",
+    "upgradeToPremium": "Nadogradi na Premium",
     "title": "Privatna Fascikla",
     "description": "Vaše privatne beleške su zaštićene",
     "biometricNotAvailable": "Biometrija nije dostupna",

@@ -28,7 +28,7 @@ export default function About() {
 
   const handleEmail = () => {
     const email = "denis.djordjevic@gmail.com"; // Zameni sa svojim email-om
-    const subject = `AInote ${t("about.feedback")} - v${version}`;
+    const subject = `AEnote ${t("about.feedback")} - v${version}`;
     const url = `mailto:${email}?subject=${encodeURIComponent(subject)}`;
     Linking.openURL(url);
   };
@@ -59,7 +59,7 @@ export default function About() {
             <Ionicons name="book" size={48} color="#FFF" />
           </View>
           <Text className="text-2xl font-monaBold text-ios-label dark:text-iosd-label">
-            AInote
+            AEnote
           </Text>
           <Text className="text-base text-ios-secondary dark:text-iosd-label2 mt-1">
             {t("about.tagline")}
@@ -115,7 +115,7 @@ export default function About() {
           <TouchableOpacity
             className="flex-row items-center py-3 px-6 active:opacity-70"
             onPress={() =>
-              handleLink("https://ainote.app", t("about.links.website"))
+              handleLink("https://aenote.app", t("about.links.website"))
             }
           >
             <View className="w-8 h-8 rounded-full bg-green-500 items-center justify-center mr-3">
@@ -157,7 +157,7 @@ export default function About() {
             onPress={() => {
               const url = Platform.select({
                 ios: `itms-apps://itunes.apple.com/app/id123456789`, // Zameni sa svojim App Store ID-em
-                android: `market://details?id=com.denis.ainote`, // Zameni sa svojim package name-om
+                android: `market://details?id=com.denis.aenote`, // Zameni sa svojim package name-om
               });
               if (url) Linking.openURL(url);
             }}
@@ -183,7 +183,7 @@ export default function About() {
             {t("about.madeWith")}
           </Text>
           <Text className="text-xs text-ios-secondary dark:text-iosd-label2 text-center mt-2">
-            © 2025 AInote. {t("about.rights")}
+            © 2025 AEnote. {t("about.rights")}
           </Text>
         </View>
 

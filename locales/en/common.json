@@ -13,7 +13,7 @@
     "login": {
       "unmatched": "Ooops, page doesn't exist...",
       "title": "Welcome Back",
-      "subtitle": "Sign in to continue to AInote",
+      "subtitle": "Sign in to continue to AEnote",
       "emailPlaceholder": "Email",
       "passwordPlaceholder": "Password",
       "signInButton": "Sign In",
@@ -113,7 +113,7 @@
       "upgradeSubtitle": "Unlock unlimited AI features",
       "success": {
         "title": "Success!",
-        "message": "Welcome to AInote Premium! Enjoy unlimited AI features."
+        "message": "Welcome to AEnote Premium! Enjoy unlimited AI features."
       },
       "benefits": {
         "title": "Premium Benefits",
@@ -168,13 +168,13 @@
     }
   },
   "app": {
-    "version": "AiNote v{{version}}"
+    "version": "AeNote v{{version}}"
   },
   "about": {
     "title": "About",
     "tagline": "Smart note-taking with AI",
     "version": "Version {{version}} ({{buildNumber}})",
-    "description": "AInote is a modern note-taking app that uses artificial intelligence to organize your ideas. Record audio, text, photos and video, and AI will automatically create titles, summaries and tags.",
+    "description": "AEnote is a modern note-taking app that uses artificial intelligence to organize your ideas. Record audio, text, photos and video, and AI will automatically create titles, summaries and tags.",
     "feedback": "Feedback",
     "links": {
       "privacy": "Privacy Policy",
@@ -231,20 +231,20 @@
   },
   "terms": {
     "title": "Terms of Use",
-    "intro": "By using the AInote app you accept the following terms of use. Please read them carefully.",
+    "intro": "By using the AEnote app you accept the following terms of use. Please read them carefully.",
     "lastUpdated": "Last updated: October 26, 2025.",
     "sections": {
       "acceptance": {
         "title": "Acceptance of terms",
-        "content": "By accessing and using the AInote app, you agree to be bound by these terms. If you disagree with any part of the terms, you may not use the app."
+        "content": "By accessing and using the AEnote app, you agree to be bound by these terms. If you disagree with any part of the terms, you may not use the app."
       },
       "account": {
         "title": "User account",
-        "content": "To use AInote, you must create an account. You are responsible for maintaining the security of your account and password. You accept responsibility for all activities that occur under your account."
+        "content": "To use AEnote, you must create an account. You are responsible for maintaining the security of your account and password. You accept responsibility for all activities that occur under your account."
       },
       "license": {
         "title": "License to use",
-        "content": "We grant you a limited, non-exclusive, non-transferable license to use the AInote app for personal, non-commercial purposes. This license does not include the right to resell or commercial use."
+        "content": "We grant you a limited, non-exclusive, non-transferable license to use the AEnote app for personal, non-commercial purposes. This license does not include the right to resell or commercial use."
       },
       "userContent": {
         "title": "User content",
@@ -350,9 +350,13 @@
       "save": "Save",
       "back": "Back",
       "togglePrivate": "Mark as private",
-      "removePrivate": "Remove privacy"
+      "removePrivate": "Remove privacy",
+      "cancel": "Cancel",
+      "upgrade": "Upgrade"
     },
     "private": {
+      "premiumRequired": "Premium Feature",
+      "premiumMessage": "Private folder is a Premium feature. Upgrade to protect your sensitive notes.",
       "badge": "Private note",
       "authRequired": "Authentication required",
       "authFailed": "Authentication failed",
@@ -531,7 +535,7 @@
       "other": "notes"
     },
     "empty": {
-      "title": "Welcome to AiNote!",
+      "title": "Welcome to AeNote!",
       "subtitle": "Your smart note-taking assistant. Capture ideas with voice, images or text.",
       "tutorial": {
         "step1": {
@@ -624,6 +628,9 @@
     }
   },
   "privateFolder": {
+    "premiumRequired": "Premium Feature",
+    "premiumMessage": "Private folder is available only for Premium users. Protect your sensitive notes with biometric authentication.",
+    "upgradeToPremium": "Upgrade to Premium",
     "title": "Private Folder",
     "description": "Your private notes are protected",
     "biometricNotAvailable": "Biometric Not Available",

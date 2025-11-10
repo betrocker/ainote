@@ -127,7 +127,7 @@ export default function Privacy() {
           <TouchableOpacity
             className="p-6 active:opacity-70"
             onPress={() => {
-              Linking.openURL("mailto:privacy@ainote.app");
+              Linking.openURL("mailto:privacy@aenote.app");
             }}
           >
             <View className="flex-row items-center mb-2">

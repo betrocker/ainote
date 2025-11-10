@@ -107,12 +107,29 @@ export default function NoteDetailScreen() {
   const { isAuthAvailable } = usePrivate();
 
   // Toggle funkcija:
+  // Toggle funkcija sa premium proverom
   const togglePrivate = async () => {
     if (!note) return;
 
-    await editNote(note.id, {
-      isPrivate: !note.isPrivate,
-    });
+    // ✅ Proveri premium ako pokušava da OZNAČI kao privatnu
+    if (!note.isPrivate && !isPremium) {
+      Alert.alert(
+        t("noteDetail.private.premiumRequired") || "Premium Feature",
+        t("noteDetail.private.premiumMessage") ||
+          "Private folder is a Premium feature. Upgrade to protect your sensitive notes.",
+        [
+          { text: t("noteDetail.actions.cancel") || "Cancel", style: "cancel" },
+          {
+            text: t("noteDetail.actions.upgrade") || "Upgrade",
+            onPress: () => setShowPaywall(true),
+          },
+        ]
+      );
+      return;
+    }
+
+    // Ako već jeste privatna, dozvoli da se ukloni privatnost (bez premium provere)
+    await editNote(note.id, { isPrivate: !note.isPrivate });
   };
 
   // ⭐ Premium check helper

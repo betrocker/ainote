@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "ainote",
-    "slug": "ainote",
+    "name": "aenote",
+    "slug": "aenote",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -16,7 +16,7 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSFaceIDUsageDescription": "Koristimo Face ID za zaštitu tvojih privatnih beleški"
+        "NSFaceIDUsageDescription": "We use Face ID to protect your private notes."
       }
     },
     "android": {
