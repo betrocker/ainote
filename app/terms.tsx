@@ -151,7 +151,7 @@ export default function Terms() {
           <TouchableOpacity
             className="p-6 active:opacity-70"
             onPress={() => {
-              Linking.openURL("mailto:legal@aenote.app");
+              Linking.openURL("mailto:denis.djordjevic@gmail.com");
             }}
           >
             <View className="flex-row items-center mb-2">

@@ -1,5 +1,3 @@
-// context/PrivateContext.tsx
-import { usePremium } from "@/context/PremiumContext";
 import * as LocalAuthentication from "expo-local-authentication";
 import React, {
   createContext,
@@ -8,7 +6,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Alert, AppState } from "react-native";
+import { AppState } from "react-native";
 
 interface PrivateContextType {
   isUnlocked: boolean;
@@ -25,7 +23,6 @@ const PrivateContext = createContext<PrivateContextType | undefined>(undefined);
 const AUTO_LOCK_TIMEOUT = 5 * 60 * 1000;
 
 export function PrivateProvider({ children }: { children: React.ReactNode }) {
-  const { isPremium } = usePremium(); // ✅ Dodaj ovo
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [isAuthAvailable, setIsAuthAvailable] = useState(false);
   const [isInPrivateFolder, setIsInPrivateFolder] = useState(false);
@@ -62,12 +59,6 @@ export function PrivateProvider({ children }: { children: React.ReactNode }) {
   };
 
   const checkAuthAvailability = async () => {
-    // ✅ Ako nema premium, biometrija nije "dostupna"
-    if (!isPremium) {
-      setIsAuthAvailable(false);
-      return;
-    }
-
     const compatible = await LocalAuthentication.hasHardwareAsync();
     const enrolled = await LocalAuthentication.isEnrolledAsync();
     setIsAuthAvailable(compatible && enrolled);
@@ -75,20 +66,7 @@ export function PrivateProvider({ children }: { children: React.ReactNode }) {
 
   const authenticateUser = async (): Promise<boolean> => {
     try {
-      // ✅ Premium provera pre biometrije
-      if (!isPremium) {
-        Alert.alert(
-          "Premium Feature",
-          "Private folder requires Premium subscription."
-        );
-        return false;
-      }
-
       if (!isAuthAvailable) {
-        Alert.alert(
-          "Not Available",
-          "Biometric authentication is not available on this device."
-        );
         return false;
       }
 
@@ -140,11 +118,6 @@ export function PrivateProvider({ children }: { children: React.ReactNode }) {
       }
     };
   }, []);
-
-  // ✅ Re-check auth availability kada se premium status promeni
-  useEffect(() => {
-    checkAuthAvailability();
-  }, [isPremium]);
 
   return (
     <PrivateContext.Provider

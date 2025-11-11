@@ -649,6 +649,9 @@
     }
   },
   "privateFolder": {
+    "feature1": "Zaštita biometrijskim katancem",
+    "feature2": "Auto-zaključavanje posle 5 minuta",
+    "feature3": "Sakrijte osetljiv sadržaj",
     "premiumRequired": "Premium funkcija",
     "premiumMessage": "Privatni folder je dostupan samo za Premium korisnike. Zaštiti svoje osetljive beleške biometrijskom autentifikacijom.",
     "upgradeToPremium": "Nadogradi na Premium",

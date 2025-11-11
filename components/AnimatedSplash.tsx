@@ -1,7 +1,6 @@
 // components/AnimatedSplash.tsx
-import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect } from "react";
-import { Image, StyleSheet, View } from "react-native";
+import { Image, View } from "react-native";
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -21,7 +20,6 @@ export default function AnimatedSplash({ onFinish }: AnimatedSplashProps) {
   const rotation = useSharedValue(0);
 
   useEffect(() => {
-    // Icon scale up + fade in
     scale.value = withTiming(1, {
       duration: 800,
       easing: Easing.out(Easing.cubic),
@@ -32,18 +30,15 @@ export default function AnimatedSplash({ onFinish }: AnimatedSplashProps) {
       easing: Easing.out(Easing.ease),
     });
 
-    // Subtle rotation effect
     rotation.value = withSequence(
       withTiming(-5, { duration: 300 }),
       withTiming(5, { duration: 300 }),
       withTiming(0, { duration: 300 })
     );
 
-    // Fade out after showing (BEZ callback-a)
     opacity.value = withDelay(1400, withTiming(0, { duration: 400 }));
 
-    // Pozovi onFinish nakon ukupnog vremena
-    const timer = setTimeout(onFinish, 1800); // 1400 + 400 = 1800ms
+    const timer = setTimeout(onFinish, 1800);
 
     return () => clearTimeout(timer);
   }, [onFinish]);
@@ -54,17 +49,13 @@ export default function AnimatedSplash({ onFinish }: AnimatedSplashProps) {
   }));
 
   return (
-    <View className="flex-1 items-center justify-center">
-      <LinearGradient
-        colors={["#FF9500", "#FF6B00", "#FF9500"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={StyleSheet.absoluteFillObject}
-      />
-
+    <View
+      // ⬇⬇⬇ OVDE JE BITNO: absolute overlay preko svega
+      className="absolute inset-0 items-center justify-center bg-white"
+    >
       <Animated.View style={animatedStyle}>
         <Image
-          source={require("@/assets/images/icon.png")}
+          source={require("@/assets/images/splash.png")}
           className="w-[250px] h-[250px]"
           resizeMode="contain"
         />

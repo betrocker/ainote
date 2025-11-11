@@ -1,4 +1,3 @@
-// app/_layout.tsx
 import AnimatedSplash from "@/components/AnimatedSplash";
 import { ModalProvider } from "@/context/ModalContext";
 import { NotesProvider } from "@/context/NotesContext";
@@ -22,8 +21,10 @@ import "../global.css";
 import "../i18n";
 import "../utils/rc-init";
 
+// 🧩 Automatski koristi pravi Clerk ključ
 const EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY =
-  "pk_test_dmVyaWZpZWQtYW50ZWxvcGUtNS5jbGVyay5hY2NvdW50cy5kZXYk";
+  process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY ||
+  process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY_TEST;
 
 const tokenCache = {
   getToken: (key: string) => SecureStore.getItemAsync(key),
@@ -31,11 +32,10 @@ const tokenCache = {
     SecureStore.setItemAsync(key, value),
 };
 
-// Prevent auto-hide of native splash
+// Spreči automatsko skrivanje native splash-a dok se ne pripremi app
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  // ✅ SVI HOOKS NA VRHU - UVEK SE POZIVAJU
   const router = useRouter();
 
   const [fontsLoaded] = useFonts({
@@ -46,47 +46,45 @@ export default function RootLayout() {
 
   const lastNotificationResponse = Notifications.useLastNotificationResponse();
 
-  // 🆕 Splash & onboarding states
   const [appReady, setAppReady] = useState(false);
   const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
   const [hasViewedOnboarding, setHasViewedOnboarding] = useState(false);
 
-  // Hide native splash immediately when component mounts
+  // 🚀 Hide native splash tek kad je app spreman
   useEffect(() => {
-    SplashScreen.hideAsync();
-  }, []);
+    if (fontsLoaded && !isCheckingOnboarding) {
+      SplashScreen.hideAsync().catch(() => {});
+    }
+  }, [fontsLoaded, isCheckingOnboarding]);
 
-  // 🆕 Check onboarding status
+  // 🔍 Proveri da li je onboarding odrađen
   useEffect(() => {
-    async function checkOnboarding() {
+    (async () => {
       try {
         const viewed = await AsyncStorage.getItem("@viewedOnboarding");
         setHasViewedOnboarding(viewed === "true");
       } catch (error) {
         console.error("❌ Error checking onboarding:", error);
-        setHasViewedOnboarding(true); // Fallback - skip onboarding on error
+        setHasViewedOnboarding(true);
       } finally {
         setIsCheckingOnboarding(false);
       }
-    }
-
-    checkOnboarding();
+    })();
   }, []);
 
+  // 🔔 Inicijalizuj notifikacije
   useEffect(() => {
     registerForPushNotifications().catch((err) => {
       console.error("❌ Notification registration error:", err);
     });
   }, []);
 
+  // 📬 Ako je notifikacija tapnuta → otvori belešku
   useEffect(() => {
     if (lastNotificationResponse) {
-      console.log("📬 Notification tapped!");
       const noteId = lastNotificationResponse.notification.request.content.data
         ?.noteId as string | undefined;
-
       if (noteId) {
-        console.log("📝 Navigating to note:", noteId);
         setTimeout(() => {
           router.push(`/note/${noteId}` as any);
         }, 100);
@@ -94,31 +92,35 @@ export default function RootLayout() {
     }
   }, [lastNotificationResponse]);
 
-  const handleSplashFinish = () => {
-    setAppReady(true);
-  };
+  // Splash gotov
+  const handleSplashFinish = () => setAppReady(true);
 
-  // ✅ Show animated splash while loading fonts or checking onboarding
+  // 🌀 Dok se sve učitava
   if (!fontsLoaded || isCheckingOnboarding || !appReady) {
     return <AnimatedSplash onFinish={handleSplashFinish} />;
   }
+
+  console.log(
+    "🔑 Using Clerk key:",
+    EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY?.slice(0, 15),
+    "..."
+  );
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider>
         <ClerkProvider
-          publishableKey={EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY}
+          publishableKey={EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!}
           tokenCache={tokenCache}
           telemetry={false}
         >
-          <PrivateProvider>
-            <PremiumProvider>
+          <PremiumProvider>
+            <PrivateProvider>
               <NotesProvider>
                 <TabProvider>
                   <ModalProvider>
                     <SafeAreaProvider>
                       <Stack screenOptions={{ headerShown: false }}>
-                        {/* 🆕 Conditional initial route */}
                         {!hasViewedOnboarding && (
                           <Stack.Screen
                             name="onboarding"
@@ -137,8 +139,8 @@ export default function RootLayout() {
                   </ModalProvider>
                 </TabProvider>
               </NotesProvider>
-            </PremiumProvider>
-          </PrivateProvider>
+            </PrivateProvider>
+          </PremiumProvider>
         </ClerkProvider>
       </ThemeProvider>
     </GestureHandlerRootView>

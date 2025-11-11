@@ -628,6 +628,9 @@
     }
   },
   "privateFolder": {
+    "feature1": "Biometrischer Sperrschutz",
+    "feature2": "Automatische Sperre nach 5 Minuten",
+    "feature3": "Vertrauliche Inhalte ausblenden",
     "premiumRequired": "Premium-Funktion",
     "premiumMessage": "Der private Ordner ist nur für Premium-Benutzer verfügbar. Schützen Sie Ihre sensiblen Notizen mit biometrischer Authentifizierung.",
     "upgradeToPremium": "Auf Premium upgraden",

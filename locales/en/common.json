@@ -628,6 +628,9 @@
     }
   },
   "privateFolder": {
+    "feature1": "Biometric lock protection",
+    "feature2": "Auto-lock after 5 minutes",
+    "feature3": "Hide sensitive content",
     "premiumRequired": "Premium Feature",
     "premiumMessage": "Private folder is available only for Premium users. Protect your sensitive notes with biometric authentication.",
     "upgradeToPremium": "Upgrade to Premium",
