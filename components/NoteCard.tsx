@@ -133,26 +133,24 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
           {
             shouldPlay: false,
             progressUpdateIntervalMillis: 250,
-            isLooping: false, // ✅ Već imaš ovo
+            isLooping: false,
           },
           (status) => {
-            if (!mounted) return; // ⭐ Prvo proveri mounted
-            if (!status.isLoaded) return; // ⭐ Pa isLoaded
+            if (!mounted || !status.isLoaded) return; // ⭐ Proveri OBE condition na početku
 
             const st = status as AVPlaybackStatusSuccess;
 
-            // ⭐ KLJUČNA IZMENA: Proveri didJustFinish PRE setIsPlaying
-            if (st.didJustFinish) {
-              console.log("🎵 [NoteCard] Audio finished, resetting position");
-              setIsPlaying(false);
-              setIsLoaded(true);
-              // ⭐ Reset pozicije asinkrono
-              soundRef.current?.setPositionAsync(0).catch(() => {});
-              return; // ⭐ RETURN - ne nastavljaj dalje
-            }
-
+            // ⭐ DODAJ: Isto kao u [id].tsx
             setIsLoaded(true);
             setIsPlaying(st.isPlaying);
+
+            // ⭐ KLJUČNO: Proveri didJustFinish SA mounted proverom
+            if (st.didJustFinish && mounted) {
+              console.log("🎵 [NoteCard] Audio finished, resetting position");
+              setIsPlaying(false);
+              soundRef.current?.setPositionAsync(0).catch(() => {});
+              // ⭐ NE RETURN - neka setuje i ostale state-ove
+            }
           }
         );
 
@@ -177,6 +175,7 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
 
   const togglePlayback = async () => {
     if (!isLoaded || !soundRef.current) return;
+
     try {
       if (isPlaying) {
         await soundRef.current.pauseAsync();
@@ -184,16 +183,22 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
       } else {
         const st =
           (await soundRef.current.getStatusAsync()) as AVPlaybackStatusSuccess;
+
+        // ⭐ KLJUČNO: Proveri poziciju MANUELNO
         if (
           st.isLoaded &&
           st.positionMillis >= (st.durationMillis ?? 0) - 150
         ) {
+          console.log("🎵 [NoteCard] Resetting position before play");
           await soundRef.current.setPositionAsync(0);
         }
+
         await soundRef.current.playAsync();
         setIsPlaying(true);
       }
-    } catch {}
+    } catch (error) {
+      console.error("[NoteCard] Playback error:", error);
+    }
   };
 
   const handlePress = async () => {

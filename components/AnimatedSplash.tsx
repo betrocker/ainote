@@ -50,8 +50,9 @@ export default function AnimatedSplash({ onFinish }: AnimatedSplashProps) {
 
   return (
     <View
-      // ⬇⬇⬇ OVDE JE BITNO: absolute overlay preko svega
-      className="absolute inset-0 items-center justify-center bg-white"
+      // ⭐ IZMENA: Ukloni 'absolute' - bude full screen component
+      className="flex-1 items-center justify-center bg-white"
+      style={{ flex: 1 }} // ⭐ DODAJ style za sigurnost
     >
       <Animated.View style={animatedStyle}>
         <Image

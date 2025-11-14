@@ -49,12 +49,12 @@ export default function RootLayout() {
   const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
   const [hasViewedOnboarding, setHasViewedOnboarding] = useState(false);
 
-  // 🚀 Hide native splash tek kad je app spreman
+  // ⭐ IZMENA: Sakrij native splash samo nakon AnimatedSplash
   useEffect(() => {
-    if (fontsLoaded && !isCheckingOnboarding) {
+    if (appReady) {
       SplashScreen.hideAsync().catch(() => {});
     }
-  }, [fontsLoaded, isCheckingOnboarding]);
+  }, [appReady]);
 
   // 🔍 Proveri da li je onboarding odrađen
   useEffect(() => {
@@ -91,21 +91,19 @@ export default function RootLayout() {
     }
   }, [lastNotificationResponse]);
 
-  // Splash gotov
-  const handleSplashFinish = () => setAppReady(true);
+  const handleSplashFinish = () => {
+    setAppReady(true);
+  };
 
-  // 🌀 Dok se sve učitava
-  if (!fontsLoaded || isCheckingOnboarding || !appReady) {
-    return <AnimatedSplash onFinish={handleSplashFinish} />;
+  // ⭐ PRVO: Dok fonts i onboarding nisu ready - vrati null (native splash ostaje)
+  if (!fontsLoaded || isCheckingOnboarding) {
+    return null;
   }
 
-  console.log(
-    "🔑 Using Clerk key:",
-    EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY?.slice(0, 15),
-    "..."
-  );
-
-  console.log("🔑 CLERK KEY:", process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY);
+  // ⭐ DRUGO: Prikaži AnimatedSplash (native splash još uvek vidljiv u pozadini)
+  if (!appReady) {
+    return <AnimatedSplash onFinish={handleSplashFinish} />;
+  }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
