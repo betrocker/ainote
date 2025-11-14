@@ -2,7 +2,8 @@
   "expo": {
     "name": "aenote",
     "slug": "ainote",
-    "version": "1.0.0",
+    "owner": "geminicode",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "ainote",
@@ -15,6 +16,7 @@
       }
     },
     "android": {
+      "versionCode": 45,
       "intentFilters": [
         {
           "action": "VIEW",
@@ -23,7 +25,10 @@
               "scheme": "ainote"
             }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ],
       "newArchEnabled": true,
@@ -34,7 +39,13 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.denis.ainote"
+      "package": "com.denis.ainote",
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -58,7 +69,9 @@
         "expo-audio",
         {
           "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone.",
-          "UIBackgroundModes": ["audio"]
+          "UIBackgroundModes": [
+            "audio"
+          ]
         }
       ],
       "expo-video",
@@ -77,7 +90,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "27558d00-dfa9-41e6-82d2-70bdfefb716e"
+        "projectId": "2fed4e7e-c9bd-49ae-b372-b75e1ef8b993"
       }
     }
   }

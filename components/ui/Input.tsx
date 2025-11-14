@@ -4,7 +4,7 @@ import React, { forwardRef, useState } from "react";
 import { Platform, StyleSheet, TextInput, TextInputProps } from "react-native";
 
 const Input = forwardRef<TextInput, TextInputProps>(
-  ({ className = "", autoCapitalize = "none", ...props }, ref) => {
+  ({ className = "", autoCapitalize = "none", style, ...props }, ref) => {
     const { colorScheme } = useColorScheme();
     const isDark = colorScheme === "dark";
     const [focused, setFocused] = useState(false);
@@ -14,9 +14,7 @@ const Input = forwardRef<TextInput, TextInputProps>(
     const caret = isDark ? "#0A84FF" : "#007AFF";
 
     // tvoje boje za “pill” pozadinu
-    const fillBg = isDark
-      ? "bg-[rgba(118,118,128,0.24)]"
-      : "bg-[rgba(118,118,128,0.12)]";
+    const fillBg = isDark ? "rgba(118,118,128,0.24)" : "rgba(118,118,128,0.12)";
 
     // mekana ivica (najbliže iOS fill stilu)
     const borderColor = focused
@@ -24,8 +22,8 @@ const Input = forwardRef<TextInput, TextInputProps>(
         ? "rgba(10,132,255,0.55)"
         : "rgba(0,122,255,0.55)"
       : isDark
-        ? "rgba(235,235,245,0.18)"
-        : "rgba(60,60,67,0.12)";
+      ? "rgba(235,235,245,0.18)"
+      : "rgba(60,60,67,0.12)";
 
     return (
       <TextInput
@@ -60,6 +58,7 @@ const Input = forwardRef<TextInput, TextInputProps>(
                 : StyleSheet.hairlineWidth,
             borderColor,
           },
+          style,
         ]}
       />
     );

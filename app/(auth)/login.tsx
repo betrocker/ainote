@@ -164,7 +164,7 @@ export default function Login() {
                     <TouchableWithoutFeedback
                       onPress={() => setShowPassword(!showPassword)}
                     >
-                      <View className="absolute right-4 top-4">
+                      <View className="absolute right-4 top-2">
                         <Ionicons
                           name={showPassword ? "eye-off" : "eye"}
                           size={22}

@@ -1,11 +1,24 @@
 import { useAuth } from "@clerk/clerk-expo";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Redirect } from "expo-router";
+import { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 
 export default function Index() {
   const { isSignedIn, isLoaded } = useAuth();
+  const [hasViewedOnboarding, setHasViewedOnboarding] = useState<
+    boolean | null
+  >(null);
 
-  if (!isLoaded) {
+  useEffect(() => {
+    (async () => {
+      const viewed = await AsyncStorage.getItem("@viewedOnboarding");
+      setHasViewedOnboarding(viewed === "true");
+    })();
+  }, []);
+
+  // 🔄 Prikaz loadinga dok se state ne učita
+  if (!isLoaded || hasViewedOnboarding === null) {
     return (
       <View
         style={{
@@ -20,9 +33,14 @@ export default function Index() {
     );
   }
 
-  if (isSignedIn) {
-    return <Redirect href="/(tabs)/home" />;
+  // 🎯 Jedan return sa logikom redirecta
+  if (!hasViewedOnboarding) {
+    return <Redirect href="/onboarding" />;
   }
 
-  return <Redirect href="/(auth)/login" />;
+  if (!isSignedIn) {
+    return <Redirect href="/(auth)/login" />;
+  }
+
+  return <Redirect href="/(tabs)/home" />;
 }

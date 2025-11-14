@@ -106,7 +106,6 @@ export default function NoteDetailScreen() {
 
   const { isAuthAvailable } = usePrivate();
 
-  // Toggle funkcija:
   // Toggle funkcija sa premium proverom
   const togglePrivate = async () => {
     if (!note) return;

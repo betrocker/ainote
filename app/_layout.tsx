@@ -23,8 +23,7 @@ import "../utils/rc-init";
 
 // 🧩 Automatski koristi pravi Clerk ključ
 const EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY =
-  process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY ||
-  process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY_TEST;
+  process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
 const tokenCache = {
   getToken: (key: string) => SecureStore.getItemAsync(key),
@@ -106,6 +105,8 @@ export default function RootLayout() {
     "..."
   );
 
+  console.log("🔑 CLERK KEY:", process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY);
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider>
@@ -121,15 +122,13 @@ export default function RootLayout() {
                   <ModalProvider>
                     <SafeAreaProvider>
                       <Stack screenOptions={{ headerShown: false }}>
-                        {!hasViewedOnboarding && (
-                          <Stack.Screen
-                            name="onboarding"
-                            options={{
-                              gestureEnabled: false,
-                              animation: "fade",
-                            }}
-                          />
-                        )}
+                        <Stack.Screen
+                          name="onboarding"
+                          options={{
+                            gestureEnabled: false,
+                            animation: "fade",
+                          }}
+                        />
                         <Stack.Screen name="index" />
                         <Stack.Screen name="(auth)" />
                         <Stack.Screen name="(tabs)" />

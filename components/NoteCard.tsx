@@ -1,4 +1,6 @@
+import CustomPaywall from "@/components/CustomPaywall";
 import { useNotes } from "@/context/NotesContext";
+import { usePremium } from "@/context/PremiumContext";
 import { usePrivate } from "@/context/PrivateContext";
 import type { Note } from "@/types/note";
 import { Ionicons } from "@expo/vector-icons";
@@ -49,8 +51,10 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
   } = useNotes();
   const router = useRouter();
   const { authenticateUser, isInPrivateFolder } = usePrivate();
+  const { isPremium, checkPremiumStatus } = usePremium();
 
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
 
   const isAudio = note.type === "audio";
   const isVideo = note.type === "video";
@@ -87,16 +91,14 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
     ? "bg-amber-500/15 dark:bg-amber-500/22"
     : "bg-ios-blue/15 dark:bg-ios-blue/22";
 
-  // ⭐ DODAJ - Video thumbnail state
   const [videoThumb, setVideoThumb] = useState<string | null>(null);
   const [thumbLoading, setThumbLoading] = useState(false);
 
-  // ⭐ DODAJ - Generisanje video thumbnail-a
   useEffect(() => {
     if (isVideo && hasUri) {
       setThumbLoading(true);
       VideoThumbnails.getThumbnailAsync(note.fileUri!, {
-        time: 0, // prvi frejm
+        time: 0,
         quality: 0.7,
       })
         .then(({ uri }) => setVideoThumb(uri))
@@ -105,7 +107,6 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
     }
   }, [isVideo, hasUri, note.fileUri]);
 
-  // --- expo-av playback (bez Reanimated) ---
   const soundRef = useRef<Audio.Sound | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -116,35 +117,52 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
     const load = async () => {
       if (!isAudio || !hasUri) return;
 
-      // Playback režim i speaker rutiranje
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: false,
-        playsInSilentModeIOS: true,
-        staysActiveInBackground: false,
-        interruptionModeIOS: InterruptionModeIOS.DoNotMix,
-        shouldDuckAndroid: false,
-        playThroughEarpieceAndroid: false, // SPEAKER, ne earpiece
-        interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
-      });
+      try {
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: false,
+          playsInSilentModeIOS: true,
+          staysActiveInBackground: false,
+          interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+          shouldDuckAndroid: false,
+          playThroughEarpieceAndroid: false,
+          interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
+        });
 
-      const { sound } = await Audio.Sound.createAsync(
-        { uri: note.fileUri! },
-        { shouldPlay: false, progressUpdateIntervalMillis: 250 },
-        (status) => {
-          if (!mounted || !status.isLoaded) return;
-          const st = status as AVPlaybackStatusSuccess;
-          setIsLoaded(true);
-          setIsPlaying(st.isPlaying);
-          if (st.didJustFinish) {
-            setIsPlaying(false);
-            soundRef.current?.setPositionAsync(0);
+        const { sound } = await Audio.Sound.createAsync(
+          { uri: note.fileUri! },
+          {
+            shouldPlay: false,
+            progressUpdateIntervalMillis: 250,
+            isLooping: false, // ✅ Već imaš ovo
+          },
+          (status) => {
+            if (!mounted) return; // ⭐ Prvo proveri mounted
+            if (!status.isLoaded) return; // ⭐ Pa isLoaded
+
+            const st = status as AVPlaybackStatusSuccess;
+
+            // ⭐ KLJUČNA IZMENA: Proveri didJustFinish PRE setIsPlaying
+            if (st.didJustFinish) {
+              console.log("🎵 [NoteCard] Audio finished, resetting position");
+              setIsPlaying(false);
+              setIsLoaded(true);
+              // ⭐ Reset pozicije asinkrono
+              soundRef.current?.setPositionAsync(0).catch(() => {});
+              return; // ⭐ RETURN - ne nastavljaj dalje
+            }
+
+            setIsLoaded(true);
+            setIsPlaying(st.isPlaying);
           }
-        }
-      );
-      soundRef.current = sound;
+        );
+
+        soundRef.current = sound;
+      } catch (error) {
+        console.error("[NoteCard] Audio load error:", error);
+      }
     };
 
-    load().catch(() => {});
+    load();
 
     return () => {
       mounted = false;
@@ -181,9 +199,7 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
   const handlePress = async () => {
     console.log("🔵 [NoteCard] Pressed note:", note.id.slice(0, 8));
 
-    // ⭐ CHECK ZA PRIVATNU BELESKU
     if (note.isPrivate) {
-      // ⭐ AKO JE KORISNIK VEĆ U PRIVATNOM FOLDERU, NE TRAŽI BIOMETRIJU
       if (!isInPrivateFolder) {
         console.log("🔴 [NoteCard] Private note - requesting authentication");
         const authenticated = await authenticateUser();
@@ -206,14 +222,12 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
     }
   };
 
-  // Dodaj handler za save
   const handleSave = async (id: string, title: string, description: string) => {
-    await editNote(id, { title, description }); // ⭐ Koristi editNote
+    await editNote(id, { title, description });
   };
 
-  // Dodaj handler da spreči propagaciju event-a
   const handleEditPress = (e: any) => {
-    e.stopPropagation(); // Spreči otvaranje detail view-a
+    e.stopPropagation();
     setIsEditModalVisible(true);
   };
 
@@ -223,7 +237,6 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
       className={[
         "mx-4 mb-3 rounded-[24px] overflow-hidden",
         "bg-white/85 dark:bg-black/35",
-        // ⭐ Zlatna ivica ako je pinned
         note.pinned
           ? "border-2 border-amber-500/60 dark:border-amber-400/60"
           : "border border-black/10 dark:border-white/15",
@@ -232,7 +245,6 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
       ].join(" ")}
     >
       <View className="flex-row items-start">
-        {/* ⭐ tip ikona sa pin badge-om */}
         <View className="relative">
           <View
             className={[
@@ -244,14 +256,12 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
             <Ionicons name={iconName} size={20} color={iconColor} />
           </View>
 
-          {/* ⭐ Mali pin badge u gornjem desnom uglu */}
           {note.pinned && (
             <View className="absolute top-0 right-1 w-4 h-4 rounded-full bg-amber-500 items-center justify-center border border-white dark:border-black">
               <Ionicons name="pin" size={8} color="#FFF" />
             </View>
           )}
 
-          {/* ⭐ Lock badge za privatne beleske */}
           {note.isPrivate && (
             <View className="absolute top-0 right-1 w-4 h-4 rounded-full bg-red-500 items-center justify-center border border-white dark:border-black">
               <Ionicons name="lock-closed" size={8} color="#FFF" />
@@ -259,9 +269,7 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
           )}
         </View>
 
-        {/* tekstualni deo */}
         <View className="flex-1 pr-2">
-          {/* ⭐ Header sa title, pin i edit dugmićima */}
           <View className="flex-row items-center justify-between">
             <Text
               className="flex-1 text-lg font-monaBold text-ios-label dark:text-iosd-label"
@@ -270,7 +278,6 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
               {note.title?.trim() || "Untitled"}
             </Text>
 
-            {/* ⭐ Summary indikator */}
             {note.ai?.summary && (
               <View className="bg-purple-500/15 rounded-full px-1.5 py-0.5">
                 <Ionicons name="sparkles" size={10} color="#A855F7" />
@@ -278,7 +285,6 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
             )}
 
             <View className="flex-row items-center">
-              {/* Pin dugme */}
               <TouchableOpacity
                 onPress={(e) => {
                   e.stopPropagation();
@@ -294,7 +300,6 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
                 />
               </TouchableOpacity>
 
-              {/* Edit dugme */}
               <TouchableOpacity
                 onPress={handleEditPress}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
@@ -305,7 +310,6 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
             </View>
           </View>
 
-          {/* Prikaz opisa ako postoji */}
           {note.description && (
             <Text
               className="mt-1 text-xs text-ios-secondary dark:text-iosd-label2"
@@ -319,7 +323,6 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
             {formatDate(note.createdAt)}
           </Text>
 
-          {/* TAGOVI */}
           {note.tags && note.tags.length > 0 && (
             <View className="flex-row flex-wrap mt-2">
               {note.tags.slice(0, 3).map((tag) => (
@@ -335,7 +338,6 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
             </View>
           )}
 
-          {/* PHOTO preview */}
           {isPhoto && hasUri && (
             <TouchableOpacity
               onPress={() => setShowImageFullscreen(true)}
@@ -353,10 +355,15 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
             </TouchableOpacity>
           )}
 
-          {/* OCR dugme za fotografije */}
           {isPhoto && hasUri && !note.text && (
             <TouchableOpacity
-              onPress={() => extractPhotoText(note.id, note.fileUri!)}
+              onPress={() => {
+                if (!isPremium) {
+                  setShowPaywall(true);
+                  return;
+                }
+                extractPhotoText(note.id, note.fileUri!);
+              }}
               disabled={isTranscribing}
               className="mt-2 flex-row items-center justify-center py-2 px-4 rounded-xl bg-green-500/15 dark:bg-green-500/22"
             >
@@ -378,7 +385,6 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
             </TouchableOpacity>
           )}
 
-          {/* Prikaz OCR teksta */}
           {isPhoto && note.text && (
             <>
               <Text
@@ -388,10 +394,13 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
                 {note.text}
               </Text>
 
-              {/* RE-EXTRACT dugme */}
               <TouchableOpacity
                 onPress={(e) => {
                   e.stopPropagation();
+                  if (!isPremium) {
+                    setShowPaywall(true);
+                    return;
+                  }
                   extractPhotoText(note.id, note.fileUri!);
                 }}
                 disabled={isTranscribing}
@@ -420,7 +429,6 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
             </>
           )}
 
-          {/* VIDEO preview */}
           {isVideo && (
             <TouchableOpacity
               onPress={() => setShowVideoFullscreen(true)}
@@ -458,7 +466,6 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
             </TouchableOpacity>
           )}
 
-          {/* Dugme za transkripciju videa - privremeno onemogućeno */}
           {isVideo && hasUri && !note.text && (
             <View className="mt-2 flex-row items-center justify-center py-2 px-4 rounded-xl bg-gray-500/15 dark:bg-gray-500/22">
               <Ionicons
@@ -472,7 +479,6 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
             </View>
           )}
 
-          {/* Prikaz transkripcije ako postoji */}
           {isVideo && note.text && (
             <Text
               numberOfLines={3}
@@ -482,7 +488,6 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
             </Text>
           )}
 
-          {/* AUDIO mini-player */}
           {isAudio && (
             <View className="mt-3 flex-row items-center gap-3">
               <TouchableOpacity
@@ -508,7 +513,6 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
                   Voice note
                 </Text>
 
-                {/* Status transkripcije */}
                 {isTranscribing && (
                   <View className="mt-2 space-y-2">
                     <View className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full w-full animate-pulse" />
@@ -516,7 +520,6 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
                   </View>
                 )}
 
-                {/* Prikaz transkripcije sa re-transcribe dugmetom */}
                 {!isTranscribing && hasTranscription && (
                   <View>
                     <Text
@@ -527,10 +530,21 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
                       {note.text}
                     </Text>
 
-                    {/* RE-TRANSCRIBE dugme */}
                     <TouchableOpacity
                       onPress={(e) => {
                         e.stopPropagation();
+
+                        if (!isPremium) {
+                          console.log(
+                            "🔒 [NoteCard] Not premium - showing paywall"
+                          );
+                          setShowPaywall(true);
+                          return;
+                        }
+
+                        console.log(
+                          "✅ [NoteCard] Premium user - re-transcribing"
+                        );
                         transcribeNote(note.id, note.fileUri!);
                       }}
                       className="mt-2 flex-row items-center justify-center py-1.5 px-3 rounded-xl bg-purple-500/10 dark:bg-purple-500/20 border border-purple-500/30"
@@ -547,7 +561,6 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
                   </View>
                 )}
 
-                {/* Placeholder ako nema transkripcije */}
                 {!isTranscribing && !hasTranscription && (
                   <Text className="mt-2 text-[13px] leading-5 text-ios-label dark:text-iosd-label italic">
                     Nema transkripcije
@@ -557,7 +570,6 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
             </View>
           )}
 
-          {/* TEXT preview */}
           {note.type === "text" && !!note.text && (
             <Text
               numberOfLines={2}
@@ -574,7 +586,6 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
           </View>
         )}
 
-        {/* Fullscreen modali */}
         {isPhoto && hasUri && (
           <ImageFullscreenViewer
             visible={showImageFullscreen}
@@ -591,12 +602,20 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
           />
         )}
 
-        {/* Edit Modal */}
         <EditNoteModal
           isVisible={isEditModalVisible}
           note={note}
           onClose={() => setIsEditModalVisible(false)}
           onSave={handleSave}
+        />
+
+        <CustomPaywall
+          visible={showPaywall}
+          onClose={() => setShowPaywall(false)}
+          onSuccess={async () => {
+            await checkPremiumStatus();
+            setShowPaywall(false);
+          }}
         />
       </View>
     </TouchableOpacity>

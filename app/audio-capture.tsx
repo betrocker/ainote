@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import ScreenBackground from "@/components/ScreenBackground";
 import { useNotes } from "@/context/NotesContext";
+import { usePremium } from "@/context/PremiumContext";
 import { Ionicons } from "@expo/vector-icons";
 import {
   AudioModule,
@@ -17,7 +18,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 export default function AudioCapture() {
   const insets = useSafeAreaInsets();
   const headerHeight = insets.top + 60;
-  const { addNoteFromAudio, editNote, transcribeNote } = useNotes();
+  const { addNoteFromAudio, transcribeNote } = useNotes();
+  const { isPremium, checkPremiumStatus } = usePremium();
 
   const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const recState = useAudioRecorderState(recorder);
@@ -37,7 +39,7 @@ export default function AudioCapture() {
       await setAudioModeAsync({
         allowsRecording: false,
         playsInSilentMode: true,
-        shouldRouteThroughEarpiece: false, // speaker by default
+        shouldRouteThroughEarpiece: false,
       } as any);
       setReady(true);
     })();
@@ -69,7 +71,6 @@ export default function AudioCapture() {
     }
   };
 
-  // Pozovi na mount (DEV only)
   useEffect(() => {
     if (__DEV__) testWhisperAuth();
   }, []);
@@ -78,6 +79,7 @@ export default function AudioCapture() {
     stopTimer();
     timerRef.current = setInterval(() => setElapsedMs((m) => m + 200), 200);
   };
+
   const stopTimer = () => {
     if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = null;
@@ -113,8 +115,8 @@ export default function AudioCapture() {
       console.log("🎙️ [3] Recorder URI:", uri);
 
       if (!uri) {
-        console.log("🎙️ [4] No URI - exiting");
-        requestAnimationFrame(() => router.back());
+        console.log("🎙️ [4] No URI - going to inbox");
+        router.replace("/inbox");
         return;
       }
 
@@ -122,13 +124,22 @@ export default function AudioCapture() {
       const id = await addNoteFromAudio(uri);
       console.log("🎙️ [6] Note saved with ID:", id);
 
-      // ⭐ Prosleđuj URI direktno
-      console.log("🎙️ [7] Starting background transcription...");
-      transcribeNote(id, uri).catch((err) => {
-        console.log("🎙️ [ERROR] Transcription failed:", err);
-      });
+      // ⭐ Refresh premium status
+      console.log("🎙️ [7] Refreshing premium status...");
+      await checkPremiumStatus();
+      console.log("🎙️ [7.1] Premium status:", isPremium);
 
-      console.log("🎙️ [8] Restoring audio mode...");
+      // ⭐ SAMO premium korisnici dobijaju auto-transcription
+      if (isPremium) {
+        console.log("🎙️ [8] Premium user - starting transcription");
+        transcribeNote(id, uri).catch((err) => {
+          console.log("🎙️ [ERROR] Transcription failed:", err);
+        });
+      } else {
+        console.log("🎙️ [8] Non-premium user - skipping transcription");
+      }
+
+      console.log("🎙️ [9] Restoring audio mode...");
       try {
         await setAudioModeAsync({
           allowsRecording: false,
@@ -137,8 +148,18 @@ export default function AudioCapture() {
         } as any);
       } catch {}
 
-      console.log("🎙️ [9] Going back...");
-      requestAnimationFrame(() => router.back());
+      // ⭐ OPCIJA 3: Detail ekran sa fallback-om
+      console.log("🎙️ [10] Navigating...");
+      if (id) {
+        console.log("🎙️ [10.1] Opening note detail:", id);
+        router.replace({
+          pathname: "/note/[id]",
+          params: { id },
+        });
+      } else {
+        console.log("🎙️ [10.2] No ID - fallback to inbox");
+        router.replace("/inbox");
+      }
     });
   };
 
