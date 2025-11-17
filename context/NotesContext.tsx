@@ -51,10 +51,8 @@ export type NotesContextType = {
   generatingSummaries: Set<string>;
 };
 
-/** ===================== Kontekst ===================== */
 const NotesContext = createContext<NotesContextType | undefined>(undefined);
 
-/** ===================== Provider ===================== */
 export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
   const [notes, setNotes] = useState<Note[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -75,7 +73,14 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
     (async () => {
       try {
         const json = await AsyncStorage.getItem(STORAGE_KEY);
-        if (json) setNotes(JSON.parse(json));
+        if (json) {
+          const parsed = JSON.parse(json);
+          const normalized = parsed.map((note: any) => ({
+            ...note,
+            isPrivate: note.isPrivate ?? false,
+          }));
+          setNotes(normalized);
+        }
       } catch (err) {
         console.log("Error loading notes", err);
       } finally {
@@ -84,7 +89,7 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
     })();
   }, []);
 
-  // Helper za upis
+  // ⭐ KONZISTENTAN save helper
   const save = useCallback(async (next: Note[]) => {
     console.log("💾 [save] Called with", next.length, "notes");
 
@@ -102,7 +107,7 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, []);
 
-  // ⭐ Helper za scheduliranje notifications
+  // Helper za scheduliranje notifications
   const scheduleNotificationsForNote = async (note: Note) => {
     const dueFact = note.ai?.facts?.find((f) => f.predicate === "due_on");
 
@@ -110,16 +115,6 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
       "🔔 [scheduleNotifications] Starting for:",
       note.id.slice(0, 8)
     );
-    console.log("🔔 [scheduleNotifications] Note title:", note.title);
-    console.log(
-      "🔔 [scheduleNotifications] Total facts:",
-      note.ai?.facts?.length
-    );
-    console.log("🔔 [scheduleNotifications] Due fact found:", !!dueFact);
-
-    if (dueFact) {
-      console.log("🔔 [scheduleNotifications] Due date:", dueFact.object);
-    }
 
     if (!dueFact?.object) {
       console.log("🔔 [scheduleNotifications] No due_on fact, exiting");
@@ -127,22 +122,11 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     try {
-      console.log(
-        "🔔 [scheduleNotifications] Scheduling due date notification..."
-      );
-
       const dueNotifId = await scheduleDueDateNotification(
         note.id,
         note.title || "Note",
         dueFact.object
       );
-
-      console.log(
-        "🔔 [scheduleNotifications] Due notification ID:",
-        dueNotifId?.slice(0, 8)
-      );
-
-      console.log("🔔 [scheduleNotifications] Scheduling reminder...");
 
       const reminderNotifId = await scheduleReminderNotification(
         note.id,
@@ -150,29 +134,15 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
         dueFact.object
       );
 
-      console.log(
-        "🔔 [scheduleNotifications] Reminder ID:",
-        reminderNotifId?.slice(0, 8)
-      );
-
-      // Update note sa notification IDs
-      setNotes((prev) =>
-        prev.map((n) =>
-          n.id === note.id
-            ? {
-                ...n,
-                notificationIds: {
-                  dueDate: dueNotifId || undefined,
-                  reminder: reminderNotifId || undefined,
-                },
-              }
-            : n
-        )
-      );
-
       console.log("🔔 [scheduleNotifications] ✅ Success");
+
+      return {
+        dueDate: dueNotifId || undefined,
+        reminder: reminderNotifId || undefined,
+      };
     } catch (error) {
       console.error("🔔 [scheduleNotifications] ❌ Error:", error);
+      return undefined;
     }
   };
 
@@ -180,7 +150,6 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
   const addNote = useCallback(
     async (partial: Omit<Note, "id" | "createdAt">) => {
       const id = generateId();
-
       const now = Date.now();
       const base: Note = { id, createdAt: now, isPrivate: false, ...partial };
 
@@ -193,26 +162,26 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
         base.ai = { ...(base.ai ?? {}), facts };
 
         console.log("📝 [addNote] Generated facts:", facts.length);
-        facts.forEach((f, i) => {
-          console.log(
-            `📝   ${i + 1}. ${f.predicate}: ${f.object} (weight: ${f.weight})`
-          );
-        });
       }
 
       const next = [base, ...notes];
       await save(next);
 
-      // ⭐ Check for due_on fact
+      // Check for due_on fact
       const hasDueDate = base.ai?.facts?.some((f) => f.predicate === "due_on");
       console.log("📝 [addNote] Has due_on fact:", hasDueDate);
 
       if (hasDueDate) {
         console.log("📝 [addNote] Calling scheduleNotificationsForNote...");
-        await scheduleNotificationsForNote(base);
-        console.log("📝 [addNote] Notification scheduling complete");
-      } else {
-        console.log("📝 [addNote] No due_on fact, skipping notifications");
+        const notifIds = await scheduleNotificationsForNote(base);
+
+        if (notifIds) {
+          // Update note sa notification IDs
+          const updatedNotes = next.map((n) =>
+            n.id === id ? { ...n, notificationIds: notifIds } : n
+          );
+          await save(updatedNotes);
+        }
       }
 
       return id;
@@ -259,60 +228,70 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
     [addNote]
   );
 
-  // ⭐ Izmena beleške - sa notification update
+  // ⭐ ISPRAVLJENO: editNote koristi save()
   const editNote = useCallback(
     async (id: string, updates: Partial<Omit<Note, "id" | "createdAt">>) => {
       console.log("📝 [editNote] Editing note:", id.slice(0, 8));
 
-      setNotes((prevNotes) => {
-        const updatedNotes = prevNotes.map((n) => {
-          if (n.id !== id) return n;
+      const updatedNotes = notes.map((n) => {
+        if (n.id !== id) return n;
 
-          const next: Note = { ...n, ...updates, updatedAt: Date.now() };
-          const changedText = Object.prototype.hasOwnProperty.call(
-            updates,
-            "text"
-          );
-          const textSrc = (next.text ?? next.content ?? "").trim();
+        const next: Note = { ...n, ...updates, updatedAt: Date.now() };
+        const changedText = Object.prototype.hasOwnProperty.call(
+          updates,
+          "text"
+        );
+        const textSrc = (next.text ?? next.content ?? "").trim();
 
-          console.log("📝 [editNote] Text changed:", changedText);
+        console.log("📝 [editNote] Text changed:", changedText);
 
-          if (changedText && textSrc.length > 0) {
-            const facts = genFactsFromText(textSrc, id);
-            next.ai = { ...(next.ai ?? {}), facts };
+        if (changedText && textSrc.length > 0) {
+          const facts = genFactsFromText(textSrc, id);
+          next.ai = { ...(next.ai ?? {}), facts };
 
-            console.log("📝 [editNote] Regenerated facts:", facts.length);
+          console.log("📝 [editNote] Regenerated facts:", facts.length);
 
-            const hasDueDate = facts.some((f) => f.predicate === "due_on");
-            console.log("📝 [editNote] Has due_on:", hasDueDate);
+          const hasDueDate = facts.some((f) => f.predicate === "due_on");
+          console.log("📝 [editNote] Has due_on:", hasDueDate);
 
-            if (hasDueDate) {
-              scheduleNotificationsForNote(next).catch((err) =>
+          if (hasDueDate) {
+            // Schedule async ali ne blokiraj save
+            scheduleNotificationsForNote(next)
+              .then((notifIds) => {
+                if (notifIds) {
+                  // Update note sa notification IDs nakon schedule
+                  setNotes((prev) =>
+                    prev.map((n) =>
+                      n.id === id ? { ...n, notificationIds: notifIds } : n
+                    )
+                  );
+                  AsyncStorage.setItem(
+                    STORAGE_KEY,
+                    JSON.stringify(
+                      notes.map((n) =>
+                        n.id === id ? { ...n, notificationIds: notifIds } : n
+                      )
+                    )
+                  );
+                }
+              })
+              .catch((err) =>
                 console.error("📝 [editNote] Notification error:", err)
               );
-            }
           }
+        }
 
-          return next;
-        });
-
-        AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedNotes))
-          .then(() => console.log("📝 [editNote] Persisted to storage"))
-          .catch((err) => console.log("📝 [editNote] Storage error:", err));
-
-        return updatedNotes;
+        return next;
       });
+
+      await save(updatedNotes);
     },
-    []
+    [notes, save]
   );
 
   const transcribeNote = useCallback(
     async (noteId: string, audioUri: string) => {
-      setTranscribingNotes((prev) => {
-        const next = new Set(prev);
-        next.add(noteId);
-        return next;
-      });
+      setTranscribingNotes((prev) => new Set(prev).add(noteId));
 
       try {
         const text = await transcribeAudio(audioUri, {
@@ -376,7 +355,7 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
     [editNote]
   );
 
-  // ⭐ Brisanje - sa cancel notifications
+  // ⭐ ISPRAVLJENO: deleteNote koristi save()
   const deleteNote = useCallback(
     async (id: string) => {
       console.log("🗑️ [deleteNote] Deleting:", id.slice(0, 8));
@@ -406,12 +385,13 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
     await save([]);
   }, [save]);
 
-  const addTagToNote = useCallback(async (noteId: string, tag: string) => {
-    const trimmedTag = tag.trim().toLowerCase();
-    if (!trimmedTag) return;
+  // ⭐ ISPRAVLJENO: addTagToNote koristi save()
+  const addTagToNote = useCallback(
+    async (noteId: string, tag: string) => {
+      const trimmedTag = tag.trim().toLowerCase();
+      if (!trimmedTag) return;
 
-    setNotes((prevNotes) => {
-      const updatedNotes = prevNotes.map((n) => {
+      const updatedNotes = notes.map((n) => {
         if (n.id !== noteId) return n;
 
         const existingTags = n.tags || [];
@@ -424,17 +404,15 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
         };
       });
 
-      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedNotes)).catch(
-        (err) => console.log("Storage error:", err)
-      );
+      await save(updatedNotes);
+    },
+    [notes, save]
+  );
 
-      return updatedNotes;
-    });
-  }, []);
-
-  const removeTagFromNote = useCallback(async (noteId: string, tag: string) => {
-    setNotes((prevNotes) => {
-      const updatedNotes = prevNotes.map((n) => {
+  // ⭐ ISPRAVLJENO: removeTagFromNote koristi save()
+  const removeTagFromNote = useCallback(
+    async (noteId: string, tag: string) => {
+      const updatedNotes = notes.map((n) => {
         if (n.id !== noteId) return n;
 
         const existingTags = n.tags || [];
@@ -445,13 +423,10 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
         };
       });
 
-      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedNotes)).catch(
-        (err) => console.log("Storage error:", err)
-      );
-
-      return updatedNotes;
-    });
-  }, []);
+      await save(updatedNotes);
+    },
+    [notes, save]
+  );
 
   const getAllTags = useCallback(() => {
     const allTags = new Set<string>();
@@ -461,9 +436,10 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
     return Array.from(allTags).sort();
   }, [notes]);
 
-  const togglePinNote = useCallback(async (noteId: string) => {
-    setNotes((prevNotes) => {
-      const updatedNotes = prevNotes.map((n) => {
+  // ⭐ ISPRAVLJENO: togglePinNote koristi save()
+  const togglePinNote = useCallback(
+    async (noteId: string) => {
+      const updatedNotes = notes.map((n) => {
         if (n.id !== noteId) return n;
 
         return {
@@ -473,13 +449,10 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
         };
       });
 
-      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedNotes)).catch(
-        (err) => console.log("Storage error:", err)
-      );
-
-      return updatedNotes;
-    });
-  }, []);
+      await save(updatedNotes);
+    },
+    [notes, save]
+  );
 
   const generateTitle = useCallback(
     async (noteId: string) => {
@@ -491,11 +464,7 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
 
-      setGeneratingTitles((prev) => {
-        const next = new Set(prev);
-        next.add(noteId);
-        return next;
-      });
+      setGeneratingTitles((prev) => new Set(prev).add(noteId));
 
       try {
         console.log("🤖 [generateTitle] Generating title...");
@@ -534,11 +503,7 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
 
-      setGeneratingSummaries((prev) => {
-        const next = new Set(prev);
-        next.add(noteId);
-        return next;
-      });
+      setGeneratingSummaries((prev) => new Set(prev).add(noteId));
 
       try {
         console.log("📝 [generateNoteSummary] Generating summary...");
@@ -601,7 +566,6 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-/** ===================== Hook ===================== */
 export const useNotes = () => {
   const ctx = useContext(NotesContext);
   if (!ctx) throw new Error("useNotes mora biti unutar NotesProvider");

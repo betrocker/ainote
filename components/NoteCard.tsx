@@ -110,7 +110,10 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
   const soundRef = useRef<Audio.Sound | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [audioDuration, setAudioDuration] = useState(0);
+  const [audioPosition, setAudioPosition] = useState(0);
 
+  // ⭐ CLEANUP - Ukloni useEffect i napravi jednostavniji pristup
   useEffect(() => {
     let mounted = true;
 
@@ -133,23 +136,33 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
           {
             shouldPlay: false,
             progressUpdateIntervalMillis: 250,
-            isLooping: false,
+            isLooping: false, // ⭐ VAŽNO
           },
+          // ⭐ SAMO JEDAN LISTENER - ovde
           (status) => {
-            if (!mounted || !status.isLoaded) return; // ⭐ Proveri OBE condition na početku
+            if (!mounted || !status.isLoaded) return;
 
             const st = status as AVPlaybackStatusSuccess;
 
-            // ⭐ DODAJ: Isto kao u [id].tsx
+            // ⭐ KLJUČNO: Proveri didJustFinish
+            if (st.didJustFinish) {
+              console.log("🎵 [NoteCard] Audio finished");
+              setIsPlaying(false);
+              setAudioPosition(0);
+              // NE pozivaj setPositionAsync ovde - samo update UI
+              return;
+            }
+
+            // Update state
             setIsLoaded(true);
             setIsPlaying(st.isPlaying);
 
-            // ⭐ KLJUČNO: Proveri didJustFinish SA mounted proverom
-            if (st.didJustFinish && mounted) {
-              console.log("🎵 [NoteCard] Audio finished, resetting position");
-              setIsPlaying(false);
-              soundRef.current?.setPositionAsync(0).catch(() => {});
-              // ⭐ NE RETURN - neka setuje i ostale state-ove
+            if (st.durationMillis) {
+              setAudioDuration(st.durationMillis);
+            }
+
+            if (st.positionMillis !== undefined) {
+              setAudioPosition(st.positionMillis);
             }
           }
         );
@@ -166,38 +179,56 @@ export default function NoteCard({ note, onPress, className = "" }: Props) {
       mounted = false;
       (async () => {
         try {
-          await soundRef.current?.unloadAsync();
-        } catch {}
-        soundRef.current = null;
+          const sound = soundRef.current;
+          if (sound) {
+            // ⭐ VAŽNO: Stop pa unload
+            await sound.stopAsync().catch(() => {});
+            await sound.unloadAsync().catch(() => {});
+          }
+        } catch (e) {
+          console.error("Cleanup error:", e);
+        } finally {
+          soundRef.current = null;
+        }
       })();
     };
   }, [isAudio, hasUri, note.fileUri]);
 
+  // ⭐ SIMPLIFIKOVANA togglePlayback funkcija
   const togglePlayback = async () => {
     if (!isLoaded || !soundRef.current) return;
 
     try {
-      if (isPlaying) {
+      const status = await soundRef.current.getStatusAsync();
+
+      if (!status.isLoaded) return;
+
+      const st = status as AVPlaybackStatusSuccess;
+
+      if (st.isPlaying) {
+        // ⭐ Pause
+        console.log("🎵 [NoteCard] Pausing");
         await soundRef.current.pauseAsync();
         setIsPlaying(false);
       } else {
-        const st =
-          (await soundRef.current.getStatusAsync()) as AVPlaybackStatusSuccess;
+        // ⭐ Play - proveri da li je na kraju
+        const isAtEnd =
+          st.durationMillis &&
+          st.positionMillis !== undefined &&
+          st.positionMillis >= st.durationMillis - 100;
 
-        // ⭐ KLJUČNO: Proveri poziciju MANUELNO
-        if (
-          st.isLoaded &&
-          st.positionMillis >= (st.durationMillis ?? 0) - 150
-        ) {
-          console.log("🎵 [NoteCard] Resetting position before play");
+        if (isAtEnd) {
+          console.log("🎵 [NoteCard] Restarting from beginning");
           await soundRef.current.setPositionAsync(0);
         }
 
+        console.log("🎵 [NoteCard] Playing");
         await soundRef.current.playAsync();
         setIsPlaying(true);
       }
     } catch (error) {
       console.error("[NoteCard] Playback error:", error);
+      setIsPlaying(false);
     }
   };
 

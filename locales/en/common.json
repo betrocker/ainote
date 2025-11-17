@@ -498,6 +498,8 @@
     }
   },
   "home": {
+    "privateCount": "{{count}} private",
+    "privateCount_plural": "{{count}} private",
     "title": "Home",
     "welcome": "Welcome back!",
     "today": "today",

@@ -2,6 +2,7 @@
 import LargeHeader, { HeaderButton } from "@/components/LargeHeader";
 import ScreenScroll from "@/components/ScreenScroll";
 import { useNotes } from "@/context/NotesContext";
+import { usePremium } from "@/context/PremiumContext";
 import ScreenBackground from "@components/ScreenBackground";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -95,6 +96,57 @@ export default function HomeScreen() {
   const { t } = useTranslation("common");
   const router = useRouter();
   const { notes, isLoading } = useNotes();
+  const { isPremium } = usePremium();
+
+  // ⭐ Stats - dodaj private count
+  const stats = useMemo(() => {
+    const now = new Date();
+    const todayStr = now.toDateString();
+
+    const total = notes.length;
+    const pinned = notes.filter((n: any) => n.pinned).length;
+    const todayCount = notes.filter(
+      (n: any) => new Date(n.createdAt).toDateString() === todayStr
+    ).length;
+
+    const byType: Record<string, number> = {
+      text: notes.filter((n: any) => n.type === "text").length,
+      audio: notes.filter((n: any) => n.type === "audio").length,
+      photo: notes.filter((n: any) => n.type === "photo").length,
+      video: notes.filter((n: any) => n.type === "video").length,
+    };
+
+    const withTags = notes.filter(
+      (n: any) => n.tags && n.tags.length > 0
+    ).length;
+    const withSummary = notes.filter((n: any) => n.ai?.summary).length;
+
+    // ⭐ DODAJ: Private notes count
+    const privateCount = notes.filter((n: any) => n.isPrivate).length;
+
+    const weekCounts = [0, 0, 0, 0, 0, 0, 0];
+    const getWeekIndex = (d: Date) => {
+      const js = d.getDay();
+      return (js + 6) % 7;
+    };
+
+    notes.forEach((n: any) => {
+      const created = new Date(n.createdAt);
+      const idx = getWeekIndex(created);
+      weekCounts[idx]++;
+    });
+
+    return {
+      total,
+      pinned,
+      todayCount,
+      byType,
+      withTags,
+      withSummary,
+      privateCount, // ⭐ DODAJ u return
+      weekCounts,
+    };
+  }, [notes]);
 
   // ⭐ SVE TRANSLATION STRINGOVE NA VRHU
   const weekLabels = [
@@ -126,52 +178,6 @@ export default function HomeScreen() {
       </ScreenBackground>
     );
   }
-
-  // ⭐ Stats - samo ako nema isLoading
-  const stats = useMemo(() => {
-    const now = new Date();
-    const todayStr = now.toDateString();
-
-    const total = notes.length;
-    const pinned = notes.filter((n: any) => n.pinned).length;
-    const todayCount = notes.filter(
-      (n: any) => new Date(n.createdAt).toDateString() === todayStr
-    ).length;
-
-    const byType: Record<string, number> = {
-      text: notes.filter((n: any) => n.type === "text").length,
-      audio: notes.filter((n: any) => n.type === "audio").length,
-      photo: notes.filter((n: any) => n.type === "photo").length,
-      video: notes.filter((n: any) => n.type === "video").length,
-    };
-
-    const withTags = notes.filter(
-      (n: any) => n.tags && n.tags.length > 0
-    ).length;
-    const withSummary = notes.filter((n: any) => n.ai?.summary).length;
-
-    const weekCounts = [0, 0, 0, 0, 0, 0, 0];
-    const getWeekIndex = (d: Date) => {
-      const js = d.getDay();
-      return (js + 6) % 7;
-    };
-
-    notes.forEach((n: any) => {
-      const created = new Date(n.createdAt);
-      const idx = getWeekIndex(created);
-      weekCounts[idx]++;
-    });
-
-    return {
-      total,
-      pinned,
-      todayCount,
-      byType,
-      withTags,
-      withSummary,
-      weekCounts,
-    };
-  }, [notes]);
 
   const upcomingNotes = useMemo(() => {
     return notes
@@ -281,7 +287,8 @@ export default function HomeScreen() {
 
             {(stats.pinned > 0 ||
               stats.withTags > 0 ||
-              stats.withSummary > 0) && (
+              stats.withSummary > 0 ||
+              (isPremium && stats.privateCount > 0)) && (
               <Animated.View
                 entering={FadeInDown.delay(350).springify()}
                 className="mt-3 pt-3 border-t border-ios-sep dark:border-iosd-sep flex-row flex-wrap gap-2"
@@ -294,6 +301,7 @@ export default function HomeScreen() {
                     </Text>
                   </View>
                 )}
+
                 {stats.withTags > 0 && (
                   <View className="flex-row items-center px-2 py-1 rounded-full bg-blue-500/10">
                     <Ionicons name="pricetag" size={12} color="#3B82F6" />
@@ -307,6 +315,16 @@ export default function HomeScreen() {
                     <Ionicons name="sparkles" size={12} color="#A855F7" />
                     <Text className="text-xs ml-1 text-purple-600 dark:text-purple-400">
                       {t("home.aiCount", { count: stats.withSummary })}
+                    </Text>
+                  </View>
+                )}
+
+                {/* ⭐ SAMO BADGE za private - NE TouchableOpacity! */}
+                {isPremium && stats.privateCount > 0 && (
+                  <View className="flex-row items-center px-2 py-1 rounded-full bg-red-500/10">
+                    <Ionicons name="lock-closed" size={12} color="#EF4444" />
+                    <Text className="text-xs ml-1 text-red-600 dark:text-red-400">
+                      {t("home.privateCount", { count: stats.privateCount })}
                     </Text>
                   </View>
                 )}
@@ -335,6 +353,32 @@ export default function HomeScreen() {
             >
               {t("home.browse")}
             </Animated.Text>
+
+            {/* ⭐ PRIVATE FOLDER LINK - PRVO! */}
+            {isPremium && stats.privateCount > 0 && (
+              <Animated.View entering={FadeInDown.delay(425).springify()}>
+                <TouchableOpacity
+                  onPress={() => router.push("/private")}
+                  className="flex-row items-center justify-between p-4 mb-2 bg-white/70 dark:bg-white/10 rounded-2xl border border-ios-sepSoft dark:border-iosd-sepSoft active:opacity-70"
+                  activeOpacity={1}
+                >
+                  <View className="flex-row items-center">
+                    <View className="w-10 h-10 rounded-full bg-red-500/15 items-center justify-center mr-3">
+                      <Ionicons name="lock-closed" size={20} color="#EF4444" />
+                    </View>
+                    <View>
+                      <Text className="text-base font-monaBold text-ios-label dark:text-iosd-label">
+                        {t("home.links.private")}
+                      </Text>
+                      <Text className="text-xs text-ios-secondary dark:text-iosd-label2">
+                        {t("home.privateCount", { count: stats.privateCount })}
+                      </Text>
+                    </View>
+                  </View>
+                  <Ionicons name="chevron-forward" size={20} color="#8E8E93" />
+                </TouchableOpacity>
+              </Animated.View>
+            )}
 
             {stats.pinned > 0 && (
               <Animated.View entering={FadeInDown.delay(450).springify()}>

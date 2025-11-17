@@ -498,6 +498,8 @@
     }
   },
   "home": {
+    "privateCount": "{{count}} privat",
+    "privateCount_plural": "{{count}} privat",
     "title": "Startseite",
     "welcome": "Willkommen zurück!",
     "today": "heute",

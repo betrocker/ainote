@@ -9,6 +9,7 @@ import { useNotes } from "@/context/NotesContext";
 import { haptics } from "@/utils/haptics";
 import ScreenBackground from "@components/ScreenBackground";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import React, { useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Animated, Text, TouchableOpacity, View } from "react-native";
@@ -109,6 +110,10 @@ export default function InboxScreen() {
         isExpanded={isSearchExpanded}
         rightButtons={
           <>
+            <HeaderButton
+              icon="settings-outline"
+              onPress={() => router.push("/settings")}
+            />
             <HeaderButton
               icon={isSearchExpanded ? "close" : "search"}
               onPress={toggleSearch}

@@ -8,7 +8,12 @@ import { useNotes } from "@/context/NotesContext";
 import { usePremium } from "@/context/PremiumContext";
 import { usePrivate } from "@/context/PrivateContext";
 import { Ionicons } from "@expo/vector-icons";
-import { Audio, AVPlaybackStatusSuccess } from "expo-av";
+import {
+  Audio,
+  AVPlaybackStatusSuccess,
+  InterruptionModeAndroid,
+  InterruptionModeIOS,
+} from "expo-av";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useColorScheme } from "nativewind";
@@ -105,6 +110,14 @@ export default function NoteDetailScreen() {
   const canGenerateSummary = !!note?.text && note.text.length > 50;
 
   const { isAuthAvailable } = usePrivate();
+  const [noteLoadTimeout, setNoteLoadTimeout] = useState(false);
+
+  useEffect(() => {
+    if (!note && id) {
+      const timer = setTimeout(() => setNoteLoadTimeout(true), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [note, id]);
 
   // Toggle funkcija sa premium proverom
   const togglePrivate = async () => {
@@ -175,8 +188,10 @@ export default function NoteDetailScreen() {
             allowsRecordingIOS: false,
             playsInSilentModeIOS: true,
             staysActiveInBackground: false,
+            interruptionModeIOS: InterruptionModeIOS.DoNotMix,
             shouldDuckAndroid: false,
             playThroughEarpieceAndroid: false,
+            interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
           });
 
           const { sound } = await Audio.Sound.createAsync(
@@ -212,7 +227,8 @@ export default function NoteDetailScreen() {
         mounted = false;
         (async () => {
           try {
-            await soundRef.current?.unloadAsync();
+            await soundRef.current?.stopAsync().catch(() => {}); // ✅ Prvo stop
+            await soundRef.current?.unloadAsync().catch(() => {}); // ✅ Pa unload
           } catch {}
           soundRef.current = null;
         })();
@@ -271,14 +287,25 @@ export default function NoteDetailScreen() {
   }
 
   if (!note) {
-    return (
-      <View className="flex-1 bg-ios-bg dark:bg-iosd-bg items-center justify-center p-4">
-        <ActivityIndicator size="large" color="#0A84FF" />
-        <Text className="text-sm text-ios-secondary dark:text-iosd-label2 mt-4">
-          {t("noteDetail.errors.loading")}
-        </Text>
-      </View>
-    );
+    if (noteLoadTimeout) {
+      return (
+        <View className="flex-1 bg-ios-bg dark:bg-iosd-bg items-center justify-center p-4">
+          <Ionicons name="alert-circle-outline" size={64} color="#EF4444" />
+          <Text className="text-lg font-monaBold text-ios-label dark:text-iosd-label mt-4 text-center">
+            {t("noteDetail.errors.notFound")}
+          </Text>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            className="mt-6 px-6 py-3 bg-ios-blue rounded-full"
+          >
+            <Text className="text-white font-monaBold">
+              {t("noteDetail.actions.back")}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+    return <ActivityIndicator size="large" color="#0A84FF" />;
   }
 
   const handleSave = async () => {
@@ -408,15 +435,6 @@ export default function NoteDetailScreen() {
 
           {/* Actions */}
           <View className="flex-row gap-2">
-            {/* ⭐ Premium Badge (ako nema premium) */}
-            {!isPremium && (
-              <View className="px-2 py-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mr-1">
-                <Text className="text-white text-[10px] font-monaBold">
-                  {t("noteDetail.premium.badge")}
-                </Text>
-              </View>
-            )}
-
             {/* Pin dugme */}
             <TouchableOpacity
               onPress={() => togglePinNote(note.id)}
@@ -439,14 +457,14 @@ export default function NoteDetailScreen() {
                 onPress={togglePrivate}
                 className={[
                   "w-9 h-9 rounded-full items-center justify-center active:opacity-70",
-                  note.isPrivate ? "bg-green-500" : "bg-green-500/15",
+                  note.isPrivate ? "bg-red-500" : "bg-red-500/15",
                 ].join(" ")}
                 activeOpacity={1}
               >
                 <Ionicons
                   name={note.isPrivate ? "lock-closed" : "lock-open-outline"}
                   size={18}
-                  color={note.isPrivate ? "#FFF" : "#48BB78"}
+                  color={note.isPrivate ? "#FFF" : "#EF4444"}
                 />
               </TouchableOpacity>
             )}
@@ -957,7 +975,7 @@ export default function NoteDetailScreen() {
               <View className="bg-white/70 dark:bg-white/5 rounded-2xl p-4 border border-ios-sep dark:border-iosd-sep">
                 {note.ai.facts.map((fact, idx) => (
                   <View
-                    key={idx}
+                    key={`${fact.predicate}-${fact.object}-${idx}`}
                     className={`flex-row items-start py-2 ${
                       idx !== note.ai!.facts!.length - 1
                         ? "border-b border-ios-sep dark:border-iosd-sep"
@@ -1153,13 +1171,15 @@ function MetadataRow({
   icon?: string;
   isLast?: boolean;
 }) {
-  const isPinned = label === "Status" && value === "Pinned";
+  // ✅ Proveri ikonu umesto texta
+  const isPinned = icon === "pin";
 
   return (
     <View
-      className={`flex-row items-center justify-between py-3 ${
-        !isLast ? "border-b border-ios-sep dark:border-iosd-sep" : ""
-      }`}
+      className={[
+        "flex-row items-center justify-between py-3",
+        !isLast ? "border-b border-ios-sep dark:border-iosd-sep" : "",
+      ].join(" ")}
     >
       <View className="flex-row items-center flex-1">
         {icon && (

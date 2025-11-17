@@ -163,9 +163,18 @@ export default function AssistantScreen() {
       <LargeHeader
         title={t("assistant.title")}
         rightButtons={
-          currentQA || history.length > 0 ? (
-            <HeaderButton icon="trash-outline" onPress={handleClear} />
-          ) : undefined
+          <>
+            {/* Settings dugme - uvek prikaži */}
+            <HeaderButton
+              icon="settings-outline"
+              onPress={() => router.push("/settings")}
+            />
+
+            {/* Clear dugme - samo ako ima istorije */}
+            {(currentQA || history.length > 0) && (
+              <HeaderButton icon="trash-outline" onPress={handleClear} />
+            )}
+          </>
         }
       />
 

@@ -1,5 +1,5 @@
 import CustomPaywall from "@/components/CustomPaywall"; // ⭐ ДОДАЈ
-import LargeHeader from "@/components/LargeHeader";
+import LargeHeader, { HeaderButton } from "@/components/LargeHeader";
 import NoteCard from "@/components/NoteCard";
 import ScreenBackground from "@/components/ScreenBackground";
 import ScreenScroll from "@/components/ScreenScroll";
@@ -10,6 +10,7 @@ import { haptics } from "@/utils/haptics"; // ⭐ ДОДАЈ
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
 import { useColorScheme } from "nativewind";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -72,7 +73,15 @@ export default function PrivateFolderScreen() {
     return (
       <>
         <ScreenBackground variant="grouped">
-          <LargeHeader title={t("privateFolder.title")} />
+          <LargeHeader
+            title={t("privateFolder.title")}
+            rightButtons={
+              <HeaderButton
+                icon="settings-outline"
+                onPress={() => router.push("/settings")}
+              />
+            }
+          />
           <View className="flex-1 items-center justify-center px-8">
             {/* Premium Icon */}
             <View className="relative mb-8">

@@ -501,6 +501,8 @@
     }
   },
   "home": {
+    "privateCount": "{{count}} privatna",
+    "privateCount_plural": "{{count}} privatnih",
     "title": "Početna",
     "welcome": "Dobrodošao nazad!",
     "today": "danas",
