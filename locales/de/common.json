@@ -9,6 +9,16 @@
   "user": {
     "fallbackName": "Benutzer"
   },
+  "audioCapture": {
+    "title": "Sprachnotiz",
+    "preparing": "Vorbereitung...",
+    "permissionDenied": "Mikrofonzugriff verweigert",
+    "permissionInstructions": "Bitte aktivieren Sie den Mikrofonzugriff in Ihren Geräteeinstellungen",
+    "tapToStart": "Tippen Sie zum Starten der Aufnahme",
+    "tapToStop": "Tippen Sie zum Stoppen und Speichern",
+    "saving": "Notiz wird gespeichert...",
+    "premiumHint": "Premium-Nutzer erhalten automatische Transkription 🎯"
+  },
   "auth": {
     "login": {
       "unmatched": "Ups, diese Seite wurde nicht gefunden...",
@@ -530,7 +540,8 @@
       "video": "Video"
     },
     "links": {
-      "pinned": "Angeheftete Notizen"
+      "pinned": "Angeheftete Notizen",
+      "private": "Privater Ordner"
     },
     "note": {
       "one": "Notiz",

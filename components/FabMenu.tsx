@@ -176,32 +176,35 @@ export default function FabMenu() {
               className="flex-row items-center justify-between px-4 py-3 rounded-2xl bg-white/70 dark:bg-white/10 border border-black/10 dark:border-white/10 active:opacity-90"
               onPress={async () => {
                 try {
-                  const { status } =
-                    await ImagePicker.requestCameraPermissionsAsync();
-                  if (status !== "granted") {
-                    alert(t("fabMenu.camera.permissionDenied"));
-                    return;
-                  }
-                  const res = await ImagePicker.launchCameraAsync({
-                    mediaTypes: ImagePicker.MediaTypeOptions.Images,
-                    quality: 0.9,
-                  });
-                  if (!res.canceled && res.assets?.[0]?.uri) {
-                    if (typeof addNoteFromPhoto === "function") {
-                      await addNoteFromPhoto(res.assets[0].uri);
-                    } else {
-                      await addNote({
-                        type: "photo",
-                        title: "Photo",
-                        fileUri: res.assets[0].uri,
-                      });
+                  closeModal(); // ← Zatvori modal odmah
+                  setMenuOpen(false); // ← Zatvori i FAB meni
+
+                  // Sačekaj da se modal zatvori pre otvaranja kamere
+                  setTimeout(async () => {
+                    const { status } =
+                      await ImagePicker.requestCameraPermissionsAsync();
+                    if (status !== "granted") {
+                      alert(t("fabMenu.camera.permissionDenied"));
+                      return;
                     }
-                  }
+                    const res = await ImagePicker.launchCameraAsync({
+                      mediaTypes: ["images"], // ← Umesto MediaTypeOptions.Images
+                      quality: 0.9,
+                    });
+                    if (!res.canceled && res.assets?.[0]?.uri) {
+                      if (typeof addNoteFromPhoto === "function") {
+                        await addNoteFromPhoto(res.assets[0].uri);
+                      } else {
+                        await addNote({
+                          type: "photo",
+                          title: "Photo",
+                          fileUri: res.assets[0].uri,
+                        });
+                      }
+                    }
+                  }, 300); // ← 300ms je dovoljno za animaciju zatvaranja modala
                 } catch (e) {
                   console.log("Photo capture error", e);
-                } finally {
-                  closeModal();
-                  setMenuOpen(false);
                 }
               }}
             >
@@ -220,32 +223,34 @@ export default function FabMenu() {
               className="flex-row items-center justify-between px-4 py-3 rounded-2xl bg-white/70 dark:bg-white/10 border border-black/10 dark:border-white/10 active:opacity-90"
               onPress={async () => {
                 try {
-                  const { status } =
-                    await ImagePicker.requestCameraPermissionsAsync();
-                  if (status !== "granted") {
-                    alert(t("fabMenu.camera.permissionDenied"));
-                    return;
-                  }
-                  const res = await ImagePicker.launchCameraAsync({
-                    mediaTypes: ImagePicker.MediaTypeOptions.Videos,
-                    videoMaxDuration: 60,
-                  });
-                  if (!res.canceled && res.assets?.[0]?.uri) {
-                    if (typeof addNoteFromVideo === "function") {
-                      await addNoteFromVideo(res.assets[0].uri);
-                    } else {
-                      await addNote({
-                        type: "video",
-                        title: "Video",
-                        fileUri: res.assets[0].uri,
-                      });
+                  closeModal(); // ← Zatvori modal odmah
+                  setMenuOpen(false); // ← Zatvori i FAB meni
+
+                  setTimeout(async () => {
+                    const { status } =
+                      await ImagePicker.requestCameraPermissionsAsync();
+                    if (status !== "granted") {
+                      alert(t("fabMenu.camera.permissionDenied"));
+                      return;
                     }
-                  }
+                    const res = await ImagePicker.launchCameraAsync({
+                      mediaTypes: ["videos"], // ← Umesto MediaTypeOptions.Videos
+                      videoMaxDuration: 60,
+                    });
+                    if (!res.canceled && res.assets?.[0]?.uri) {
+                      if (typeof addNoteFromVideo === "function") {
+                        await addNoteFromVideo(res.assets[0].uri);
+                      } else {
+                        await addNote({
+                          type: "video",
+                          title: "Video",
+                          fileUri: res.assets[0].uri,
+                        });
+                      }
+                    }
+                  }, 300);
                 } catch (e) {
                   console.log("Video capture error", e);
-                } finally {
-                  closeModal();
-                  setMenuOpen(false);
                 }
               }}
             >

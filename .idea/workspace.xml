@@ -5,7 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4626ac8a-c00b-4985-b68a-659b18d1a37a" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app.json" beforeDir="false" afterPath="$PROJECT_DIR$/app.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/locales/de/common.json" beforeDir="false" afterPath="$PROJECT_DIR$/locales/de/common.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/locales/en/common.json" beforeDir="false" afterPath="$PROJECT_DIR$/locales/en/common.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/locales/sr/common.json" beforeDir="false" afterPath="$PROJECT_DIR$/locales/sr/common.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -63,7 +67,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-b598e85cdad2-JavaScript-WS-252.25557.126" />
+        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-WS-252.27397.92" />
       </set>
     </attachedChunks>
   </component>
@@ -98,6 +102,9 @@
       <workItem from="1759419452718" duration="13844000" />
       <workItem from="1759434295155" duration="546000" />
       <workItem from="1760716906448" duration="9000" />
+      <workItem from="1763490901238" duration="152000" />
+      <workItem from="1763491229410" duration="626000" />
+      <workItem from="1763493108294" duration="24000" />
     </task>
     <servers />
   </component>

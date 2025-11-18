@@ -9,6 +9,16 @@
   "user": {
     "fallbackName": "Korisnik"
   },
+  "audioCapture": {
+    "title": "Glasovna beleška",
+    "preparing": "Priprema...",
+    "permissionDenied": "Mikrofon nije dozvoljen",
+    "permissionInstructions": "Omogući pristup mikrofonu u podešavanjima uređaja",
+    "tapToStart": "Tapni da počneš snimanje",
+    "tapToStop": "Tapni da zaustaviš i sačuvaš",
+    "saving": "Čuvam belešku...",
+    "premiumHint": "Premium korisnici dobijaju automatsku transkripciju 🎯"
+  },
   "auth": {
     "login": {
       "unmatched": "Ups, ne postoji ta stranica...",
@@ -547,7 +557,8 @@
       "video": "Video"
     },
     "links": {
-      "pinned": "Zakačene beleške"
+      "pinned": "Zakačene beleške",
+      "private": "Privatni folder"
     },
     "note": {
       "one": "beleška",

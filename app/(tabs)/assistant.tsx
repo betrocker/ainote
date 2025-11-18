@@ -183,7 +183,7 @@ export default function AssistantScreen() {
         contentContainerStyle={{
           paddingHorizontal: 0,
           paddingTop: 0,
-          paddingBottom: 160,
+          paddingBottom: keyboardHeight > 0 ? keyboardHeight + 100 : 220,
         }}
         showsVerticalScrollIndicator={false}
         keyboardDismissMode="interactive"
@@ -340,7 +340,7 @@ export default function AssistantScreen() {
 
           {/* Last 5 Questions - SA DATUMOM I VREMENOM */}
           {lastFiveQA.length > 0 && (
-            <View className="mt-6">
+            <View className="mt-6 mb-12">
               <Text className="text-xs font-monaBold text-ios-secondary dark:text-iosd-label2 mb-3 uppercase tracking-wide">
                 {t("assistant.lastQuestions")}
               </Text>

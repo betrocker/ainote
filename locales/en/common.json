@@ -9,6 +9,16 @@
   "user": {
     "fallbackName": "User"
   },
+  "audioCapture": {
+    "title": "Voice Note",
+    "preparing": "Preparing...",
+    "permissionDenied": "Microphone Access Denied",
+    "permissionInstructions": "Please enable microphone access in your device settings",
+    "tapToStart": "Tap to start recording",
+    "tapToStop": "Tap to stop and save",
+    "saving": "Saving note...",
+    "premiumHint": "Premium users get automatic transcription 🎯"
+  },
   "auth": {
     "login": {
       "unmatched": "Ooops, page doesn't exist...",
@@ -530,7 +540,8 @@
       "video": "Video"
     },
     "links": {
-      "pinned": "Pinned notes"
+      "pinned": "Pinned notes",
+      "private": "Private Folder"
     },
     "note": {
       "one": "note",

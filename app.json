@@ -16,7 +16,7 @@
       }
     },
     "android": {
-      "versionCode": 49,
+      "versionCode": 51,
       "intentFilters": [
         {
           "action": "VIEW",
@@ -81,7 +81,8 @@
           "faceIDPermission": "Omogući $(PRODUCT_NAME) da koristi Face ID za zaštitu privatnih beleški"
         }
       ],
-      "expo-asset"
+      "expo-asset",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
