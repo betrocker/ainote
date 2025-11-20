@@ -34,7 +34,7 @@ export default function AudioCapture() {
   const [isSaving, setIsSaving] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // ⭐ Setup audio sa cleanup
+  // Setup audio sa cleanup
   useEffect(() => {
     (async () => {
       const status = await AudioModule.requestRecordingPermissionsAsync();
@@ -48,56 +48,12 @@ export default function AudioCapture() {
       setReady(true);
     })();
 
-    // ⭐ CLEANUP za timer
+    // Cleanup za timer
     return () => {
       if (timerRef.current) {
         clearInterval(timerRef.current);
         timerRef.current = null;
       }
-    };
-  }, []);
-
-  // ⭐ Test Whisper auth sa cleanup
-  useEffect(() => {
-    let mounted = true;
-
-    const testWhisperAuth = async () => {
-      if (!mounted) return;
-
-      try {
-        const apiKey = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
-        if (!apiKey) {
-          console.log("❌ API key nije definisan");
-          return;
-        }
-
-        const res = await fetch("https://api.openai.com/v1/models", {
-          headers: { Authorization: `Bearer ${apiKey}` },
-        });
-
-        if (!mounted) return;
-
-        if (res.ok) {
-          console.log("✅ API key validan");
-          console.log(
-            "✅ Tier info dostupan na platform.openai.com/settings/organization/limits"
-          );
-        } else {
-          const err = await res.json();
-          console.log("❌ API error:", err);
-        }
-      } catch (e) {
-        if (!mounted) return;
-        console.log("❌ Network error:", e);
-      }
-    };
-
-    if (__DEV__) {
-      testWhisperAuth();
-    }
-
-    return () => {
-      mounted = false;
     };
   }, []);
 
@@ -126,24 +82,18 @@ export default function AudioCapture() {
   const stopRecording = async () => {
     if (!recState.isRecording) return;
 
-    console.log("🎙️ [1] Stopping recording...");
-
     try {
       await recorder.stop();
     } finally {
       stopTimer();
     }
 
-    console.log("🎙️ [2] Recording stopped");
-
-    // ⭐ Mala pauza da se URI sigurno sačuva
+    // Mala pauza da se URI sigurno sačuva
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     const uri = recorder.uri;
-    console.log("🎙️ [3] Recorder URI:", uri);
 
     if (!uri) {
-      console.log("🎙️ [4] No URI - going to inbox");
       router.replace("/inbox");
       return;
     }
@@ -151,26 +101,19 @@ export default function AudioCapture() {
     setIsSaving(true);
 
     try {
-      console.log("🎙️ [5] Saving audio note...");
       const id = await addNoteFromAudio(uri);
-      console.log("🎙️ [6] Note saved with ID:", id);
 
-      // ⭐ Refresh premium status
-      console.log("🎙️ [7] Refreshing premium status...");
+      // Refresh premium status
       await checkPremiumStatus();
-      console.log("🎙️ [7.1] Premium status:", isPremium);
 
-      // ⭐ SAMO premium korisnici dobijaju auto-transcription
+      // Samo premium korisnici dobijaju auto-transcription
       if (isPremium) {
-        console.log("🎙️ [8] Premium user - starting transcription");
         transcribeNote(id, uri).catch((err) => {
-          console.log("🎙️ [ERROR] Transcription failed:", err);
+          console.error("Transcription failed:", err);
         });
-      } else {
-        console.log("🎙️ [8] Non-premium user - skipping transcription");
       }
 
-      console.log("🎙️ [9] Restoring audio mode...");
+      // Restore audio mode
       try {
         await setAudioModeAsync({
           allowsRecording: false,
@@ -179,19 +122,17 @@ export default function AudioCapture() {
         } as any);
       } catch {}
 
-      console.log("🎙️ [10] Navigating...");
+      // Navigate
       if (id) {
-        console.log("🎙️ [10.1] Opening note detail:", id);
         router.replace({
           pathname: "/note/[id]",
           params: { id },
         });
       } else {
-        console.log("🎙️ [10.2] No ID - fallback to inbox");
         router.replace("/inbox");
       }
     } catch (error) {
-      console.error("🎙️ [ERROR] Failed to save note:", error);
+      console.error("Failed to save note:", error);
       router.replace("/inbox");
     } finally {
       setIsSaving(false);
@@ -294,7 +235,7 @@ export default function AudioCapture() {
         )}
       </View>
 
-      {/* ⭐ Loading overlay */}
+      {/* Loading overlay */}
       {isSaving && (
         <View className="absolute inset-0 bg-black/50 items-center justify-center">
           <View className="bg-white dark:bg-iosd-elevated rounded-2xl p-6 items-center">

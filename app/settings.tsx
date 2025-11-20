@@ -64,10 +64,9 @@ function EditProfileModal({
       haptics.success();
       onClose();
     } catch (error) {
-      console.error("Error updating profile:", error);
       Alert.alert(
-        t("settings.profile.error.title") || "Error",
-        t("settings.profile.error.message") || "Failed to update profile"
+        t("settings.profile.error.title"),
+        t("settings.profile.error.message")
       );
     } finally {
       setLoading(false);
@@ -85,18 +84,18 @@ function EditProfileModal({
         <View className="flex-row items-center justify-between px-6 pt-16 pb-4 border-b border-ios-sep dark:border-iosd-sep">
           <TouchableOpacity onPress={onClose} disabled={loading}>
             <Text className="text-ios-blue text-base">
-              {t("settings.profile.cancel") || "Cancel"}
+              {t("settings.profile.cancel")}
             </Text>
           </TouchableOpacity>
           <Text className="text-lg font-monaBold text-ios-label dark:text-iosd-label">
-            {t("settings.profile.edit") || "Edit Profile"}
+            {t("settings.profile.edit")}
           </Text>
           <TouchableOpacity onPress={handleSave} disabled={loading}>
             {loading ? (
               <ActivityIndicator />
             ) : (
               <Text className="text-ios-blue text-base font-medium">
-                {t("settings.profile.save") || "Save"}
+                {t("settings.profile.save")}
               </Text>
             )}
           </TouchableOpacity>
@@ -105,14 +104,12 @@ function EditProfileModal({
         <View className="p-6">
           <View className="mb-4">
             <Text className="text-sm font-medium text-ios-label dark:text-iosd-label mb-2">
-              {t("settings.profile.firstName") || "First Name"}
+              {t("settings.profile.firstName")}
             </Text>
             <TextInput
               value={firstName}
               onChangeText={setFirstName}
-              placeholder={
-                t("settings.profile.firstNamePlaceholder") || "Enter first name"
-              }
+              placeholder={t("settings.profile.firstNamePlaceholder")}
               className="bg-white dark:bg-white/10 rounded-xl px-4 py-3 text-base text-ios-label dark:text-iosd-label border border-black/10 dark:border-white/10"
               placeholderTextColor="#999"
               editable={!loading}
@@ -121,14 +118,12 @@ function EditProfileModal({
 
           <View className="mb-4">
             <Text className="text-sm font-medium text-ios-label dark:text-iosd-label mb-2">
-              {t("settings.profile.lastName") || "Last Name"}
+              {t("settings.profile.lastName")}
             </Text>
             <TextInput
               value={lastName}
               onChangeText={setLastName}
-              placeholder={
-                t("settings.profile.lastNamePlaceholder") || "Enter last name"
-              }
+              placeholder={t("settings.profile.lastNamePlaceholder")}
               className="bg-white dark:bg-white/10 rounded-xl px-4 py-3 text-base text-ios-label dark:text-iosd-label border border-black/10 dark:border-white/10"
               placeholderTextColor="#999"
               editable={!loading}
@@ -154,9 +149,8 @@ function UserProfileHeader() {
 
       if (!permissionResult.granted) {
         Alert.alert(
-          t("settings.profile.permission.title") || "Permission Required",
-          t("settings.profile.permission.message") ||
-            "Please allow access to your photo library to upload a profile picture."
+          t("settings.profile.permission.title"),
+          t("settings.profile.permission.message")
         );
         return;
       }
@@ -183,10 +177,9 @@ function UserProfileHeader() {
               await user.reload();
               haptics.success();
             } catch (error) {
-              console.error("Error setting profile image:", error);
               Alert.alert(
-                "Error",
-                "Failed to upload profile image. Please try again."
+                t("settings.profile.error.title"),
+                t("settings.profile.imageUpload.error")
               );
             } finally {
               setUploadingImage(false);
@@ -195,21 +188,25 @@ function UserProfileHeader() {
 
           reader.readAsDataURL(blob);
         } catch (error) {
-          console.error("Error processing image:", error);
-          Alert.alert("Error", "Failed to process image. Please try again.");
+          Alert.alert(
+            t("settings.profile.error.title"),
+            t("settings.profile.imageProcess.error")
+          );
           setUploadingImage(false);
         }
       }
     } catch (error) {
-      console.error("Error picking image:", error);
-      Alert.alert("Error", "Failed to pick image. Please try again.");
+      Alert.alert(
+        t("settings.profile.error.title"),
+        t("settings.profile.imagePick.error")
+      );
       setUploadingImage(false);
     }
   };
 
   const formatDate = (date: Date | null) => {
     if (!date) return "N/A";
-    return new Intl.DateTimeFormat("sr-RS", {
+    return new Intl.DateTimeFormat(t("locale") || "sr-RS", {
       year: "numeric",
       month: "long",
       day: "numeric",
@@ -232,7 +229,6 @@ function UserProfileHeader() {
   return (
     <>
       <View className="px-6 mb-6">
-        {/* Avatar & Name */}
         <View className="flex-row items-center mb-6">
           <TouchableOpacity
             onPress={handleImagePick}
@@ -265,10 +261,7 @@ function UserProfileHeader() {
             <View className="flex-row items-center justify-between">
               <View className="flex-1">
                 <Text className="text-xl font-monaBold text-ios-label dark:text-iosd-label">
-                  {user?.fullName ||
-                    user?.firstName ||
-                    t("user.fallbackName") ||
-                    "User"}
+                  {user?.fullName || user?.firstName || t("user.fallbackName")}
                 </Text>
                 <Text className="text-sm text-ios-secondary dark:text-iosd-label2 mt-1">
                   {user?.primaryEmailAddress?.emailAddress}
@@ -287,7 +280,6 @@ function UserProfileHeader() {
           </View>
         </View>
 
-        {/* Account Info */}
         <View className="bg-white/80 dark:bg-white/10 rounded-2xl p-4 border border-black/10 dark:border-white/10">
           <View className="flex-row items-center mb-3">
             <Ionicons
@@ -297,7 +289,7 @@ function UserProfileHeader() {
               style={{ marginRight: 8 }}
             />
             <Text className="text-[13px] text-ios-secondary dark:text-iosd-label2">
-              {t("settings.profile.memberSince") || "Member since"}:{" "}
+              {t("settings.profile.memberSince")}:{" "}
               <Text className="text-ios-label dark:text-iosd-label font-medium">
                 {formatDate(user?.createdAt || null)}
               </Text>
@@ -312,7 +304,7 @@ function UserProfileHeader() {
                 style={{ marginRight: 8 }}
               />
               <Text className="text-[13px] text-ios-secondary dark:text-iosd-label2">
-                {t("settings.profile.lastSignIn") || "Last sign in"}:{" "}
+                {t("settings.profile.lastSignIn")}:{" "}
                 <Text className="text-ios-label dark:text-iosd-label font-medium">
                   {formatDate(user.lastSignInAt)}
                 </Text>
@@ -350,10 +342,10 @@ function ThemeToggleRow() {
         </View>
         <View>
           <Text className="text-base text-ios-label dark:text-iosd-label font-medium">
-            {t("appearance.darkMode.title") || "Dark Mode"}
+            {t("appearance.darkMode.title")}
           </Text>
           <Text className="text-[12px] mt-0.5 text-ios-secondary dark:text-iosd-label2">
-            {t("appearance.darkMode.subtitle") || "Change app appearance"}
+            {t("appearance.darkMode.subtitle")}
           </Text>
         </View>
       </View>
@@ -386,27 +378,8 @@ function PremiumSettings() {
   const { t } = useTranslation("common");
 
   const handleManageSubscription = useCallback(() => {
-    const isExpoGo = Constants.appOwnership === "expo";
-
-    if (isExpoGo) {
-      Alert.alert(
-        "💎 Premium Features",
-        "Premium subscription will be available in the production build.\n\nFor testing, you can grant premium access via RevenueCat Dashboard.",
-        [
-          {
-            text: "Refresh Status",
-            onPress: async () => {
-              await checkPremiumStatus();
-              haptics.light();
-            },
-          },
-          { text: "OK", style: "cancel" },
-        ]
-      );
-    } else {
-      setShowPaywall(true);
-    }
-  }, [checkPremiumStatus]);
+    setShowPaywall(true);
+  }, []);
 
   if (loading) {
     return (
@@ -434,7 +407,7 @@ function PremiumSettings() {
             </View>
             <View className="flex-1">
               <Text className="text-base text-ios-label dark:text-iosd-label font-medium">
-                {t("settings.premium.status") || "Premium Status"}
+                {t("settings.premium.status")}
               </Text>
               <Text
                 className={`text-[12px] mt-0.5 ${
@@ -444,8 +417,8 @@ function PremiumSettings() {
                 }`}
               >
                 {isPremium
-                  ? t("settings.premium.active") || "Active"
-                  : t("settings.premium.inactive") || "Inactive"}
+                  ? t("settings.premium.active")
+                  : t("settings.premium.inactive")}
               </Text>
             </View>
           </View>
@@ -465,15 +438,13 @@ function PremiumSettings() {
           <View>
             <Text className="text-base text-ios-label dark:text-iosd-label font-medium">
               {isPremium
-                ? t("settings.premium.manage") || "Manage Subscription"
-                : t("settings.premium.upgrade") || "Upgrade to Premium"}
+                ? t("settings.premium.manage")
+                : t("settings.premium.upgrade")}
             </Text>
             <Text className="text-[12px] mt-0.5 text-ios-secondary dark:text-iosd-label2">
               {isPremium
-                ? t("settings.premium.manageSubtitle") ||
-                  "Manage your subscription"
-                : t("settings.premium.upgradeSubtitle") ||
-                  "Unlock all features"}
+                ? t("settings.premium.manageSubtitle")
+                : t("settings.premium.upgradeSubtitle")}
             </Text>
           </View>
           <Ionicons name="chevron-forward" size={20} color="#999" />
@@ -485,32 +456,31 @@ function PremiumSettings() {
           <View className="h-px bg-ios-sep dark:bg-iosd-sep ml-14" />
           <View className="py-3 px-6">
             <Text className="text-[11px] uppercase font-monaBold text-ios-secondary dark:text-iosd-label2 mb-3">
-              {t("settings.premium.benefits.title") || "Premium Benefits"}
+              {t("settings.premium.benefits.title")}
             </Text>
             <View className="space-y-2">
               <View className="flex-row items-center mb-2">
                 <Ionicons name="checkmark-circle" size={16} color="#FF9500" />
                 <Text className="text-[13px] text-ios-label dark:text-iosd-label ml-2">
-                  {t("paywall.benefits.transcription.title") ||
-                    "Audio transkripcija"}
+                  {t("paywall.benefits.transcription.title")}
                 </Text>
               </View>
               <View className="flex-row items-center mb-2">
                 <Ionicons name="checkmark-circle" size={16} color="#FF9500" />
                 <Text className="text-[13px] text-ios-label dark:text-iosd-label ml-2">
-                  {t("paywall.benefits.ocr.title") || "OCR za slike"}
+                  {t("paywall.benefits.ocr.title")}
                 </Text>
               </View>
               <View className="flex-row items-center mb-2">
                 <Ionicons name="checkmark-circle" size={16} color="#FF9500" />
                 <Text className="text-[13px] text-ios-label dark:text-iosd-label ml-2">
-                  {t("paywall.benefits.ai.title") || "AI asistent"}
+                  {t("paywall.benefits.ai.title")}
                 </Text>
               </View>
               <View className="flex-row items-center">
                 <Ionicons name="checkmark-circle" size={16} color="#FF9500" />
                 <Text className="text-[13px] text-ios-label dark:text-iosd-label ml-2">
-                  {t("paywall.benefits.private.title") || "Privatni folder"}
+                  {t("paywall.benefits.private.title")}
                 </Text>
               </View>
             </View>
@@ -546,7 +516,7 @@ function NotificationSettings() {
       const enabled = await AsyncStorage.getItem("notifications_enabled");
       setNotificationsEnabled(enabled === "true");
     } catch (error) {
-      console.error("❌ [Notifications] Error loading settings:", error);
+      // Silent fail
     }
   };
 
@@ -568,7 +538,6 @@ function NotificationSettings() {
         await AsyncStorage.setItem("notifications_enabled", "false");
       }
     } catch (error) {
-      console.error("❌ [Notifications] Error:", error);
       setNotificationsEnabled(!value);
     }
   };
@@ -581,11 +550,10 @@ function NotificationSettings() {
         </View>
         <View className="flex-1">
           <Text className="text-base text-ios-label dark:text-iosd-label font-medium">
-            {t("settings.notifications.title") || "Notifications"}
+            {t("settings.notifications.title")}
           </Text>
           <Text className="text-[12px] mt-0.5 text-ios-secondary dark:text-iosd-label2">
-            {t("settings.notifications.subtitle") ||
-              "Enable push notifications"}
+            {t("settings.notifications.subtitle")}
           </Text>
         </View>
       </View>
@@ -607,6 +575,82 @@ function NotificationSettings() {
   );
 }
 
+// Delete Account Component
+function DeleteAccountSection() {
+  const { user } = useUser();
+  const { signOut } = useAuth();
+  const { t } = useTranslation("common");
+
+  const handleDeleteAccount = useCallback(() => {
+    Alert.alert(
+      t("settings.deleteAccount.confirm.title"),
+      t("settings.deleteAccount.confirm.message"),
+      [
+        {
+          text: t("settings.deleteAccount.confirm.cancel"),
+          style: "cancel",
+        },
+        {
+          text: t("settings.deleteAccount.confirm.confirm"),
+          style: "destructive",
+          onPress: () => {
+            Alert.alert(
+              t("settings.deleteAccount.finalConfirm.title"),
+              t("settings.deleteAccount.finalConfirm.message"),
+              [
+                {
+                  text: t("settings.deleteAccount.finalConfirm.cancel"),
+                  style: "cancel",
+                },
+                {
+                  text: t("settings.deleteAccount.finalConfirm.confirm"),
+                  style: "destructive",
+                  onPress: async () => {
+                    try {
+                      if (user) {
+                        await user.delete();
+                        await signOut();
+                        router.replace("/");
+                        haptics.success();
+                      }
+                    } catch (error) {
+                      Alert.alert(
+                        t("settings.deleteAccount.error.title"),
+                        t("settings.deleteAccount.error.message")
+                      );
+                    }
+                  },
+                },
+              ]
+            );
+          },
+        },
+      ]
+    );
+  }, [user, signOut, t]);
+
+  return (
+    <View className="mt-6 mx-4 rounded-2xl overflow-hidden border border-red-500/30 dark:border-red-500/30 bg-white/80 dark:bg-white/10">
+      <TouchableOpacity
+        className="flex-row items-center py-3 px-6 active:opacity-70"
+        onPress={handleDeleteAccount}
+      >
+        <View className="w-8 h-8 rounded-full bg-red-500 items-center justify-center mr-3">
+          <Ionicons name="trash-outline" size={18} color="white" />
+        </View>
+        <View className="flex-1">
+          <Text className="text-base font-monaBold text-red-500">
+            {t("settings.deleteAccount.button")}
+          </Text>
+          <Text className="text-[12px] mt-0.5 text-red-500/70">
+            {t("settings.deleteAccount.subtitle")}
+          </Text>
+        </View>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
 // Main Settings Screen
 export default function Settings() {
   const { user } = useUser();
@@ -615,104 +659,17 @@ export default function Settings() {
   const { t } = useTranslation("common");
   const insets = useSafeAreaInsets();
 
-  // Delete Account Component
-  function DeleteAccountSection() {
-    const { user } = useUser();
-    const { signOut } = useAuth();
-    const { t } = useTranslation("common");
-
-    const handleDeleteAccount = useCallback(() => {
-      Alert.alert(
-        t("settings.deleteAccount.confirm.title") || "Delete Account",
-        t("settings.deleteAccount.confirm.message") ||
-          "Are you sure you want to permanently delete your account? This action cannot be undone and all your data will be lost.",
-        [
-          {
-            text: t("settings.deleteAccount.confirm.cancel") || "Cancel",
-            style: "cancel",
-          },
-          {
-            text: t("settings.deleteAccount.confirm.confirm") || "Delete",
-            style: "destructive",
-            onPress: () => {
-              Alert.alert(
-                t("settings.deleteAccount.finalConfirm.title") ||
-                  "Final Confirmation",
-                t("settings.deleteAccount.finalConfirm.message") ||
-                  "This is your last chance. Type your email to confirm deletion.",
-                [
-                  {
-                    text:
-                      t("settings.deleteAccount.finalConfirm.cancel") ||
-                      "Cancel",
-                    style: "cancel",
-                  },
-                  {
-                    text:
-                      t("settings.deleteAccount.finalConfirm.confirm") ||
-                      "I Understand, Delete",
-                    style: "destructive",
-                    onPress: async () => {
-                      try {
-                        if (user) {
-                          await user.delete();
-                          await signOut();
-                          router.replace("/");
-                          haptics.success();
-                        }
-                      } catch (error) {
-                        console.error("Error deleting account:", error);
-                        Alert.alert(
-                          t("settings.deleteAccount.error.title") || "Error",
-                          t("settings.deleteAccount.error.message") ||
-                            "Failed to delete account. Please try again or contact support."
-                        );
-                      }
-                    },
-                  },
-                ]
-              );
-            },
-          },
-        ]
-      );
-    }, [user, signOut, t]);
-
-    return (
-      <View className="mt-6 mx-4 rounded-2xl overflow-hidden border border-red-500/30 dark:border-red-500/30 bg-white/80 dark:bg-white/10">
-        <TouchableOpacity
-          className="flex-row items-center py-3 px-6 active:opacity-70"
-          onPress={handleDeleteAccount}
-        >
-          <View className="w-8 h-8 rounded-full bg-red-500 items-center justify-center mr-3">
-            <Ionicons name="trash-outline" size={18} color="white" />
-          </View>
-          <View className="flex-1">
-            <Text className="text-base font-monaBold text-red-500">
-              {t("settings.deleteAccount.button") || "Delete Account"}
-            </Text>
-            <Text className="text-[12px] mt-0.5 text-red-500/70">
-              {t("settings.deleteAccount.subtitle") ||
-                "Permanently delete your account and all data"}
-            </Text>
-          </View>
-        </TouchableOpacity>
-      </View>
-    );
-  }
-
   const handleLogout = useCallback(() => {
     Alert.alert(
-      t("settings.logout.confirm.title") || "Logout",
-      t("settings.logout.confirm.message") ||
-        "Are you sure you want to logout?",
+      t("settings.logout.confirm.title"),
+      t("settings.logout.confirm.message"),
       [
         {
-          text: t("settings.logout.confirm.cancel") || "Cancel",
+          text: t("settings.logout.confirm.cancel"),
           style: "cancel",
         },
         {
-          text: t("settings.logout.confirm.confirm") || "Logout",
+          text: t("settings.logout.confirm.confirm"),
           style: "destructive",
           onPress: async () => {
             await signOut();
@@ -723,49 +680,16 @@ export default function Settings() {
     );
   }, [signOut, t]);
 
-  const handleResetOnboarding = useCallback(() => {
-    Alert.alert(
-      "Reset Onboarding",
-      "Da li želiš da ponovo vidiš onboarding ekrane pri sledećem pokretanju?",
-      [
-        {
-          text: "Otkaži",
-          style: "cancel",
-        },
-        {
-          text: "Resetuj",
-          style: "destructive",
-          onPress: async () => {
-            await AsyncStorage.removeItem("@viewedOnboarding");
-            haptics.success();
-            Alert.alert(
-              "✅ Gotovo",
-              "Onboarding će se prikazati pri sledećem pokretanju aplikacije.",
-              [
-                {
-                  text: "OK",
-                  onPress: () => {
-                    router.replace("/onboarding");
-                  },
-                },
-              ]
-            );
-          },
-        },
-      ]
-    );
-  }, []);
-
   if (!ready) return null;
 
   return (
     <ScreenBackground variant="grouped">
       <LargeHeader
-        title={t("screen.settings.title") || "Settings"}
+        title={t("screen.settings.title")}
         rightButtons={
           <TouchableOpacity onPress={() => router.back()}>
             <Text className="text-ios-blue text-base font-medium">
-              {t("settings.done") || "Done"}
+              {t("settings.done")}
             </Text>
           </TouchableOpacity>
         }
@@ -800,26 +724,6 @@ export default function Settings() {
           <NotificationSettings />
         </View>
 
-        {/* Reset Onboarding */}
-        <View className="mt-6 mx-4 rounded-2xl overflow-hidden border border-black/10 dark:border-white/10 bg-white/80 dark:bg-white/10">
-          <TouchableOpacity
-            className="flex-row items-center py-3 px-6 active:opacity-70"
-            onPress={handleResetOnboarding}
-          >
-            <View className="w-8 h-8 rounded-full bg-orange-500 items-center justify-center mr-3">
-              <Ionicons name="reload-outline" size={18} color="white" />
-            </View>
-            <View className="flex-1">
-              <Text className="text-base text-ios-label dark:text-iosd-label font-medium">
-                Resetuj Onboarding
-              </Text>
-              <Text className="text-[12px] mt-0.5 text-ios-secondary dark:text-iosd-label2">
-                Prikaži uvodni vodič ponovo
-              </Text>
-            </View>
-          </TouchableOpacity>
-        </View>
-
         {/* About */}
         <View className="mt-6 mx-4 rounded-2xl overflow-hidden border border-black/10 dark:border-white/10 bg-white/80 dark:bg-white/10">
           <TouchableOpacity
@@ -835,7 +739,7 @@ export default function Settings() {
             </View>
             <View className="flex-1 flex-row justify-between items-center">
               <Text className="text-base text-ios-label dark:text-iosd-label font-medium">
-                {t("settings.sections.about") || "About"}
+                {t("settings.sections.about")}
               </Text>
               <Ionicons name="chevron-forward" size={20} color="#999" />
             </View>
@@ -854,7 +758,7 @@ export default function Settings() {
               <Ionicons name="exit-outline" size={18} color="white" />
             </View>
             <Text className="text-base font-monaBold text-red-500">
-              {t("settings.logout.button") || "Logout"}
+              {t("settings.logout.button")}
             </Text>
           </TouchableOpacity>
         </View>
@@ -864,7 +768,7 @@ export default function Settings() {
           <Text className="text-sm text-ios-secondary dark:text-iosd-label2">
             {t("app.version", {
               version: Constants.expoConfig?.version || "1.0.0",
-            }) || `Version ${Constants.expoConfig?.version || "1.0.0"}`}
+            })}
           </Text>
         </View>
       </ScreenScroll>
