@@ -1,4 +1,4 @@
-// utils/ai.ts
+// utils/ai.ts - KOMPLETAN FAJL SA i18n PODRŠKOM
 import { File } from "expo-file-system";
 import * as ImageManipulator from "expo-image-manipulator";
 
@@ -6,7 +6,31 @@ import * as ImageManipulator from "expo-image-manipulator";
 // BACKEND API CONFIGURATION
 // ========================================
 
-const API_URL = process.env.EXPO_PUBLIC_AI_BACKEND_URL;
+const API_URL =
+  process.env.EXPO_PUBLIC_AI_BACKEND_URL ??
+  "https://ainote-backend.vercel.app/api";
+
+console.log("API_URL u runtime-u:", API_URL);
+
+// ========================================
+// i18n ERROR & FALLBACK PORUKE
+// ========================================
+export const AI_MESSAGES = {
+  backendNotAvailable: "ai.errors.backendNotAvailable",
+  transcriptionFailed: "ai.errors.transcriptionFailed",
+  ocrFailed: "ai.errors.ocrFailed",
+  titleGenerationFailed: "ai.errors.titleFailed",
+  noNotesFound: "ai.errors.noNotesFound",
+  noAnswerAvailable: "ai.errors.noAnswer",
+  untitledNote: "ai.labels.untitledNote",
+  foundNote: "ai.labels.foundNote",
+  today: "ai.dates.today",
+  tomorrow: "ai.dates.tomorrow",
+  dayAfterTomorrow: "ai.dates.dayAfterTomorrow",
+  yesterday: "ai.dates.yesterday",
+  inDays: "ai.dates.inDays",
+  inWeeks: "ai.dates.inWeeks"
+} as const;
 
 // ========================================
 // BACKEND API CALLS (OpenAI via Vercel)
@@ -14,10 +38,11 @@ const API_URL = process.env.EXPO_PUBLIC_AI_BACKEND_URL;
 
 export async function transcribeAudio(
   audioUri: string,
-  options?: { language?: string; prompt?: string }
+  options?: { language?: string; prompt?: string },
+  t?: (key: string) => string
 ): Promise<string> {
   if (!API_URL) {
-    throw new Error("AI backend nije dostupan. Pokušaj ponovo kasnije.");
+    throw new Error(t ? t(AI_MESSAGES.backendNotAvailable) : "AI backend not available. Try again later.");
   }
 
   try {
@@ -29,13 +54,20 @@ export async function transcribeAudio(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         audioBase64: base64,
-        language: options?.language || "sr",
+        language: options?.language || "en",
       }),
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || "Transcription failed");
+      const raw = await response.text();
+      console.log("Transcribe raw error:", raw);
+
+      try {
+        const parsed = JSON.parse(raw);
+        throw new Error(parsed.error || (t ? t(AI_MESSAGES.transcriptionFailed) : "Transcription failed"));
+      } catch {
+        throw new Error("Transcription failed: " + raw.slice(0, 200));
+      }
     }
 
     const data = await response.json();
@@ -47,10 +79,11 @@ export async function transcribeAudio(
 }
 
 export async function extractTextFromImage(
-  imageUri: string
+  imageUri: string,
+  t?: (key: string) => string
 ): Promise<string | null> {
   if (!API_URL) {
-    throw new Error("AI backend nije dostupan. Pokušaj ponovo kasnije.");
+    throw new Error(t ? t(AI_MESSAGES.backendNotAvailable) : "AI backend not available.");
   }
 
   try {
@@ -69,8 +102,15 @@ export async function extractTextFromImage(
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || "OCR failed");
+      const raw = await response.text();
+      console.log("OCR raw error:", raw);
+
+      try {
+        const parsed = JSON.parse(raw);
+        throw new Error(parsed.error || (t ? t(AI_MESSAGES.ocrFailed) : "OCR failed"));
+      } catch {
+        throw new Error("OCR failed: " + raw.slice(0, 200));
+      }
     }
 
     const data = await response.json();
@@ -81,15 +121,19 @@ export async function extractTextFromImage(
   }
 }
 
-export async function generateSmartTitle(text: string): Promise<string> {
+export async function generateSmartTitle(
+  text: string,
+  t?: (key: string) => string
+): Promise<string> {
+  const untitled = t ? t(AI_MESSAGES.untitledNote) : "Untitled Note";
+  
   if (!text || text.trim().length < 10) {
-    return "Untitled Note";
+    return untitled;
   }
 
   if (!API_URL) {
-    // Fallback - koristi prvih 6 reči
     const words = text.trim().split(/\s+/).slice(0, 6).join(" ");
-    return words || "Untitled Note";
+    return words || untitled;
   }
 
   try {
@@ -100,8 +144,9 @@ export async function generateSmartTitle(text: string): Promise<string> {
     });
 
     if (!response.ok) {
-      // Fallback na prvih 6 reči
-      return text.trim().split(/\s+/).slice(0, 6).join(" ") || "Untitled Note";
+      const raw = await response.text();
+      console.log("Title raw error:", raw);
+      return text.trim().split(/\s+/).slice(0, 6).join(" ") || untitled;
     }
 
     const data = await response.json();
@@ -111,25 +156,77 @@ export async function generateSmartTitle(text: string): Promise<string> {
       return generatedTitle.replace(/^["']|["']$/g, "").slice(0, 80);
     }
 
-    return "Untitled Note";
+    return untitled;
   } catch (error) {
     console.error("Error generating smart title:", error);
-    // Fallback na prvih 6 reči
-    return text.trim().split(/\s+/).slice(0, 6).join(" ") || "Untitled Note";
+    return text.trim().split(/\s+/).slice(0, 6).join(" ") || untitled;
   }
 }
 
 export async function generateSummary(text: string): Promise<string> {
-  // Summary feature - može se dodati kasnije ako treba
-  // Za sada vraćamo prazan string
   return "";
 }
+
+// ========================================
+// OPENAI ASSISTANT FUNCTION
+// ========================================
+
+async function askOpenAI(
+  question: string, 
+  notes: any[], 
+  systemPrompt: string,
+  t?: (key: string) => string
+): Promise<{ answer: string; topNoteId?: string | null; dueOn?: string | null; matches?: any[] }> {
+  
+  if (!API_URL) {
+    throw new Error(t ? t(AI_MESSAGES.backendNotAvailable) : "Backend not available");
+  }
+
+  const relevantNotes = notes.slice(0, 5);
+  const noAnswer = t ? t(AI_MESSAGES.noAnswerAvailable) : "No answer available.";
+  const untitled = t ? t(AI_MESSAGES.untitledNote) : "Untitled";
+
+  try {
+    const response = await fetch(`${API_URL}/assistant`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        question,
+        systemPrompt,
+        notes: relevantNotes.map((n: any) => ({
+          title: n.title || untitled,
+          text: n.text?.slice(0, 100)
+        }))
+      }),
+    });
+
+    if (!response.ok) {
+      const raw = await response.text();
+      console.log("Assistant API error:", raw);
+      throw new Error("Assistant failed");
+    }
+
+    const data = await response.json();
+    
+    return {
+      answer: data.answer || noAnswer,
+      topNoteId: relevantNotes[0]?.id,
+      matches: [],  // ✅ DODATO
+      dueOn: null   // ✅ DODATO
+    };
+  } catch (error) {
+    console.error("Assistant error:", error);
+    throw error;
+  }
+}
+
 
 // ========================================
 // LOCAL AI - FACT EXTRACTION & SEARCH
 // ========================================
 
 const KNOWN_CITIES = [
+  "belgrade",
   "beograd",
   "novi sad",
   "niš",
@@ -290,6 +387,39 @@ function normalizeDateToken(tok: string, now = new Date()): string | null {
   return toISODate(candidate);
 }
 
+function formatHuman(iso: string, now = new Date(), t?: (key: string, params?: any) => string): string {
+  try {
+    const d = new Date(iso + "T00:00:00");
+    const diffDays = Math.round(
+      (+d - +new Date(now.getFullYear(), now.getMonth(), now.getDate())) /
+        86400000
+    );
+
+    if (diffDays === 0) return t ? t(AI_MESSAGES.today) : "today";
+    if (diffDays === 1) return t ? t(AI_MESSAGES.tomorrow) : "tomorrow";
+    if (diffDays === 2) return t ? t(AI_MESSAGES.dayAfterTomorrow) : "day after tomorrow";
+    if (diffDays === -1) return t ? t(AI_MESSAGES.yesterday) : "yesterday";
+    if (diffDays > 2 && diffDays <= 7) {
+      return t ? t(AI_MESSAGES.inDays, { count: diffDays }) : `in ${diffDays} days`;
+    }
+    if (diffDays > 7 && diffDays <= 30) {
+      const weeks = Math.round(diffDays / 7);
+      return t ? t(AI_MESSAGES.inWeeks, { count: weeks }) : `in ${weeks} week${weeks === 1 ? '' : 's'}`;
+    }
+    if (diffDays < -1 && diffDays >= -7) {
+      return t ? t(AI_MESSAGES.inDays, { count: -diffDays }) : `${-diffDays} days ago`;
+    }
+
+    return d.toLocaleDateString("en-US", {
+      day: "2-digit",
+      month: "long",
+      year: diffDays > 365 ? "numeric" : undefined,
+    });
+  } catch {
+    return iso;
+  }
+}
+
 export function genFactsFromText(text: string, noteId?: string): Fact[] {
   const facts: Fact[] = [];
   const raw = (text || "").trim();
@@ -403,38 +533,29 @@ type NoteLike = {
   ai?: { facts?: Fact[] };
 };
 
-function formatHuman(iso: string, now = new Date()): string {
-  try {
-    const d = new Date(iso + "T00:00:00");
-    const diffDays = Math.round(
-      (+d - +new Date(now.getFullYear(), now.getMonth(), now.getDate())) /
-        86400000
-    );
+// ========================================
+// MAIN ASK FUNCTION - SA i18n PODRŠKOM
+// ========================================
 
-    if (diffDays === 0) return "danas";
-    if (diffDays === 1) return "sutra";
-    if (diffDays === 2) return "prekosutra";
-    if (diffDays === -1) return "juče";
-    if (diffDays > 2 && diffDays <= 7) return `za ${diffDays} dana`;
-    if (diffDays > 7 && diffDays <= 30) {
-      const weeks = Math.round(diffDays / 7);
-      return `za ${weeks} ${
-        weeks === 1 ? "nedelju" : weeks <= 4 ? "nedelje" : "nedelja"
-      }`;
+export async function ask(
+  query: string, 
+  notes: NoteLike[],
+  systemPrompt?: string,
+  t?: (key: string, params?: any) => string
+): Promise<{ answer: string; topNoteId?: string | null; dueOn?: string | null; matches?: any[] }> {
+  
+  // Ako ima systemPrompt → koristi OpenAI (language-aware)
+  if (systemPrompt) {
+    try {
+      console.log("🤖 Using OpenAI with language:", systemPrompt);
+      return await askOpenAI(query, notes, systemPrompt, t);
+    } catch (error) {
+      console.error("OpenAI failed, falling back to local:", error);
+      // Fallback na lokalnu logiku
     }
-    if (diffDays < -1 && diffDays >= -7) return `pre ${-diffDays} dana`;
-
-    return d.toLocaleDateString("sr-RS", {
-      day: "2-digit",
-      month: "long",
-      year: diffDays > 365 ? "numeric" : undefined,
-    });
-  } catch {
-    return iso;
   }
-}
 
-export function ask(query: string, notes: NoteLike[]) {
+  // LOCAL SEARCH LOGIKA
   const q = query
     .toLowerCase()
     .trim()
@@ -498,7 +619,7 @@ export function ask(query: string, notes: NoteLike[]) {
         total += f.weight || 1;
 
         if (f.predicate === "due_on") {
-          why.push(`datum:${formatHuman(f.object)}`);
+          why.push(`datum:${formatHuman(f.object, new Date(), t)}`);
         } else if (f.predicate === "number") {
           why.push(`broj:${f.object}`);
         } else if (f.predicate === "topic") {
@@ -556,11 +677,13 @@ export function ask(query: string, notes: NoteLike[]) {
   const topNote = top ? notes.find((n) => n.id === top.noteId) : undefined;
 
   if (!topNote || entries.length === 0) {
+    const noNotesMsg = t 
+      ? t(AI_MESSAGES.noNotesFound) || `No notes found matching "${queryWords.join(" ")}".`
+      : `No notes found matching "${queryWords.join(" ")}". Try different words or create a new note.`;
+    
     return {
       matches: [],
-      answer: `Nisam pronašao beležke koje sadrže "${queryWords.join(
-        " "
-      )}". Pokušaj sa drugim rečima ili kreiraj novu belešku.`,
+      answer: noNotesMsg,
       topNoteId: null,
       dueOn: null,
     };
@@ -579,23 +702,23 @@ export function ask(query: string, notes: NoteLike[]) {
   if (topicFact && dueFact) {
     const place =
       topicFact.object.charAt(0).toUpperCase() + topicFact.object.slice(1);
-    answer = `Putovanje u ${place} - ${formatHuman(dueFact.object)}`;
+    answer = `${place} - ${formatHuman(dueFact.object, new Date(), t)}`;
   } else if (dueFact && (q.includes("kada") || q.includes("when"))) {
-    answer = `${topNote.title || "Pronađeno"} - ${formatHuman(dueFact.object)}`;
+    answer = `${topNote.title || (t ? t(AI_MESSAGES.foundNote) : "Found")} - ${formatHuman(dueFact.object, new Date(), t)}`;
   } else if (numberFact && /\d{3,}/.test(q)) {
-    answer = `${topNote.title || "Pronađeno"} - ${numberFact.object}`;
+    answer = `${topNote.title || (t ? t(AI_MESSAGES.foundNote) : "Found")} - ${numberFact.object}`;
     if (dueFact) {
-      answer += ` (${formatHuman(dueFact.object)})`;
+      answer += ` (${formatHuman(dueFact.object, new Date(), t)})`;
     }
   } else if (topicFact) {
     const place =
       topicFact.object.charAt(0).toUpperCase() + topicFact.object.slice(1);
-    answer = `${topNote.title || `Beležka o ${place}`}`;
+    answer = `${topNote.title || place}`;
     if (dueFact) {
-      answer += ` - ${formatHuman(dueFact.object)}`;
+      answer += ` - ${formatHuman(dueFact.object, new Date(), t)}`;
     }
   } else {
-    answer = topNote.title || "Pronađena beležka";
+    answer = topNote.title || (t ? t(AI_MESSAGES.foundNote) : "Found note");
 
     if (topNote.text && topNote.text.length > 20) {
       const snippet = topNote.text.slice(0, 100).trim();
@@ -605,7 +728,7 @@ export function ask(query: string, notes: NoteLike[]) {
     }
 
     if (dueFact) {
-      answer += `\n\n📅 ${formatHuman(dueFact.object)}`;
+      answer += `\n\n📅 ${formatHuman(dueFact.object, new Date(), t)}`;
     }
   }
 

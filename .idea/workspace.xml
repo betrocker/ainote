@@ -5,11 +5,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4626ac8a-c00b-4985-b68a-659b18d1a37a" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/app.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/ocr.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/package-lock.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/title.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/transcribe.ts" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/app.json" beforeDir="false" afterPath="$PROJECT_DIR$/app.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/about.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/about.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/privacy.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/privacy.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/terms.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/terms.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/locales/de/common.json" beforeDir="false" afterPath="$PROJECT_DIR$/locales/de/common.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/locales/en/common.json" beforeDir="false" afterPath="$PROJECT_DIR$/locales/en/common.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/locales/sr/common.json" beforeDir="false" afterPath="$PROJECT_DIR$/locales/sr/common.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/ai.ts" beforeDir="false" afterPath="$PROJECT_DIR$/utils/ai.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -105,6 +115,7 @@
       <workItem from="1763490901238" duration="152000" />
       <workItem from="1763491229410" duration="626000" />
       <workItem from="1763493108294" duration="24000" />
+      <workItem from="1763838868016" duration="54000" />
     </task>
     <servers />
   </component>

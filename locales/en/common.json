@@ -1,4 +1,27 @@
 {
+  "ai": {
+    "errors": {
+      "backendNotAvailable": "AI backend not available. Try again later.",
+      "transcriptionFailed": "Audio transcription failed",
+      "ocrFailed": "Text extraction from image failed",
+      "titleFailed": "Title generation failed",
+      "noNotesFound": "No notes found matching your query. Try different words.",
+      "noAnswer": "No answer available.",
+      "failed": "Failed to get answer. Please try again."
+    },
+    "labels": {
+      "untitledNote": "Untitled Note",
+      "foundNote": "Found note"
+    },
+    "dates": {
+      "today": "today",
+      "tomorrow": "tomorrow",
+      "dayAfterTomorrow": "day after tomorrow",
+      "yesterday": "yesterday",
+      "inDays": "in {{count}} days",
+      "inWeeks": "in {{count}} weeks"
+    }
+  },
   "screen": {
     "home": { "title": "Home" },
     "inbox": { "title": "Inbox" },
@@ -236,7 +259,7 @@
     },
     "contact": {
       "title": "Contact Us",
-      "content": "If you have questions about this privacy policy, contact us at denis.djordjevic@gmail.com"
+      "content": "If you have questions about this privacy policy, contact us at office@aenoteapp.com"
     }
   },
   "terms": {
@@ -283,7 +306,7 @@
     },
     "contact": {
       "title": "Contact",
-      "content": "For legal matters contact us at denis.djordjevic@gmail.com"
+      "content": "For legal matters contact us at office@aenoteapp.com"
     }
   },
   "paywall": {

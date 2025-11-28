@@ -1,4 +1,27 @@
 {
+  "ai": {
+    "errors": {
+      "backendNotAvailable": "AI backend nije dostupan. Pokušaj ponovo kasnije.",
+      "transcriptionFailed": "Transkripcija audio zapisa nije uspela",
+      "ocrFailed": "Ekstrakcija teksta sa slike nije uspela",
+      "titleFailed": "Generisanje naslova nije uspelo",
+      "noNotesFound": "Nisam pronašao beležke koje odgovaraju upitu. Pokušaj druge reči.",
+      "noAnswer": "Odgovor nije dostupan.",
+      "failed": "Greška pri dobijanju odgovora. Pokušaj ponovo."
+    },
+    "labels": {
+      "untitledNote": "Beležka bez naslova",
+      "foundNote": "Pronađena beležka"
+    },
+    "dates": {
+      "today": "danas",
+      "tomorrow": "sutra",
+      "dayAfterTomorrow": "prekosutra",
+      "yesterday": "juče",
+      "inDays": "za {{count}} dana",
+      "inWeeks": "za {{count}} nedelje"
+    }
+  },
   "screen": {
     "home": { "title": "Home" },
     "inbox": { "title": "Inbox" },
@@ -236,7 +259,7 @@
     },
     "contact": {
       "title": "Kontaktirajte nas",
-      "content": "Ako imate pitanja o ovoj politici privatnosti, kontaktirajte nas na denis.djordjevic@gmail.com"
+      "content": "Ako imate pitanja o ovoj politici privatnosti, kontaktirajte nas na office@aenoteapp.com"
     }
   },
   "terms": {
@@ -283,7 +306,7 @@
     },
     "contact": {
       "title": "Kontakt",
-      "content": "Za pravna pitanja kontaktirajte nas na denis.djordjevic@gmail.com"
+      "content": "Za pravna pitanja kontaktirajte nas na office@aenoteapp.com"
     }
   },
   "paywall": {

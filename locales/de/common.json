@@ -1,4 +1,27 @@
 {
+  "ai": {
+    "errors": {
+      "backendNotAvailable": "KI-Backend nicht verfügbar. Versuchen Sie es später erneut.",
+      "transcriptionFailed": "Audio-Transkription fehlgeschlagen",
+      "ocrFailed": "Textextraktion aus Bild fehlgeschlagen",
+      "titleFailed": "Titelgenerierung fehlgeschlagen",
+      "noNotesFound": "Keine Notizen gefunden, die Ihrer Anfrage entsprechen. Versuchen Sie andere Wörter.",
+      "noAnswer": "Keine Antwort verfügbar.",
+      "failed": "Fehler beim Abrufen der Antwort. Bitte versuchen Sie es erneut."
+    },
+    "labels": {
+      "untitledNote": "Unbenannte Notiz",
+      "foundNote": "Gefundene Notiz"
+    },
+    "dates": {
+      "today": "heute",
+      "tomorrow": "morgen",
+      "dayAfterTomorrow": "übermorgen",
+      "yesterday": "gestern",
+      "inDays": "in {{count}} Tagen",
+      "inWeeks": "in {{count}} Wochen"
+    }
+  },
   "screen": {
     "home": { "title": "Startseite" },
     "inbox": { "title": "Posteingang" },
@@ -236,7 +259,7 @@
     },
     "contact": {
       "title": "Kontaktieren Sie uns",
-      "content": "Wenn Sie Fragen zu dieser Datenschutzrichtlinie haben, kontaktieren Sie uns unter denis.djordjevic@gmail.com"
+      "content": "Wenn Sie Fragen zu dieser Datenschutzrichtlinie haben, kontaktieren Sie uns unter office@aenoteapp.com"
     }
   },
   "terms": {
@@ -283,7 +306,7 @@
     },
     "contact": {
       "title": "Kontakt",
-      "content": "Für rechtliche Fragen kontaktieren Sie uns unter denis.djordjevic@gmail.com"
+      "content": "Für rechtliche Fragen kontaktieren Sie uns unter office@aenoteapp.com"
     }
   },
   "paywall": {

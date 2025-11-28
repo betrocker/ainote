@@ -1,4 +1,4 @@
-// app/assistant.tsx
+// app/(tabs)/assistant.tsx - KOMPLETAN FAJL SA i18n I BACKEND INTEGRACIJOM
 import LargeHeader, { HeaderButton } from "@/components/LargeHeader";
 import { useNotes } from "@/context/NotesContext";
 import { ask } from "@/utils/ai";
@@ -30,11 +30,18 @@ type QAPair = {
   timestamp: number;
 };
 
+// Language mapping za AI system prompt
+const LANG_MAP: Record<string, string> = {
+  'en': 'English',
+  'sr': 'Serbian',
+  'de': 'German'
+};
+
 export default function AssistantScreen() {
   const router = useRouter();
   const { notes } = useNotes();
   const { colorScheme } = useColorScheme();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation("common");
   const isDark = colorScheme === "dark";
   const insets = useSafeAreaInsets();
   const scrollRef = useRef<ScrollView>(null);
@@ -46,7 +53,16 @@ export default function AssistantScreen() {
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
-  // KLJUČNO: Praćenje tastature
+  // System prompt sa trenutnim jezikom
+  const getSystemPrompt = () => {
+    const currentLang = i18n.language || 'en';
+    const langName = LANG_MAP[currentLang as keyof typeof LANG_MAP] || 'English';
+    
+    return `You are a helpful AI assistant for note-taking app. 
+Respond ONLY in ${langName}. Be concise and professional.`;
+  };
+
+  // Keyboard listener
   useEffect(() => {
     const keyboardShowListener = Keyboard.addListener(
       Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
@@ -101,7 +117,8 @@ export default function AssistantScreen() {
       Keyboard.dismiss();
 
       try {
-        const result = ask(q, notes);
+        // Prosleđi i18n funkciju 't' u ask()
+        const result = await ask(q, notes, getSystemPrompt(), t);
 
         const newQA: QAPair = {
           id: Date.now().toString(),
@@ -126,7 +143,7 @@ export default function AssistantScreen() {
         setLoading(false);
       }
     },
-    [query, notes, t]
+    [query, notes, t, i18n.language]
   );
 
   const handleClear = () => {
@@ -153,8 +170,6 @@ export default function AssistantScreen() {
   };
 
   const lastFiveQA = history.slice(0, 5);
-
-  // KRITIČNO: Pravilna kalkulacija bottom pozicije
   const bottomPosition =
     keyboardHeight > 0 ? keyboardHeight + 65 : insets.bottom + 75;
 
@@ -164,13 +179,10 @@ export default function AssistantScreen() {
         title={t("assistant.title")}
         rightButtons={
           <>
-            {/* Settings dugme - uvek prikaži */}
             <HeaderButton
               icon="settings-outline"
               onPress={() => router.push("/settings")}
             />
-
-            {/* Clear dugme - samo ako ima istorije */}
             {(currentQA || history.length > 0) && (
               <HeaderButton icon="trash-outline" onPress={handleClear} />
             )}
@@ -263,7 +275,7 @@ export default function AssistantScreen() {
           {/* Current Q&A */}
           {currentQA && (
             <View className="mb-6">
-              {/* Question Card - WIĘKSZE I BOLD */}
+              {/* Question Card */}
               <View className="mb-4 p-5 rounded-3xl bg-gradient-to-br from-ios-blue/15 to-ios-blue/5 border border-ios-blue/30 dark:border-ios-blue/20 backdrop-blur-xl">
                 <View className="flex-row items-center mb-3">
                   <View className="w-8 h-8 rounded-full bg-ios-blue/20 items-center justify-center">
@@ -278,7 +290,7 @@ export default function AssistantScreen() {
                 </Text>
               </View>
 
-              {/* Answer Card - DIREKTNO ISPOD */}
+              {/* Answer Card */}
               {loading ? (
                 <View className="p-6 rounded-3xl bg-gradient-to-br from-white/60 to-white/40 dark:from-white/10 dark:to-white/5 border border-white/40 dark:border-white/20 backdrop-blur-xl items-center justify-center min-h-32">
                   <ActivityIndicator size="large" color="#0A84FF" />
@@ -338,7 +350,7 @@ export default function AssistantScreen() {
             </View>
           )}
 
-          {/* Last 5 Questions - SA DATUMOM I VREMENOM */}
+          {/* Last 5 Questions */}
           {lastFiveQA.length > 0 && (
             <View className="mt-6 mb-12">
               <Text className="text-xs font-monaBold text-ios-secondary dark:text-iosd-label2 mb-3 uppercase tracking-wide">
@@ -389,7 +401,7 @@ export default function AssistantScreen() {
                       </Text>
                     </View>
 
-                    {/* Timestamp - DATUM I VREME */}
+                    {/* Timestamp */}
                     <View className="flex-row items-center pl-5 border-t border-ios-blue/20 dark:border-ios-blue/25 pt-2">
                       <Ionicons
                         name="calendar"
@@ -412,7 +424,7 @@ export default function AssistantScreen() {
         </View>
       </ScrollView>
 
-      {/* FLOATING INPUT - KLJUČNO */}
+      {/* FLOATING INPUT */}
       <View
         className="absolute left-0 right-0"
         style={{

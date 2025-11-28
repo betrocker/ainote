@@ -27,7 +27,7 @@ export default function About() {
   };
 
   const handleEmail = () => {
-    const email = "denis.djordjevic@gmail.com"; // Zameni sa svojim email-om
+    const email = "office@aenoteapp.com"; // Zameni sa svojim email-om
     const subject = `AEnote ${t("about.feedback")} - v${version}`;
     const url = `mailto:${email}?subject=${encodeURIComponent(subject)}`;
     Linking.openURL(url);
