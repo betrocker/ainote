@@ -44,7 +44,7 @@ function MiniWeekChart({
                 className="w-3 rounded-lg bg-ios-blue"
                 style={{ height: `${h}%` }}
               />
-              <Text className="mt-2 text-[11px] text-ios-secondary dark:text-iosd-secondary">
+              <Text className="mt-2 text-[11px] text-ios-secondary dark:text-iosd-label">
                 {days[i]}
               </Text>
             </Animated.View>
